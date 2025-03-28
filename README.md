@@ -5,6 +5,8 @@
 ## Features
 
 - [x] 基本功能完成
+- [x] 渲染 Markdown
+- [x] 计算生成速度
 - [ ] 配置地址和默认模型
 - [ ] 配置地址后获取模型列表
 - [ ] 样式优化
@@ -12,6 +14,8 @@
 ## Test
 
 ```bash
+npm i
+npm run vsce
 code --install-extension your-extension.vsix
 ```
 
