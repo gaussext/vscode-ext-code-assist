@@ -12,5 +12,9 @@
 ## Test
 
 ```bash
+code --install-extension your-extension.vsix
+```
+
+```bash
 使用十种编程语言输出 Hello World
 ```

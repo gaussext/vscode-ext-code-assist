@@ -12,29 +12,6 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": [
-      {
-        "command": "code-assist.openChat",
-        "title": "Open Chat",
-        "icon": "$(comment-discussion)"
-      }
-    ],
-    "menus": {
-      "view/title": [
-        {
-          "command": "code-assist.openChat",
-          "when": "view == chatView",
-          "group": "navigation"
-        }
-      ],
-      "view/item/context": [
-        {
-          "command": "code-assist.openChat",
-          "when": "view == chatView",
-          "group": "inline"
-        }
-      ]
-    },
     "viewsContainers": {
       "activitybar": [
         {
@@ -71,7 +48,8 @@
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
     "lint": "eslint src",
-    "test": "vscode-test"
+    "test": "vscode-test",
+    "vsce": "vsce package"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.10",
@@ -88,6 +66,7 @@
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
+    "@vscode/vsce": "^3.3.1",
     "axios": "^1.8.4"
   }
 }
