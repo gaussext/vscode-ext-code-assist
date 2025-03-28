@@ -62,9 +62,10 @@
       const messageElement = list[list.length - 1];
       const duration = (endTime - startTime) / 1000;
       const speed = tokens / duration;
-      contentTemp += `\`\`\`Tokens: ${tokens} Duration: ${duration.toFixed(2)}s Speed: ${speed.toFixed(2)}Token/s\`\`\``;
+      contentTemp += `\`\`\`Tokens: ${tokens} Duration: ${duration.toFixed(2)} Sec Speed: ${speed.toFixed(2)} Token/s\`\`\``;
       messageElement.innerHTML = marked.parse(contentTemp);
       messagesContainer.scrollTo(0, messagesContainer.scrollHeight);
+      tokens = 0;
     }
   });
 })();
