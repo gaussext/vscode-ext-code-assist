@@ -38,12 +38,9 @@ export async function submitStream(url: string, model: string, prompt: string, o
   let timer: null | any = null;
   onText("start", JSON.stringify(template));
   stream.on("data", (data: any) => {
-    const textChunk = new TextDecoder().decode(data);
-    const lines = textChunk.split("\n");
-    for (const line of lines) {
-      if (line) {
-        onText("data", line);
-      }
+    const text = new TextDecoder().decode(data);
+    if (text.trim()) {
+      onText("data", text);
     }
     if (timer) {
       clearTimeout(timer);
@@ -54,6 +51,9 @@ export async function submitStream(url: string, model: string, prompt: string, o
   });
 
   stream.on("end", () => {
+    if (timer) {
+      clearTimeout(timer);
+    }
     onText("end", JSON.stringify(template));
   });
 }

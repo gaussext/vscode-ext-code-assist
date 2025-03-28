@@ -27,7 +27,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
               url,
               model,
               message.text,
-              (type: string, text: string) => {
+              (type: string, text: string) => {          
                 webviewView.webview.postMessage({ type, text });
               }
             );

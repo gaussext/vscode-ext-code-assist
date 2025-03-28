@@ -1,8 +1,8 @@
 body {
   font-family: var(--vscode-font-family);
-  padding: 10px;
+  padding: 8px;
   color: var(--vscode-foreground);
-  background-color: var(--vscode-editor-background);
+  background-color: #1e1f1c;
 }
 
 .chat-container {
@@ -12,13 +12,12 @@ body {
 }
 
 .messages {
-  flex-grow: 1;
   overflow-y: auto;
-  margin-bottom: 10px;
   border: 1px solid var(--vscode-input-border);
-  padding: 10px;
+  padding: 8px;
   border-radius: 4px;
-  height: 90vh;
+  margin-bottom: 12px;
+  height: calc(100vh - 100px);
 }
 
 .message-you,
@@ -26,14 +25,20 @@ body {
   margin-bottom: 8px;
   line-height: 1.35;
   border: 1px solid var(--vscode-input-border);
-  background-color: var(--vscode-input-background);
-  padding: 4px;
+  background-color: #272822;
+  padding: 8px;
   border-radius: 4px;
+}
+
+.message-you {
+  color: #409eff;
 }
 
 .input-area {
   display: flex;
-  gap: 10px;
+  align-items: center;
+  gap: 8px;
+  height: 50px;
 }
 
 .input-area-input {
@@ -56,4 +61,47 @@ body {
 
 .input-area-button:hover {
   background-color: var(--vscode-button-hoverBackground);
+}
+
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--vscode-editor-foreground);
+}
+
+.markdown-body p {
+  line-height: 1.35;
+  margin: 0;
+  padding: 0;
+}
+
+.markdown-body pre {
+  background-color: var(--vscode-textCodeBlock-background);
+  border-radius: 4px;
+  padding: 8px;
+  overflow: auto;
+}
+
+.markdown-body code {
+  font-family: var(--vscode-editor-font-family);
+  background-color: transparent;
+}
+
+.markdown-body blockquote {
+  border-left: 4px solid var(--vscode-editor-foreground);
+  color: var(--vscode-descriptionForeground);
+  padding: 0 1em;
+  margin: 0 0 8px 0;
+}
+
+.markdown-body ol,
+.markdown-body ul {
+  padding-inline-start: 8px;
 }

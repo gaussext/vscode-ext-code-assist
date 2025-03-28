@@ -28,14 +28,21 @@
     }
   });
 
+  let contentTemp = '';
+  let tokens = 0;
+  let startTime = 0;
+  let endTime = 0;
   window.addEventListener("message", (e) => {
     const type = e.data.type;
-
-
     if (type === "start") {
       const messageElement = document.createElement("div");
       messageElement.classList.add("message-ai");
-      messageElement.textContent = `AI: `;
+      messageElement.classList.add("markdown-body");
+      const json = e.data.text;
+      const data = JSON.parse(json);
+      startTime = new Date(data.created_at).getTime();
+      contentTemp = `AI: `;
+      messageElement.innerHTML = marked.parse(contentTemp);
       messagesContainer.appendChild(messageElement);
     } else if (type === "data") {
       const messageElements = document.querySelectorAll(".message-ai");
@@ -44,7 +51,20 @@
       const json = e.data.text;
       const data = JSON.parse(json);
       const text = data.message.content;
-      messageElement.textContent += text;
+      endTime = new Date(data.created_at).getTime();
+      contentTemp += text;
+      messageElement.innerHTML = marked.parse(contentTemp);
+      messagesContainer.scrollTo(0, messagesContainer.scrollHeight);
+      tokens++;
+    } else if (type === "end") {
+      const messageElements = document.querySelectorAll(".message-ai");
+      const list = Array.from(messageElements);
+      const messageElement = list[list.length - 1];
+      const duration = (endTime - startTime) / 1000;
+      const speed = tokens / duration;
+      contentTemp += `\`\`\`Tokens: ${tokens} Duration: ${duration.toFixed(2)}s Speed: ${speed.toFixed(2)}Token/s\`\`\``;
+      messageElement.innerHTML = marked.parse(contentTemp);
+      messagesContainer.scrollTo(0, messagesContainer.scrollHeight);
     }
   });
 })();
