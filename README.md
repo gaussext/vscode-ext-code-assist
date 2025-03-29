@@ -1,6 +1,6 @@
 # vscode-ext-code-assist
 
-简单代码小助手，使用本地 Ollama 作为后端的代码问答助手
+VS Code 简单代码小助手，使用本地 Ollama 作为后端的代码问答助手
 
 ## Configuration
 
@@ -23,13 +23,15 @@
 - [x] 样式优化
 - [x] 支持上下文对话
 
-## Test
+## Build
 
 ```bash
 npm i
 npm run vsce
 code --install-extension your-extension.vsix
 ```
+
+## Test
 
 ```bash
 使用十种编程语言输出 Hello World
