@@ -62,13 +62,24 @@ function main() {
   let endTime = 0;
   window.addEventListener("message", (e) => {
     const type = e.data.type;
-    if (type === "chat-start") {
+    if (type === "chat-pre") {
       const messageElement = document.createElement("div");
       messageElement.classList.add("message-ai");
       messageElement.classList.add("markdown-body");
+      $messages.appendChild(messageElement);
+      contentTemp = `AI: ...`;
+      messageElement.innerHTML = marked.parse(contentTemp);
+      $messages.scrollTo(0, $messages.scrollHeight);
+      $input.disabled = true;
+      $button.disabled = true;
+    }
+    if (type === "chat-start") {
+      const messageElements = document.querySelectorAll(".message-ai");
+      const list = Array.from(messageElements);
+      const messageElement = list[list.length - 1];
       contentTemp = `AI: `;
       messageElement.innerHTML = marked.parse(contentTemp);
-      $messages.appendChild(messageElement);
+      $messages.scrollTo(0, $messages.scrollHeight);
     } else if (type === "chat-data") {
       const messageElements = document.querySelectorAll(".message-ai");
       const list = Array.from(messageElements);
@@ -107,6 +118,8 @@ Speed: ${speed.toFixed(2)} Token/s
       tokens = 0;
       startTime = 0;
       endTime = 0;
+      $input.disabled = false;
+      $button.disabled = false;
     } else if (type === "tags-end") {
       const json = e.data.text;
       const models = json.models || [];

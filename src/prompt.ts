@@ -27,16 +27,14 @@ export async function chat(prompt: string, oldMessage: any[], model: string, onT
     stream: true,
     raw: true,
   };
-
   console.log('chat-req', data);
-
   const template = {
     model: model,
     created_at: new Date().toISOString(),
     message: { role: "assistant", content: "" },
     done: false,
   };
-
+  onText("chat-pre", JSON.stringify(template));
   const response = await axios.post(API_CHAT, data, { responseType: "stream" });
   const stream = response!.data;
   let timer: null | any = null;

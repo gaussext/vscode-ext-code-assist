@@ -63,6 +63,11 @@ body {
   background-color: var(--vscode-button-hoverBackground);
 }
 
+.input-area-button[disabled],
+.input-area-button[disabled]:hover {
+  color: var(--vscode-input-foreground);
+  background-color: var(--vscode-button-background);
+}
 
 .markdown-body h1,
 .markdown-body h2,
