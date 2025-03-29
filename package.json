@@ -12,6 +12,16 @@
   "activationEvents": [],
   "main": "./dist/extension.js",
   "contributes": {
+    "configuration": {
+      "title": "Your Extension",
+      "properties": {
+        "code-assist.origin": {
+          "type": "string",
+          "default": "http://127.0.0.1:11434",
+          "description": "Ollama Server Address"
+        }
+      }
+    },
     "viewsContainers": {
       "activitybar": [
         {
@@ -26,7 +36,7 @@
         {
           "icon": "assets/chat-icon.svg",
           "id": "chatView",
-          "name": "Chat",
+          "name": "Chat View",
           "type": "webview",
           "contextualTitle": "VS Code Chat"
         }
