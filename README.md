@@ -1,6 +1,16 @@
 # vscode-ext-code-assist
 
-简单代码小助手
+简单代码小助手，使用本地 Ollama 作为后端的代码问答助手
+
+## Configuration
+
+`settings.json`
+
+```json
+{
+    "code-assist.origin": "http://127.0.0.1:11434"
+}
+```
 
 ## Features
 
@@ -11,7 +21,7 @@
 - [x] 配置地址后获取模型列表
 - [x] 可自由选择模型 
 - [x] 样式优化
-- [ ] 支持上下文对话
+- [x] 支持上下文对话
 
 ## Test
 
