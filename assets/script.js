@@ -5,7 +5,8 @@ function main() {
   const $button = document.getElementById("sendButton");
   const $messages = document.getElementById("messages");
   let currentModel = '';
-  
+  const oldMessage = [];
+
   function tags() {
     vscode.postMessage({
       command: 'tags',
@@ -16,6 +17,7 @@ function main() {
     vscode.postMessage({
       command: "chat",
       text: text,
+      oldMessage: oldMessage,
       model: currentModel
     });
   }
@@ -32,6 +34,10 @@ function main() {
   $button.addEventListener("click", () => {
     const message = $input.value;
     if (message) {
+      oldMessage.push({
+        role: 'user',
+        content: message,
+      });
       chat(message, currentModel);
       // 在本地显示消息
       const messageElement = document.createElement("div");
@@ -79,6 +85,10 @@ function main() {
       $messages.scrollTo(0, $messages.scrollHeight);
       tokens++;
     } else if (type === "chat-end") {
+      oldMessage.push({
+        role: 'assistant',
+        content: contentTemp,
+      });
       const messageElements = document.querySelectorAll(".message-ai");
       const list = Array.from(messageElements);
       const messageElement = list[list.length - 1];
@@ -100,12 +110,13 @@ Speed: ${speed.toFixed(2)} Token/s
     } else if (type === "tags-end") {
       const json = e.data.text;
       const models = json.models || [];
+      models.sort((a, b) => a.name.localeCompare(b.name))
       if (!currentModel) {
         currentModel = models[0].name;
         $select.value = currentModel;
       }
       $select.innerHTML = '';
-      models.sort((a,b) => a.name.localeCompare(b.name)).forEach(model => {
+      models.forEach(model => {
         const $option = document.createElement('option');
         $option.value = model.name;
         $option.textContent = `${model.name}`;

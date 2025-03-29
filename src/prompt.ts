@@ -14,18 +14,21 @@ export function tags(onText: any) {
   });
 }
 
-export async function chat(prompt: string, model: string, onText: any) {
+export async function chat(prompt: string, oldMessage: any[], model: string, onText: any) {
   const data = {
     model,
     messages: [
+      ...oldMessage,
       {
-        content: prompt,
         role: "user",
+        content: prompt,
       },
     ],
     stream: true,
     raw: true,
   };
+
+  console.log('chat-req', data);
 
   const template = {
     model: model,
