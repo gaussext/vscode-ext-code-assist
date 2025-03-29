@@ -1,6 +1,6 @@
 # vscode-ext-code-assist
 
-VS Code 简单代码小助手，使用本地 Ollama 作为后端的代码问答助手
+VS Code 简单代码小助手，使用本地 Ollama 作为后端
 
 ## Configuration
 
