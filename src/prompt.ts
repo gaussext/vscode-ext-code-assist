@@ -1,24 +1,38 @@
 import axios from "axios";
 import * as vscode from "vscode";
 
-const setting = vscode.workspace.getConfiguration('code-assist');
+const setting = vscode.workspace.getConfiguration("code-assist");
 const origin = setting.get<string>("origin") || "http://127.0.0.1:11434";
 
-const API_TAGS = origin + '/api/tags';
-const API_CHAT = origin + '/api/chat';
+const API_TAGS = origin + "/api/tags";
+const API_CHAT = origin + "/api/chat";
+const API_STOP = origin + "/api/delete";
 
 export function tags(onText: any) {
-  return axios.get(API_TAGS).then(res => {
+  return axios.get(API_TAGS).then((res) => {
     console.log("tags-end", res.data);
     onText("tags-end", res.data);
   });
 }
 
-export async function chat(prompt: string, oldMessage: any[], model: string, onText: any) {
+export function stop(onText: any) {
+  return axios.get(API_STOP).then((res) => {
+    console.log("stop-end", res.data);
+    onText("stop-end", res.data);
+  });
+}
+
+export async function chat(
+  prompt: string,
+  messages: any[],
+  model: string,
+  onText: any,
+  controller: AbortController
+) {
   const data = {
     model,
     messages: [
-      ...oldMessage,
+      ...messages,
       {
         role: "user",
         content: prompt,
@@ -27,7 +41,7 @@ export async function chat(prompt: string, oldMessage: any[], model: string, onT
     stream: true,
     raw: true,
   };
-  console.log('chat-req', data);
+  console.log("chat-req", data);
   const template = {
     model: model,
     created_at: new Date().toISOString(),
@@ -35,7 +49,7 @@ export async function chat(prompt: string, oldMessage: any[], model: string, onT
     done: false,
   };
   onText("chat-pre", JSON.stringify(template));
-  const response = await axios.post(API_CHAT, data, { responseType: "stream" });
+  const response = await axios.post(API_CHAT, data, { responseType: "stream", signal: controller.signal });
   const stream = response!.data;
   let timer: null | any = null;
   onText("chat-start", JSON.stringify(template));
@@ -53,7 +67,7 @@ export async function chat(prompt: string, oldMessage: any[], model: string, onT
     }, 300);
   });
 
-  stream.on("chat-end", (data:any ) => {
+  stream.on("chat-end", (data: any) => {
     if (timer) {
       clearTimeout(timer);
     }

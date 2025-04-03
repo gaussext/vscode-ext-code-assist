@@ -34,14 +34,14 @@ body {
   color: #409eff;
 }
 
-.input-area {
+.chat-area {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-top: 4px;
 }
 
-.input-area-input {
+.chat-area-input {
   flex-grow: 1;
   padding: 6px 8px;
   border: 1px solid var(--vscode-input-border);
@@ -50,7 +50,8 @@ body {
   border-radius: 4px;
 }
 
-.input-area-button {
+.model-area-button,
+.chat-area-button {
   padding: 6px 16px;
   background-color: var(--vscode-button-background);
   color: var(--vscode-button-foreground);
@@ -59,14 +60,18 @@ body {
   cursor: pointer;
 }
 
-.input-area-button:hover {
+.chat-area-button:hover {
   background-color: var(--vscode-button-hoverBackground);
 }
 
-.input-area-button[disabled],
-.input-area-button[disabled]:hover {
+.chat-area-button[disabled],
+.chat-area-button[disabled]:hover {
   color: var(--vscode-input-foreground);
   background-color: var(--vscode-button-background);
+}
+
+.markdown-body {
+  padding-left: 8px;
 }
 
 .markdown-body h1,
@@ -108,7 +113,7 @@ body {
 
 .markdown-body ol,
 .markdown-body ul {
-  padding-inline-start: 8px;
+  padding-inline-start: 16px;
 }
 
 .vscode-select {
