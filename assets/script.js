@@ -1,36 +1,43 @@
 // 初始化
 marked.setOptions({
-  highlight: function(code, language) {
-    const validLanguage = hljs.getLanguage(language) ? language : 'plaintext';
+  highlight: function (code, language) {
+    const validLanguage = hljs.getLanguage(language) ? language : "plaintext";
     return hljs.highlight(validLanguage, code).value;
   },
-  langPrefix: 'hljs language-', // highlight.js css expects a top-level 'hljs' class.
+  langPrefix: "hljs language-", // highlight.js css expects a top-level 'hljs' class.
   pedantic: false,
   gfm: true,
   breaks: false,
   sanitize: false,
   smartLists: true,
   smartypants: false,
-  xhtml: false
+  xhtml: false,
 });
 
 const db = new SimpleIDB({
-  dbName: 'code-assist',
-  storeName: 'conversations'
+  dbName: "code-assist",
+  storeName: "conversations",
+  version: 3,
 });
 
+function createConversationInit(params) {
+  return [
+    {
+      id: "0",
+      title: "新建对话",
+    },
+  ];
+}
+
 const vscode = acquireVsCodeApi();
+let conversations = createConversationInit();
 let messages = [];
-let currentId = 'code-assist';
+let currentId = "0";
 let currentModel = localStorage.getItem("code-assist.currentModel") || "";
 
-function init() {
+function getModels() {
   vscode.postMessage({
     command: "tags",
-  });
-  vscode.postMessage({
-    command: "history",
-    id: currentId
   });
 }
 
@@ -59,16 +66,16 @@ function chatEnd(text, info) {
     role: "assistant",
     timestamp: Date.now(),
     content: text,
-    info: info
+    info: info,
   });
-  saveData();
+  saveMessages();
 }
 
-function saveData() {
+function saveMessages() {
   db.set({
     id: currentId,
     messages: messages,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 }
 
@@ -76,22 +83,38 @@ function cleanData() {
   db.set({
     id: currentId,
     messages: [],
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 }
 
+function createConversation() {
+  const nextId =
+    (Math.max(...conversations.map((item) => Number(item.id))) || 0) + 1;
+  currentId = `${nextId}`;
+  conversations.push({
+    id: currentId,
+    title: "新建对话",
+  });
+}
+
+function saveConversation() {
+  localStorage.setItem("conversations", JSON.stringify(conversations));
+}
+
 function onLoad() {
-  const $select = document.getElementById("model-select");
+  const $selectModel = document.getElementById("model-select");
+  const $selectHistory = document.getElementById("history-select");
   const $input = document.getElementById("chat-input");
   const $buttonChat = document.getElementById("chat-button");
   const $buttonStop = document.getElementById("stop-button");
+  const $buttonNew = document.getElementById("new-button");
   const $buttonClean = document.getElementById("clean-button");
 
   const $messages = document.getElementById("messages");
 
   function createMarkdownInfo(info) {
     if (!info) {
-      return '';
+      return "";
     }
     const { model, tokens, duration } = info;
     const speed = tokens / duration;
@@ -125,40 +148,106 @@ function onLoad() {
     const $message = list[list.length - 1];
     return $message;
   }
-  
-  // 获取数据
-  db.get(currentId).then(conversation => {
-    messages = conversation.messages || [];
-    messages.forEach(item => {
-      if (item.role === "user") {
-        $messages.appendChild(createMessageForYou(item.content));
-      }
-      if (item.role === "assistant") {
-        $messages.appendChild(createMessageForAI(item.content + createMarkdownInfo(item.info)));
-      }
-    });
-    $messages.scrollTo(0, $messages.scrollHeight);
-    hljs.highlightAll();
-  });
-  // 初始化
-  // 1. 获取模型列表
-  // 2. 获取历史对话
-  init();
 
-  // 选择模型
-  $select.addEventListener("change", (e) => {
-    currentModel = e.target.value;
-    localStorage.setItem("code-assist.currentModel", currentModel);
-  });
+  function renderConversation() {
+    $selectHistory.innerHTML = "";
+    conversations.forEach((item) => {
+      const $option = document.createElement("option");
+      $option.value = item.id;
+      $option.textContent = `${item.title}`;
+      if ($option.value === currentId) {
+        $option.selected = true;
+      }
+      $selectHistory.appendChild($option);
+    });
+  }
+
+  function getConversations() {
+    try {
+      const list = JSON.parse(localStorage.getItem("conversations")) || [];
+      if (list.length) {
+        conversations = list;
+        currentId = list[0].id;
+        renderConversation();
+      }
+    } catch (error) {
+      conversations = createConversationInit();
+      renderConversation();
+    }
+  }
+  // 获取数据
+  function getMesasges() {
+    db.get(currentId)
+      .then((conversation) => {
+        if (!conversation) {
+          return false;
+        }
+        messages = conversation.messages || [];
+        messages.forEach((item) => {
+          if (item.role === "user") {
+            $messages.appendChild(createMessageForYou(item.content));
+          }
+          if (item.role === "assistant") {
+            $messages.appendChild(
+              createMessageForAI(item.content + createMarkdownInfo(item.info))
+            );
+          }
+        });
+        $messages.scrollTo(0, $messages.scrollHeight);
+        hljs.highlightAll();
+      })
+  }
 
   function sendMessage() {
     const message = $input.value;
     if (message) {
       $messages.appendChild(createMessageForYou(message));
       chatStart(message);
+      conversations.forEach((item) => {
+        if (item.id === currentId) {
+          item.title = message.slice(0, 10) + "...";
+        }
+      });
+      renderConversation();
+      saveConversation();
       $input.value = "";
     }
   }
+
+  // 初始化
+  renderConversation();
+  // 1. 获取模型列表
+  getModels();
+  // 2. 获取历史对话
+  getConversations();
+  // 3. 获取对话消息
+  getMesasges();
+
+  // 创建新对话
+  $buttonNew.addEventListener("click", () => {
+    createConversation();
+    renderConversation();
+    saveConversation();
+    messages = [];
+    $messages.innerHTML = [];
+    saveMessages();
+  });
+
+  // 选择对话
+  $selectHistory.addEventListener("change", (e) => {
+    currentId = e.target.value;
+    localStorage.setItem("code-assist.currentId", currentId);
+    messages = [];
+    $messages.innerHTML = [];
+    getMesasges();
+  });
+
+  // 选择模型
+  $selectModel.addEventListener("change", (e) => {
+    currentModel = e.target.value;
+    localStorage.setItem("code-assist.currentModel", currentModel);
+  });
+
   // 发送消息
   $buttonChat.addEventListener("click", () => {
     sendMessage();
@@ -183,23 +272,41 @@ function onLoad() {
     cleanData();
   });
 
+  function disableInteraction(){
+    $input.disabled = true;
+    $buttonChat.disabled = true;
+    $buttonNew.disabled = true;
+    $buttonClean.disabled = true;
+  }
+
+  function enableInteraction(){
+    $input.disabled = false;
+    $buttonChat.disabled = false;
+    $buttonNew.disabled = false;
+    $buttonClean.disabled = false;
+  }
   // 接受消息
   let contentTemp = "";
   let tokens = 0;
   let startTime = 0;
   let endTime = 0;
+
+  function resetInfo() {
+    tokens = 0;
+    startTime = 0;
+    endTime = 0;
+  }
   window.addEventListener("message", (e) => {
     const type = e.data.type;
     if (type === "chat-pre") {
       contentTemp = `...`;
       $messages.appendChild(createMessageForAI(contentTemp));
       $messages.scrollTo(0, $messages.scrollHeight);
-      $input.disabled = true;
-      $buttonChat.disabled = true;
+      disableInteraction();
     }
     if (type === "chat-start") {
       const $message = getLatestMessage();
-      contentTemp = '';
+      contentTemp = "";
       $message.innerHTML = marked.parse(contentTemp);
       $messages.scrollTo(0, $messages.scrollHeight);
     } else if (type === "chat-data") {
@@ -218,21 +325,22 @@ function onLoad() {
     } else if (type === "chat-end") {
       const duration = (endTime - startTime) / 1000;
       chatEnd(contentTemp, { model: currentModel, tokens, duration });
-      contentTemp += createMarkdownInfo({ model: currentModel, tokens, duration });
+      contentTemp += createMarkdownInfo({
+        model: currentModel,
+        tokens,
+        duration,
+      });
       const $message = getLatestMessage();
       $message.innerHTML = marked.parse(contentTemp);
       $messages.scrollTo(0, $messages.scrollHeight);
       hljs.highlightAll();
-      tokens = 0;
-      startTime = 0;
-      endTime = 0;
-      $input.disabled = false;
-      $buttonChat.disabled = false;
+      resetInfo();
+      enableInteraction();
     } else if (type === "tags-end") {
       const json = e.data.text;
       const models = json.models || [];
       models.sort((a, b) => a.name.localeCompare(b.name));
-      $select.innerHTML = "";
+      $selectModel.innerHTML = "";
       models.forEach((model) => {
         const $option = document.createElement("option");
         $option.value = model.name;
@@ -240,7 +348,7 @@ function onLoad() {
         if ($option.value === currentModel) {
           $option.selected = true;
         }
-        $select.appendChild($option);
+        $selectModel.appendChild($option);
       });
     }
   });
