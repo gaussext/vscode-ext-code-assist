@@ -23,9 +23,11 @@
   overflow: auto;
 }
 
-.markdown-body code {
+.markdown-body pre code {
   font-family: var(--vscode-editor-font-family);
   background-color: transparent;
+  font-size: 13px;
+  padding: 4px;
 }
 
 .markdown-body blockquote {

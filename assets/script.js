@@ -61,10 +61,10 @@ function chatEnd(text, info) {
     content: text,
     info: info
   });
-  save();
+  saveData();
 }
 
-function save() {
+function saveData() {
   db.set({
     id: currentId,
     messages: messages,
@@ -72,11 +72,20 @@ function save() {
   });
 }
 
+function cleanData() {
+  db.set({
+    id: currentId,
+    messages: [],
+    timestamp: Date.now()
+  });
+}
+
 function onLoad() {
   const $select = document.getElementById("model-select");
   const $input = document.getElementById("chat-input");
-  const $button = document.getElementById("chat-button");
-  const $stop = document.getElementById("stop-button");
+  const $buttonChat = document.getElementById("chat-button");
+  const $buttonStop = document.getElementById("stop-button");
+  const $buttonClean = document.getElementById("clean-button");
 
   const $messages = document.getElementById("messages");
 
@@ -151,7 +160,7 @@ function onLoad() {
     }
   }
   // 发送消息
-  $button.addEventListener("click", () => {
+  $buttonChat.addEventListener("click", () => {
     sendMessage();
   });
 
@@ -163,8 +172,15 @@ function onLoad() {
   });
 
   // 中断消息
-  $stop.addEventListener("click", () => {
+  $buttonStop.addEventListener("click", () => {
     chatStop();
+  });
+
+  // 清空消息
+  $buttonClean.addEventListener("click", () => {
+    messages = [];
+    $messages.innerHTML = [];
+    cleanData();
   });
 
   // 接受消息
@@ -179,7 +195,7 @@ function onLoad() {
       $messages.appendChild(createMessageForAI(contentTemp));
       $messages.scrollTo(0, $messages.scrollHeight);
       $input.disabled = true;
-      $button.disabled = true;
+      $buttonChat.disabled = true;
     }
     if (type === "chat-start") {
       const $message = getLatestMessage();
@@ -211,7 +227,7 @@ function onLoad() {
       startTime = 0;
       endTime = 0;
       $input.disabled = false;
-      $button.disabled = false;
+      $buttonChat.disabled = false;
     } else if (type === "tags-end") {
       const json = e.data.text;
       const models = json.models || [];
