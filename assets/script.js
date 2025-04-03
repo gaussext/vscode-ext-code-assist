@@ -1,4 +1,19 @@
 // 初始化
+marked.setOptions({
+  highlight: function(code, language) {
+    const validLanguage = hljs.getLanguage(language) ? language : 'plaintext';
+    return hljs.highlight(validLanguage, code).value;
+  },
+  langPrefix: 'hljs language-', // highlight.js css expects a top-level 'hljs' class.
+  pedantic: false,
+  gfm: true,
+  breaks: false,
+  sanitize: false,
+  smartLists: true,
+  smartypants: false,
+  xhtml: false
+});
+
 const db = new SimpleIDB({
   dbName: 'code-assist',
   storeName: 'conversations'
@@ -114,6 +129,7 @@ function onLoad() {
       }
     });
     $messages.scrollTo(0, $messages.scrollHeight);
+    hljs.highlightAll();
   });
   // 初始化
   // 1. 获取模型列表
@@ -190,6 +206,7 @@ function onLoad() {
       const $message = getLatestMessage();
       $message.innerHTML = marked.parse(contentTemp);
       $messages.scrollTo(0, $messages.scrollHeight);
+      hljs.highlightAll();
       tokens = 0;
       startTime = 0;
       endTime = 0;
@@ -209,7 +226,6 @@ function onLoad() {
         }
         $select.appendChild($option);
       });
-      $select.appendChild(select);
     }
   });
 }

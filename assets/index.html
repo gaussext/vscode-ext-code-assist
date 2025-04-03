@@ -4,22 +4,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- marked -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- highlight -->
+    <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/highlight.min.js"></script>
+    <!-- Atom One Dark -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/atom-one-dark.min.css">
+    <link href="{{vscodeStyleUri}}" rel="stylesheet">
+    <link href="{{markdownStyleUri}}" rel="stylesheet">
     <link href="{{styleUri}}" rel="stylesheet">
     <title>VS Code Chat</title>
 </head>
 
 <body>
     <div class="chat-container">
-        <div id="messages" class="messages"></div>
-        <div class="model-area">
-            <select class="model-area-select vscode-select" id="model-select"></select>
-            
+        <div class="history-area">
+            <select class="vscode-select" id="model-select"></select>
+            <select class="vscode-select" id="history-select"></select>
+            <button class="vscode-button" id="conversation-button">New</button>
         </div>
+        <div class="messages-area" id="messages"></div>
         <div class="chat-area">
-            <input class="chat-area-input" id="chat-input" type="textarea" rows="2" placeholder="Type your message...">
-            <button class="chat-area-button" id="chat-button">Send</button>
-            <button class="chat-area-button" id="stop-button">Stop</button>
+            <input class="vscode-input" id="chat-input" type="textarea" rows="2" placeholder="Type your message...">
+            <button class="vscode-button" id="chat-button">Send</button>
+            <button class="vscode-button" id="stop-button">Stop</button>
         </div>
     </div>
     <script src="{{SimpleIDBUri}}"></script>

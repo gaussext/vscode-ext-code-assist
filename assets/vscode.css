@@ -1,0 +1,60 @@
+.vscode-select {
+  /* 基本样式 */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe WPC", "Segoe UI",
+    system-ui, "Ubuntu", "Droid Sans", sans-serif;
+  font-size: 14px;
+  padding: 0px 4px;
+  border-radius: 2px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  min-width: 200px;
+  max-width: 300px;
+  height: 28px;
+  line-height: 20px;
+  box-sizing: border-box;
+  appearance: none;
+  -webkit-appearance: none;
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  color: var(--vscode-foreground);
+  background-color: #272822;
+
+  /* 下拉箭头图标 - 使用 VS Code 图标 */
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23cccccc'%3e%3cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3e%3c/svg%3e");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  background-size: 12px;
+  color: #3666d1;
+}
+
+
+.vscode-input {
+  flex-grow: 1;
+  height: 28px;
+  padding: 0 4px;
+  border: 1px solid var(--vscode-input-border);
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border-radius: 2px;
+}
+
+.vscode-button {
+  padding: 4px 16px;
+  font-size: 14px;
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: none;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.vscode-button:hover {
+  background-color: var(--vscode-button-hoverBackground);
+}
+
+.vscode-button[disabled],
+.vscode-button[disabled]:hover {
+  color: var(--vscode-input-foreground);
+  background-color: var(--vscode-button-background);
+}

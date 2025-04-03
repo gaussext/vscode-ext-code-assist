@@ -11,18 +11,19 @@ body {
   height: 100%;
 }
 
-.messages {
-  overflow-y: auto;
+.messages-area {
+  margin-top: 8px;
+  margin-bottom: 8px;
   border: 1px solid var(--vscode-input-border);
-  padding: 8px;
-  border-radius: 4px;
-  margin-bottom: 12px;
-  height: calc(100vh - 110px);
+  padding: 0 8px 0 0;
+  border-radius: 2px;
+  height: calc(100vh - 100px);
+  overflow-y: auto;
 }
 
 .message-you,
 .message-ai {
-  margin-bottom: 8px;
+  margin-bottom: 16px;
   line-height: 1.35;
   border: 1px solid var(--vscode-input-border);
   background-color: #272822;
@@ -32,137 +33,21 @@ body {
 
 .message-you {
   color: #409eff;
+  border:1px solid #409eff;
 }
 
+
+.model-area {
+  height: 36px;
+  box-sizing: border-box;
+}
+
+.history-area,
 .chat-area {
+  height: 36px;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
 }
 
-.chat-area-input {
-  flex-grow: 1;
-  padding: 6px 8px;
-  border: 1px solid var(--vscode-input-border);
-  background-color: var(--vscode-input-background);
-  color: var(--vscode-input-foreground);
-  border-radius: 4px;
-}
-
-.model-area-button,
-.chat-area-button {
-  padding: 6px 16px;
-  background-color: var(--vscode-button-background);
-  color: var(--vscode-button-foreground);
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.chat-area-button:hover {
-  background-color: var(--vscode-button-hoverBackground);
-}
-
-.chat-area-button[disabled],
-.chat-area-button[disabled]:hover {
-  color: var(--vscode-input-foreground);
-  background-color: var(--vscode-button-background);
-}
-
-.markdown-body {
-  padding-left: 8px;
-}
-
-.markdown-body h1,
-.markdown-body h2,
-.markdown-body h3,
-.markdown-body h4,
-.markdown-body h5,
-.markdown-body h6 {
-  margin-top: 8px;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: var(--vscode-editor-foreground);
-}
-
-.markdown-body p {
-  line-height: 1.35;
-  margin: 0;
-  padding: 0;
-}
-
-.markdown-body pre {
-  background-color: var(--vscode-textCodeBlock-background);
-  border-radius: 4px;
-  padding: 8px;
-  overflow: auto;
-}
-
-.markdown-body code {
-  font-family: var(--vscode-editor-font-family);
-  background-color: transparent;
-}
-
-.markdown-body blockquote {
-  border-left: 4px solid var(--vscode-editor-foreground);
-  color: var(--vscode-descriptionForeground);
-  padding: 0 1em;
-  margin: 0 0 8px 0;
-}
-
-.markdown-body ol,
-.markdown-body ul {
-  padding-inline-start: 16px;
-}
-
-.vscode-select {
-  /* 基本样式 */
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe WPC', 'Segoe UI', system-ui, 'Ubuntu', 'Droid Sans', sans-serif;
-  font-size: 14px;
-  padding: 0px 4px;
-  border-radius: 4px;
-  border: none;
-  outline: none;
-  cursor: pointer;
-  min-width: 200px;
-  max-width: 300px;
-  height: 28px;
-  line-height: 20px;
-  box-sizing: border-box;
-  appearance: none;
-  -webkit-appearance: none;
-  background-repeat: no-repeat;
-  background-position: right 4px center;
-  color: var(--vscode-foreground);
-  background-color: #272822;
-
-  /* 下拉箭头图标 - 使用 VS Code 图标 */
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23cccccc'%3e%3cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3e%3c/svg%3e");
-  background-repeat: no-repeat;
-  background-position: right 6px center;
-  background-size: 12px;
-  color: #3666d1;
-}
-
-/* Option 元素样式 */
-
-.vscode-select option {
-  padding: 0px;
-  border-radius: 2px;
-  background-color: var(--vscode-dropdown-listBackground);
-  color: var(--vscode-dropdown-foreground);
-}
-
-/* 悬停状态 (部分浏览器支持) */
-.vscode-select option:hover {
-  background-color: var(--vscode-list-hoverBackground);
-  color: var(--vscode-list-hoverForeground);
-}
-
-/* 选中状态 */
-.vscode-select option:checked,
-.vscode-select option:selected {
-  background-color: var(--vscode-list-activeSelectionBackground);
-  color: var(--vscode-list-activeSelectionForeground);
-}

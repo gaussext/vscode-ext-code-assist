@@ -1,0 +1,41 @@
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: var(--vscode-editor-foreground);
+}
+
+.markdown-body p {
+  line-height: 1.35;
+  margin: 0;
+  padding: 0;
+}
+
+.markdown-body pre {
+  background-color: var(--vscode-textCodeBlock-background);
+  border-radius: 4px;
+  padding: 4px;
+  overflow: auto;
+}
+
+.markdown-body code {
+  font-family: var(--vscode-editor-font-family);
+  background-color: transparent;
+}
+
+.markdown-body blockquote {
+  border-left: 4px solid var(--vscode-editor-foreground);
+  color: var(--vscode-descriptionForeground);
+  padding: 0 1em;
+  margin: 0 0 8px 0;
+}
+
+.markdown-body ol,
+.markdown-body ul {
+  padding-inline-start: 16px;
+}

@@ -65,7 +65,20 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       )
     );
 
-    const styleUri = webview.asWebviewUri(
+    const vscodeStyleUri = webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(this._extensionUri.fsPath, "assets", "vscode.css")
+      )
+    );
+
+    const markdownStyleUri = webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(this._extensionUri.fsPath, "assets", "markdown.css")
+      )
+    );
+
+
+    const mainStyleUri = webview.asWebviewUri(
       vscode.Uri.file(
         path.join(this._extensionUri.fsPath, "assets", "style.css")
       )
@@ -82,7 +95,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     // 替换占位符
     html = html.replace("{{SimpleIDBUri}}", SimpleIDBUri.toString());
     html = html.replace("{{scriptUri}}", scriptUri.toString());
-    html = html.replace("{{styleUri}}", styleUri.toString());
+    html = html.replace("{{vscodeStyleUri}}", vscodeStyleUri.toString());
+    html = html.replace("{{markdownStyleUri}}", markdownStyleUri.toString());
+    html = html.replace("{{styleUri}}", mainStyleUri.toString());
 
     return html;
   }
