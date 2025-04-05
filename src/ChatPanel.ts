@@ -6,25 +6,26 @@ import { chat, tags } from "./prompt";
 let controller = new AbortController();
 
 export class ChatViewProvider implements vscode.WebviewViewProvider {
-  constructor(private readonly _extensionUri: vscode.Uri) { }
+  private _view?: vscode.WebviewView;
+  constructor(private readonly _extensionUri: vscode.Uri) {}
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
+    this._view = webviewView;
     webviewView.webview.options = {
       enableScripts: true,
       localResourceRoots: [this._extensionUri],
     };
-    
-    
+
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     // 处理来自 webview 的消息
-    webviewView.webview.onDidReceiveMessage(async (message) => {      
+    webviewView.webview.onDidReceiveMessage(async (message) => {
       switch (message.command) {
         case "tags": {
           console.log("tags", message);
           tags((type: string, text: string) => {
             webviewView.webview.postMessage({ type, text });
-          }); 
+          });
           break;
         }
         case "chat": {
@@ -77,7 +78,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       )
     );
 
-
     const mainStyleUri = webview.asWebviewUri(
       vscode.Uri.file(
         path.join(this._extensionUri.fsPath, "assets", "style.css")
@@ -100,5 +100,19 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     html = html.replace("{{styleUri}}", mainStyleUri.toString());
 
     return html;
+  }
+
+  // 添加一个公开的显示方法
+  public show() {
+    if (this._view) {
+      this._view.show(true); // true 参数表示即使已可见也强制聚焦
+    }
+  }
+
+  public onSelection(text: string) {
+    if (this._view) {
+      this._view.webview.postMessage({ type: 'selection-end', text });
+
+    }
   }
 }

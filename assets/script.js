@@ -272,14 +272,14 @@ function onLoad() {
     cleanData();
   });
 
-  function disableInteraction(){
+  function disableInteraction() {
     $input.disabled = true;
     $buttonChat.disabled = true;
     $buttonNew.disabled = true;
     $buttonClean.disabled = true;
   }
 
-  function enableInteraction(){
+  function enableInteraction() {
     $input.disabled = false;
     $buttonChat.disabled = false;
     $buttonNew.disabled = false;
@@ -350,6 +350,10 @@ function onLoad() {
         }
         $selectModel.appendChild($option);
       });
+    } else if (type === "selection-end") {
+      const text = e.data.text;
+      $input.value = `优化一下这段代码 ${text}`;
+      $buttonChat.click();
     }
   });
 }

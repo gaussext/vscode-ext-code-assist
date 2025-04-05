@@ -1,6 +1,6 @@
 {
   "name": "code-assist",
-  "displayName": "Code Assist",
+  "displayName": "Gauss Code Assist",
   "description": "Code Assist With Ollama",
   "version": "0.0.5",
   "engines": {
@@ -13,7 +13,7 @@
   "main": "./dist/extension.js",
   "contributes": {
     "configuration": {
-      "title": "Your Extension",
+      "title": "Code Assist",
       "properties": {
         "code-assist.origin": {
           "type": "string",
@@ -22,6 +22,12 @@
         }
       }
     },
+    "commands": [
+      {
+        "command": "code-assist.optimization",
+        "title": "Code Assist -> Optimization"
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -47,6 +53,15 @@
         "default": "add",
         "description": "Chat Icon"
       }
+    },
+    "menus": {
+      "editor/context": [
+        {
+          "command": "code-assist.optimization",
+          "group": "code-assist",
+          "when": "editorHasSelection"
+        }
+      ]
     }
   },
   "scripts": {
