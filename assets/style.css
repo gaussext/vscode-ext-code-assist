@@ -17,7 +17,7 @@ body {
   border: 1px solid var(--vscode-input-border);
   padding: 0 8px 0 0;
   border-radius: 2px;
-  height: calc(100vh - 100px);
+  height: calc(100vh - 150px);
   overflow-y: auto;
 }
 
@@ -36,7 +36,6 @@ body {
   border:1px solid #409eff;
 }
 
-
 .model-area {
   height: 36px;
   box-sizing: border-box;
@@ -44,10 +43,19 @@ body {
 
 .history-area,
 .chat-area {
-  height: 36px;
+  
   box-sizing: border-box;
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.history-area {
+  height: 36px;
+}
+
+.chat-area {
+  height: 72px;
+  align-items: flex-start;
 }
 

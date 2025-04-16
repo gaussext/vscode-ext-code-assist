@@ -3,22 +3,30 @@ import { ChatViewProvider } from "./ChatPanel";
 
 export function activate(context: vscode.ExtensionContext) {
   const provider = new ChatViewProvider(context.extensionUri);
-  context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider("chatView", provider)
-  );
+  const view = vscode.window.registerWebviewViewProvider("chatView", provider);
+  context.subscriptions.push(view);
 
-  const disposable = vscode.commands.registerCommand(
-    "code-assist.optimization",
-    (e) => {
+  const optimization = vscode.commands.registerCommand(
+    "codeAssist.optimization",
+    () => {
       const editor = vscode.window.activeTextEditor;
       if (editor) {
         const selection = editor.document.getText(editor.selection);
-        provider.onSelection(selection);
+        provider.onSelection('optimization', selection);
       }
-      vscode.commands.executeCommand('workbench.view.code-assisst.chatView');
-      provider.show();
     }
   );
 
-  context.subscriptions.push(disposable);
+  const explanation = vscode.commands.registerCommand(
+    "codeAssist.explanation",
+    () => {
+      const editor = vscode.window.activeTextEditor;
+      if (editor) {
+        const selection = editor.document.getText(editor.selection);
+        provider.onSelection('explanation', selection);
+      }
+    }
+  );
+
+  context.subscriptions.push(optimization, explanation);
 }

@@ -109,9 +109,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     }
   }
 
-  public onSelection(text: string) {
+  public onSelection(type: string, text: string) {
     if (this._view) {
-      this._view.webview.postMessage({ type: 'selection-end', text });
+      this._view.webview.postMessage({ type, text });
 
     }
   }

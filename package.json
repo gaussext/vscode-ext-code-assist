@@ -22,12 +22,6 @@
         }
       }
     },
-    "commands": [
-      {
-        "command": "code-assist.optimization",
-        "title": "Code Assist -> Optimization"
-      }
-    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -56,13 +50,37 @@
     },
     "menus": {
       "editor/context": [
+        {          
+          "submenu": "codeAssist.submenu"
+        }
+      ],
+      "codeAssist.submenu": [
         {
-          "command": "code-assist.optimization",
-          "group": "code-assist",
-          "when": "editorHasSelection"
+          "command": "codeAssist.optimization",
+          "label": "代码优化"
+        },
+        {
+          "command": "codeAssist.explanation",
+          "label": "代码解释"
         }
       ]
-    }
+    },
+    "submenus": [
+      {
+        "id": "codeAssist.submenu",
+        "label": "代码助手"
+      }
+    ],
+    "commands": [
+      {
+        "command": "codeAssist.optimization",
+        "title": "代码优化"
+      },
+      {
+        "command": "codeAssist.explanation",
+        "title": "代码解释"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",

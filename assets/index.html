@@ -9,7 +9,8 @@
     <!-- highlight -->
     <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/highlight.min.js"></script>
     <!-- Atom One Dark -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/atom-one-dark.min.css">
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.7.0/build/styles/atom-one-dark.min.css">
     <link href="{{vscodeStyleUri}}" rel="stylesheet">
     <link href="{{markdownStyleUri}}" rel="stylesheet">
     <link href="{{styleUri}}" rel="stylesheet">
@@ -21,14 +22,19 @@
         <div class="history-area">
             <select class="vscode-select" id="model-select"></select>
             <select class="vscode-select" id="history-select"></select>
-            <button class="vscode-button" id="new-button">New</button>
-            <button class="vscode-button" id="clean-button">Clean</button>
+            <button class="vscode-button" id="create-button">新建</button>
+            <button class="vscode-button" id="delete-button">删除</button>
         </div>
         <div class="messages-area" id="messages"></div>
         <div class="chat-area">
-            <input class="vscode-input" id="chat-input" type="textarea" rows="2" placeholder="Type your message...">
-            <button class="vscode-button" id="chat-button">Send</button>
-            <button class="vscode-button" id="stop-button">Stop</button>
+            <textarea class="vscode-textarea" id="chat-input" rows="4" placeholder="请输入您的问题"
+                resize="none"></textarea>
+            <div>
+                <div style="margin-bottom: 4px;"><button class="vscode-button" id="chat-button">发送</button></div>
+                <div style="margin-bottom: 4px;"><button class="vscode-button" id="stop-button">停止</button></div>
+                <div><button class="vscode-button" id="clean-button">清除</button></div>
+            </div>
+
         </div>
     </div>
     <script src="{{SimpleIDBUri}}"></script>

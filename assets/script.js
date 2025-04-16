@@ -97,6 +97,14 @@ function createConversation() {
   });
 }
 
+function deleteConversation(id) {
+  if (conversations.length <= 1) {
+    return false;
+  }
+  conversations = conversations.filter(item => item.id !== id);
+  currentId = conversations[0].id;
+}
+
 function saveConversation() {
   localStorage.setItem("conversations", JSON.stringify(conversations));
 }
@@ -107,7 +115,8 @@ function onLoad() {
   const $input = document.getElementById("chat-input");
   const $buttonChat = document.getElementById("chat-button");
   const $buttonStop = document.getElementById("stop-button");
-  const $buttonNew = document.getElementById("new-button");
+  const $buttonCreate = document.getElementById("create-button");
+  const $buttonDelete = document.getElementById("delete-button");
   const $buttonClean = document.getElementById("clean-button");
 
   const $messages = document.getElementById("messages");
@@ -131,7 +140,8 @@ function onLoad() {
   function createMessageForYou(message) {
     const $message = document.createElement("div");
     $message.classList.add("message-you");
-    $message.textContent = `You: ${message}`;
+    $message.classList.add("markdown-body");
+    $message.innerHTML = marked.parse(`You: ${message}`);
     return $message;
   }
 
@@ -177,6 +187,8 @@ function onLoad() {
   }
   // 获取数据
   function getMesasges() {
+    messages = [];
+    $messages.innerHTML = '';
     db.get(currentId)
       .then((conversation) => {
         if (!conversation) {
@@ -195,7 +207,7 @@ function onLoad() {
         });
         $messages.scrollTo(0, $messages.scrollHeight);
         hljs.highlightAll();
-      })
+      });
   }
 
   function sendMessage() {
@@ -211,6 +223,7 @@ function onLoad() {
       renderConversation();
       saveConversation();
       $input.value = "";
+      hljs.highlightAll();
     }
   }
 
@@ -224,7 +237,7 @@ function onLoad() {
   getMesasges();
 
   // 创建新对话
-  $buttonNew.addEventListener("click", () => {
+  $buttonCreate.addEventListener("click", () => {
     createConversation();
     renderConversation();
     saveConversation();
@@ -233,12 +246,18 @@ function onLoad() {
     saveMessages();
   });
 
+  // 删除当前会话
+  $buttonDelete.addEventListener("click", () => {
+    deleteConversation(currentId);
+    renderConversation();
+    saveConversation();
+    getMesasges();
+  });
+
   // 选择对话
   $selectHistory.addEventListener("change", (e) => {
     currentId = e.target.value;
     localStorage.setItem("code-assist.currentId", currentId);
-    messages = [];
-    $messages.innerHTML = [];
     getMesasges();
   });
 
@@ -275,15 +294,17 @@ function onLoad() {
   function disableInteraction() {
     $input.disabled = true;
     $buttonChat.disabled = true;
-    $buttonNew.disabled = true;
     $buttonClean.disabled = true;
+    $buttonCreate.disabled = true;
+    $buttonDelete.disabled = true;
   }
 
   function enableInteraction() {
     $input.disabled = false;
     $buttonChat.disabled = false;
-    $buttonNew.disabled = false;
     $buttonClean.disabled = false;
+    $buttonCreate.disabled = false;
+    $buttonDelete.disabled = false;
   }
   // 接受消息
   let contentTemp = "";
@@ -350,9 +371,19 @@ function onLoad() {
         }
         $selectModel.appendChild($option);
       });
-    } else if (type === "selection-end") {
+    } else if (type === "optimization") {
       const text = e.data.text;
-      $input.value = `优化一下这段代码 ${text}`;
+      $input.value = `优化一下这段代码  
+\`\`\`
+${text}
+\`\`\``;
+      $buttonChat.click();
+    } else if (type === "explanation") {
+      const text = e.data.text;
+      $input.value = `解释一下这段代码 
+\`\`\`
+${text}
+\`\`\``;
       $buttonChat.click();
     }
   });
