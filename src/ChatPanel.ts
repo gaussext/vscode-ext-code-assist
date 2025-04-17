@@ -48,13 +48,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
           return;
       }
     });
-
-    webviewView.onDidChangeVisibility(() => {
-      console.log("[debug] visible", webviewView.visible);
-      if (webviewView.visible) {
-        // 视图变为可见时执行的操作
-      }
-    });
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
