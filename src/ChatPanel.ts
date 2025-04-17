@@ -59,6 +59,25 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
+    // 获取依赖包
+
+    const markedUri = webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(this._extensionUri.fsPath, "assets", "lib", "marked.min.js")
+      )
+    );
+
+    const highlightUri = webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(this._extensionUri.fsPath, "assets", "lib", "highlight.min.js")
+      )
+    );
+
+    const oneDarkUri = webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(this._extensionUri.fsPath, "assets", "lib", "atom-one-dark.min.css")
+      )
+    );
     // 获取本地脚本和样式表的 URI
     const SimpleIDBUri = webview.asWebviewUri(
       vscode.Uri.file(
@@ -99,6 +118,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     let html = fs.readFileSync(htmlPath, "utf-8");
 
     // 替换占位符
+    
+    html = html.replace("{{markedUri}}", markedUri.toString());
+    html = html.replace("{{highlightUri}}", highlightUri.toString());
+    html = html.replace("{{oneDarkUri}}", oneDarkUri.toString());
     html = html.replace("{{SimpleIDBUri}}", SimpleIDBUri.toString());
     html = html.replace("{{scriptUri}}", scriptUri.toString());
     html = html.replace("{{vscodeStyleUri}}", vscodeStyleUri.toString());
