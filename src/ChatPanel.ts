@@ -28,7 +28,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
           break;
         }
         case "chat": {
-          console.log("[debug] chat", message);
           controller = new AbortController();
           chat(
             message.text,
@@ -63,19 +62,19 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
     const markedUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets", "lib", "marked.min.js")
+        path.join(this._extensionUri.fsPath, "assets/lib/marked.min.js")
       )
     );
 
     const highlightUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets", "lib", "highlight.min.js")
+        path.join(this._extensionUri.fsPath, "assets/lib/highlight.min.js")
       )
     );
 
     const oneDarkUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets", "lib", "atom-one-dark.min.css")
+        path.join(this._extensionUri.fsPath, "assets/lib/atom-one-dark.min.css")
       )
     );
     // 获取本地脚本和样式表的 URI

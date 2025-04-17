@@ -10,14 +10,14 @@ const API_STOP = origin + "/api/delete";
 
 export function tags(onText: any) {
   return axios.get(API_TAGS).then((res) => {
-    console.log("[debug] tags", res.data);
+    console.log("[INFO] tags", res.data);
     onText("tags-end", res.data);
   });
 }
 
 export function stop(onText: any) {
   return axios.get(API_STOP).then((res) => {
-    console.log("[debug] stop", res.data);
+    console.log("[INFO] stop", res.data);
     onText("stop-end", res.data);
   });
 }
@@ -55,18 +55,20 @@ export async function chat(
 ) {
 
   onText("chat-pre", JSON.stringify(createResponseData(model)));
-
   const data = createRequestData(model, prompt, messages);
-  let timer: null | any = null;
+  console.log("[INFO] chat start", data);
   const response = await axios.post(API_CHAT, data, { responseType: "stream", signal: controller.signal });
   const stream = response!.data;
 
+  let timer: null | any = null;
   const end = () => {
     if (timer) {
       clearTimeout(timer);
     }
     timer = setTimeout(() => {
-      onText("chat-end", JSON.stringify(createResponseData(model, true)));
+      const text = JSON.stringify(createResponseData(model, true));
+      console.log("[INFO] chat end",text);
+      onText("chat-end", text);
     }, 100);
   };
 
@@ -74,6 +76,7 @@ export async function chat(
   stream.on("data", (data: any) => {
     const text = new TextDecoder().decode(data);
     if (text.trim()) {
+      console.log("[INFO] chat data", text);
       onText("chat-data", text);
     }
     end();

@@ -409,33 +409,36 @@ function onLoad() {
 
   // 接受消息
   function onRequest() {
-    info.content = `...`;
-    $messages.appendChild(createMessageForAI(contentTemp));
+    state.content = `...`;
+    $messages.appendChild(createMessageForAI(state.content));
     disableInteraction();
   }
 
   function onStart() {
-    info.content = "";
-    updateMessageForAI(info.content);
+    state.content = "";
+    updateMessageForAI(state.content);
   }
 
-  function onRecive(e) {
+  function onData(e) {
     const json = e.data.text;
     const data = JSON.parse(json);
     const text = data.message.content;
-    if (info.startTime === 0) {
-      info.startTime = new Date(data.created_at).getTime();
+    if (data.created_at) {
+      if (state.startTime === 0) {
+        state.startTime = new Date(data.created_at).getTime();
+      }
+      state.endTime = new Date(data.created_at).getTime();
     }
-    endTime = new Date(data.created_at).getTime();
-    info.content += text;
-    info.tokens++;
-    updateMessageForAI(info.content);
+    
+    state.content += text;
+    state.tokens++;
+    updateMessageForAI(state.content);
   }
 
   function onEnd() {
     doChatEnd(state);
-    info.content += createMarkdownInfo(state);
-    updateMessageForAI(info.content, false);
+    state.content += createMarkdownInfo(state);
+    updateMessageForAI(state.content);
     hljs.highlightAll();
     resetInfo();
     enableInteraction();
@@ -474,7 +477,7 @@ ${text}
     } else if (type === "chat-start") {
       onStart();
     } else if (type === "chat-data") {
-      onRecive(e);
+      onData(e);
     } else if (type === "chat-end") {
       onEnd();
     } else if (type === "optimization") {
