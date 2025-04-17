@@ -26,7 +26,7 @@
       "activitybar": [
         {
           "id": "chat-container",
-          "title": "Code Assist",
+          "title": "代码助手",
           "icon": "assets/chat-icon.svg"
         }
       ]
@@ -34,10 +34,10 @@
     "views": {
       "chat-container": [
         {
-          "icon": "assets/chat-icon.svg",
-          "id": "chatView",
+          "id": "code-assist.view",
           "name": "Chat View",
           "type": "webview",
+          "icon": "assets/chat-icon.svg",
           "contextualTitle": "VS Code Chat"
         }
       ]

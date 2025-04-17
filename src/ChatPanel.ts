@@ -22,14 +22,13 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.onDidReceiveMessage(async (message) => {
       switch (message.command) {
         case "tags": {
-          console.log("tags", message);
           tags((type: string, text: string) => {
             webviewView.webview.postMessage({ type, text });
           });
           break;
         }
         case "chat": {
-          console.log("chat", message);
+          console.log("[debug] chat", message);
           controller = new AbortController();
           chat(
             message.text,
@@ -48,6 +47,13 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         }
         default:
           return;
+      }
+    });
+
+    webviewView.onDidChangeVisibility(() => {
+      console.log("[debug] visible", webviewView.visible);
+      if (webviewView.visible) {
+        // 视图变为可见时执行的操作
       }
     });
   }
@@ -107,6 +113,10 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     if (this._view) {
       this._view.show(true); // true 参数表示即使已可见也强制聚焦
     }
+  }
+
+  public isVisible() {
+    return this._view?.visible;
   }
 
   public onSelection(type: string, text: string) {
