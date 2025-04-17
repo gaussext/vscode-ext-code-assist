@@ -3,6 +3,7 @@ body {
   padding: 8px;
   color: var(--vscode-foreground);
   background-color: #1e1f1c;
+  min-width: 480px;
 }
 
 .chat-container {
@@ -59,3 +60,11 @@ body {
   align-items: flex-start;
 }
 
+.link-copy {
+  display: inline-block;
+  user-select: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+}

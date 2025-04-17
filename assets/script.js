@@ -1,3 +1,30 @@
+async function copyToClipboard(text) {
+  if (navigator.clipboard) {
+    return await navigator.clipboard.writeText(text);
+  } else {
+    return new Promise((resolve, reject) => {
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      try {
+        const successful = document.execCommand("copy");
+        document.body.removeChild(textarea);
+        if (successful) {
+          resolve();
+        } else {
+          reject(new Error("复制命令失败"));
+        }
+      } catch (err) {
+        document.body.removeChild(textarea);
+        reject(err);
+      }
+    });
+  }
+}
+
 // 初始化
 marked.setOptions({
   highlight: function (code, language) {
@@ -29,11 +56,28 @@ function createConversationInit(params) {
   ];
 }
 
+function createState() {
+  return {
+    model: "",
+    startTime: 0,
+    endTime: 0,
+    tokens: 0,
+    content: "",
+  };
+}
+
+const state = createState();
+function resetInfo() {
+  state.startTime = 0;
+  state.endTime = 0;
+  state.tokens = 0;
+  state.content = "";
+}
 const vscode = acquireVsCodeApi();
 let conversations = createConversationInit();
 let messages = [];
 let currentId = "0";
-let currentModel = localStorage.getItem("code-assist.currentModel") || "";
+state.model = localStorage.getItem("code-assist.model") || "";
 
 function getModels() {
   vscode.postMessage({
@@ -41,7 +85,7 @@ function getModels() {
   });
 }
 
-function chatStart(message) {
+function doChatStart(message) {
   messages.push({
     role: "user",
     timestamp: Date.now(),
@@ -49,26 +93,46 @@ function chatStart(message) {
   });
   vscode.postMessage({
     command: "chat",
-    model: currentModel,
+    model: state.model,
     text: message,
     messages: messages,
   });
 }
 
-function chatStop() {
+function doChatStop() {
   vscode.postMessage({
     command: "stop",
   });
 }
 
-function chatEnd(text, info) {
+function doChatEnd(info) {
+  const { content, model, tokens, startTime, endTime } = info;
+  const duration = (endTime - startTime) / 1000;
   messages.push({
     role: "assistant",
     timestamp: Date.now(),
-    content: text,
-    info: info,
+    content: content,
+    info: {
+      model,
+      tokens,
+      duration
+    },
   });
   saveMessages();
+}
+
+function createMarkdownInfo(info) {
+  const { model, tokens, startTime, endTime } = info;
+  const duration = (endTime - startTime) / 1000;
+  const speed = tokens / duration;
+  return `
+\`\`\`
+Model: ${model} 
+Tokens: ${tokens} 
+Duration: ${duration.toFixed(2)} Sec 
+Speed: ${speed.toFixed(2)} Token/s
+\`\`\`
+`;
 }
 
 function saveMessages() {
@@ -101,7 +165,7 @@ function deleteConversation(id) {
   if (conversations.length <= 1) {
     return false;
   }
-  conversations = conversations.filter(item => item.id !== id);
+  conversations = conversations.filter((item) => item.id !== id);
   currentId = conversations[0].id;
 }
 
@@ -121,20 +185,35 @@ function onLoad() {
 
   const $messages = document.getElementById("messages");
 
-  function createMarkdownInfo(info) {
-    if (!info) {
-      return "";
+  function getLatestMessage() {
+    const list = Array.from(document.querySelectorAll(".message-ai"));
+    const $message = list[list.length - 1];
+    return $message;
+  }
+
+  function addCopyEvent($message, message) {
+    const $html = $message.querySelector(".copy-html");
+    if ($html) {
+      $html.onclick = () => {
+        copyToClipboard($message.innerHTML).then(() => {
+          $html.innerHTML = "复制成功";
+          setTimeout(() => {
+            $html.innerHTML = "复制 HTML";
+          }, 1000);
+        });
+      };
     }
-    const { model, tokens, duration } = info;
-    const speed = tokens / duration;
-    return `
-  \`\`\`
-  Model: ${model} 
-  Tokens: ${tokens} 
-  Duration: ${duration.toFixed(2)} Sec 
-  Speed: ${speed.toFixed(2)} Token/s
-  \`\`\`
-  `;
+    const $markdown = $message.querySelector(".copy-markdown");
+    if ($markdown) {
+      $markdown.onclick = () => {
+        copyToClipboard(message).then(() => {
+          $markdown.innerHTML = "复制成功";
+          setTimeout(() => {
+            $markdown.innerHTML = "复制 Markdown";
+          }, 1000);
+        });
+      };
+    }
   }
 
   function createMessageForYou(message) {
@@ -142,21 +221,27 @@ function onLoad() {
     $message.classList.add("message-you");
     $message.classList.add("markdown-body");
     $message.innerHTML = marked.parse(`You: ${message}`);
+    $messages.scrollTo(0, $messages.scrollHeight);
     return $message;
   }
 
+  const footer =
+    '<a class="link-copy copy-html">复制 HTML</a><a class="link-copy copy-markdown">复制 Markdown</a>';
   function createMessageForAI(message) {
     const $message = document.createElement("div");
     $message.classList.add("message-ai");
     $message.classList.add("markdown-body");
-    $message.innerHTML = marked.parse(`AI: ${message}`);
+    $message.innerHTML = marked.parse(`AI: ${message}`) + footer;
+    $messages.scrollTo(0, $messages.scrollHeight);
+    addCopyEvent($message, message);
     return $message;
   }
 
-  function getLatestMessage() {
-    const list = Array.from(document.querySelectorAll(".message-ai"));
-    const $message = list[list.length - 1];
-    return $message;
+  function updateMessageForAI(message) {
+    const $message = getLatestMessage();
+    $message.innerHTML = marked.parse(`AI: ${message}`) + footer;
+    $messages.scrollTo(0, $messages.scrollHeight);
+    addCopyEvent($message, message);
   }
 
   function renderConversation() {
@@ -188,33 +273,32 @@ function onLoad() {
   // 获取数据
   function getMesasges() {
     messages = [];
-    $messages.innerHTML = '';
-    db.get(currentId)
-      .then((conversation) => {
-        if (!conversation) {
-          return false;
+    $messages.innerHTML = "";
+    db.get(currentId).then((conversation) => {
+      if (!conversation) {
+        return false;
+      }
+      messages = conversation.messages || [];
+      messages.forEach((item) => {
+        if (item.role === "user") {
+          $messages.appendChild(createMessageForYou(item.content));
         }
-        messages = conversation.messages || [];
-        messages.forEach((item) => {
-          if (item.role === "user") {
-            $messages.appendChild(createMessageForYou(item.content));
-          }
-          if (item.role === "assistant") {
-            $messages.appendChild(
-              createMessageForAI(item.content + createMarkdownInfo(item.info))
-            );
-          }
-        });
-        $messages.scrollTo(0, $messages.scrollHeight);
-        hljs.highlightAll();
+        if (item.role === "assistant") {
+          $messages.appendChild(
+            createMessageForAI(item.content + createMarkdownInfo(item.info))
+          );
+        }
       });
+      $messages.scrollTo(0, $messages.scrollHeight);
+      hljs.highlightAll();
+    });
   }
 
   function sendMessage() {
     const message = $input.value;
     if (message) {
       $messages.appendChild(createMessageForYou(message));
-      chatStart(message);
+      doChatStart(message);
       conversations.forEach((item) => {
         if (item.id === currentId) {
           item.title = message.slice(0, 10) + "...";
@@ -263,8 +347,8 @@ function onLoad() {
 
   // 选择模型
   $selectModel.addEventListener("change", (e) => {
-    currentModel = e.target.value;
-    localStorage.setItem("code-assist.currentModel", currentModel);
+    state.model = e.target.value;
+    localStorage.setItem("code-assist.model", state.model);
   });
 
   // 发送消息
@@ -281,7 +365,7 @@ function onLoad() {
 
   // 中断消息
   $buttonStop.addEventListener("click", () => {
-    chatStop();
+    doChatStop();
   });
 
   // 清空消息
@@ -306,85 +390,97 @@ function onLoad() {
     $buttonCreate.disabled = false;
     $buttonDelete.disabled = false;
   }
-  // 接受消息
-  let contentTemp = "";
-  let tokens = 0;
-  let startTime = 0;
-  let endTime = 0;
-
-  function resetInfo() {
-    tokens = 0;
-    startTime = 0;
-    endTime = 0;
+  // 获取到模型列表
+  function onModels(e) {
+    const json = e.data.text;
+    const models = json.models || [];
+    models.sort((a, b) => a.name.localeCompare(b.name));
+    $selectModel.innerHTML = "";
+    models.forEach((model) => {
+      const $option = document.createElement("option");
+      $option.value = model.name;
+      $option.textContent = `${model.name}`;
+      if ($option.value === state.model) {
+        $option.selected = true;
+      }
+      $selectModel.appendChild($option);
+    });
   }
+
+  // 接受消息
+  function onRequest() {
+    info.content = `...`;
+    $messages.appendChild(createMessageForAI(contentTemp));
+    disableInteraction();
+  }
+
+  function onStart() {
+    info.content = "";
+    updateMessageForAI(info.content);
+  }
+
+  function onRecive(e) {
+    const json = e.data.text;
+    const data = JSON.parse(json);
+    const text = data.message.content;
+    if (info.startTime === 0) {
+      info.startTime = new Date(data.created_at).getTime();
+    }
+    endTime = new Date(data.created_at).getTime();
+    info.content += text;
+    info.tokens++;
+    updateMessageForAI(info.content);
+  }
+
+  function onEnd() {
+    doChatEnd(state);
+    info.content += createMarkdownInfo(state);
+    updateMessageForAI(info.content, false);
+    hljs.highlightAll();
+    resetInfo();
+    enableInteraction();
+  }
+  // 优化代码
+  function onOptimization(e) {
+    const text = e.data.text;
+    if (!text) {
+      return false;
+    }
+    $input.value = `优化一下这段代码  
+\`\`\`
+${text}
+\`\`\``;
+    $buttonChat.click();
+  }
+  // 解释代码
+  function onExplanation(e) {
+    const text = e.data.text;
+    if (!text) {
+      return false;
+    }
+    $input.value = `解释一下这段代码 
+\`\`\`
+${text}
+\`\`\``;
+    $buttonChat.click();
+  }
+
   window.addEventListener("message", (e) => {
     const type = e.data.type;
-    if (type === "chat-pre") {
-      contentTemp = `...`;
-      $messages.appendChild(createMessageForAI(contentTemp));
-      $messages.scrollTo(0, $messages.scrollHeight);
-      disableInteraction();
-    }
-    if (type === "chat-start") {
-      const $message = getLatestMessage();
-      contentTemp = "";
-      $message.innerHTML = marked.parse(contentTemp);
-      $messages.scrollTo(0, $messages.scrollHeight);
+    if (type === "tags-end") {
+      onModels(e);
+    } else if (type === "chat-pre") {
+      onRequest();
+    } else if (type === "chat-start") {
+      onStart();
     } else if (type === "chat-data") {
-      const $message = getLatestMessage();
-      const json = e.data.text;
-      const data = JSON.parse(json);
-      const text = data.message.content;
-      if (startTime === 0) {
-        startTime = new Date(data.created_at).getTime();
-      }
-      endTime = new Date(data.created_at).getTime();
-      contentTemp += text;
-      $message.innerHTML = marked.parse(contentTemp);
-      $messages.scrollTo(0, $messages.scrollHeight);
-      tokens++;
+      onRecive(e);
     } else if (type === "chat-end") {
-      const duration = (endTime - startTime) / 1000;
-      chatEnd(contentTemp, { model: currentModel, tokens, duration });
-      contentTemp += createMarkdownInfo({
-        model: currentModel,
-        tokens,
-        duration,
-      });
-      const $message = getLatestMessage();
-      $message.innerHTML = marked.parse(contentTemp);
-      $messages.scrollTo(0, $messages.scrollHeight);
-      hljs.highlightAll();
-      resetInfo();
-      enableInteraction();
-    } else if (type === "tags-end") {
-      const json = e.data.text;
-      const models = json.models || [];
-      models.sort((a, b) => a.name.localeCompare(b.name));
-      $selectModel.innerHTML = "";
-      models.forEach((model) => {
-        const $option = document.createElement("option");
-        $option.value = model.name;
-        $option.textContent = `${model.name}`;
-        if ($option.value === currentModel) {
-          $option.selected = true;
-        }
-        $selectModel.appendChild($option);
-      });
+      onEnd();
     } else if (type === "optimization") {
-      const text = e.data.text;
-      $input.value = `优化一下这段代码  
-\`\`\`
-${text}
-\`\`\``;
-      $buttonChat.click();
+      onOptimization(e);
     } else if (type === "explanation") {
-      const text = e.data.text;
-      $input.value = `解释一下这段代码 
-\`\`\`
-${text}
-\`\`\``;
-      $buttonChat.click();
+      onExplanation(e);
     }
   });
 }
