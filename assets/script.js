@@ -432,7 +432,9 @@ function onLoad() {
     
     state.content += text;
     state.tokens++;
-    updateMessageForAI(state.content);
+    if (state.tokens % 2 === 0) {
+      updateMessageForAI(state.content);
+    }
   }
 
   function onEnd() {
