@@ -8,9 +8,14 @@
     <script src="{{markedUri}}"></script>
     <!-- highlight -->
     <script src="{{highlightUri}}"></script>
+    <!-- SimpleID -->
+    <script src="{{SimpleIDBUri}}"></script>
+    <script src="{{scriptUri}}"></script>
     <!-- Atom One Dark -->
-    <link href="{{oneDarkUri}}" rel="stylesheet" >
+    <link href="{{oneDarkUri}}" rel="stylesheet">
+    <!-- Vscode -->
     <link href="{{vscodeStyleUri}}" rel="stylesheet">
+    <!-- Markdown -->
     <link href="{{markdownStyleUri}}" rel="stylesheet">
     <link href="{{styleUri}}" rel="stylesheet">
     <title>VS Code Chat</title>
@@ -26,18 +31,14 @@
         </div>
         <div class="messages-area" id="messages"></div>
         <div class="chat-area">
-            <textarea class="vscode-textarea" id="chat-input" rows="4" placeholder="请输入您的问题"
-                resize="none"></textarea>
+            <textarea class="vscode-textarea" id="chat-input" rows="4" placeholder="请输入您的问题" resize="none"></textarea>
             <div>
                 <div style="margin-bottom: 4px;"><button class="vscode-button" id="chat-button">发送</button></div>
                 <div style="margin-bottom: 4px;"><button class="vscode-button" id="stop-button">停止</button></div>
                 <div><button class="vscode-button" id="clean-button">清除</button></div>
             </div>
-
         </div>
     </div>
-    <script src="{{SimpleIDBUri}}"></script>
-    <script src="{{scriptUri}}"></script>
 </body>
 
 </html>

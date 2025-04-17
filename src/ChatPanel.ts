@@ -62,43 +62,43 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
 
     const markedUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets/lib/marked.min.js")
+        path.join(this._extensionUri.fsPath, "assets/lib/js/marked.min.js")
       )
     );
 
     const highlightUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets/lib/highlight.min.js")
+        path.join(this._extensionUri.fsPath, "assets/lib/js/highlight.min.js")
       )
     );
 
     const oneDarkUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets/lib/atom-one-dark.min.css")
+        path.join(this._extensionUri.fsPath, "assets/lib/css/atom-one-dark.min.css")
       )
     );
-    // 获取本地脚本和样式表的 URI
+
+    const vscodeStyleUri = webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(this._extensionUri.fsPath, "assets/lib/css/vscode.css")
+      )
+    );
+
+    const markdownStyleUri = webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(this._extensionUri.fsPath, "assets/lib/css/markdown.css")
+      )
+    );
+
     const SimpleIDBUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets", "SimpleIDB.js")
+        path.join(this._extensionUri.fsPath, "assets/lib/js/simple-db.js")
       )
     );
 
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.file(
         path.join(this._extensionUri.fsPath, "assets", "script.js")
-      )
-    );
-
-    const vscodeStyleUri = webview.asWebviewUri(
-      vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets", "vscode.css")
-      )
-    );
-
-    const markdownStyleUri = webview.asWebviewUri(
-      vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets", "markdown.css")
       )
     );
 
