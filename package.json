@@ -56,12 +56,18 @@
       ],
       "codeAssist.submenu": [
         {
+          "command": "codeAssist.chat",
+          "label": "开始对话"
+        },
+        {
           "command": "codeAssist.optimization",
-          "label": "代码优化"
+          "label": "代码优化",
+          "when": "editorHasSelection"
         },
         {
           "command": "codeAssist.explanation",
-          "label": "代码解释"
+          "label": "代码解释",
+          "when": "editorHasSelection"
         }
       ]
     },
@@ -72,6 +78,10 @@
       }
     ],
     "commands": [
+      {
+        "command": "codeAssist.chat",
+        "title": "开始对话"
+      },
       {
         "command": "codeAssist.optimization",
         "title": "代码优化"

@@ -20,6 +20,13 @@ export function activate(context: vscode.ExtensionContext) {
     }, 1000);
   };
   
+  const chat = vscode.commands.registerCommand(
+    "codeAssist.chat",
+    () => {
+      openViewAndSendMessage("chat", '');
+    }
+  );
+
   const optimization = vscode.commands.registerCommand(
     "codeAssist.optimization",
     () => {
@@ -42,5 +49,5 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(optimization, explanation);
+  context.subscriptions.push(chat, optimization, explanation);
 }
