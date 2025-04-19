@@ -19,8 +19,14 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     // 处理来自 webview 的消息
+    let startTime = Date.now();
     webviewView.webview.onDidReceiveMessage(async (message) => {
       switch (message.command) {
+        case "loaded": {
+          const loadTime = Date.now() - startTime;
+          console.log(`[INFO] Webview loaded in ${loadTime}ms`);
+          break;
+        }
         case "tags": {
           tags((type: string, text: string) => {
             webviewView.webview.postMessage({ type, text });
@@ -46,6 +52,14 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
         }
         default:
           return;
+      }
+    });
+
+    webviewView.onDidChangeVisibility(() => {
+      console.log("[INFO] visible", webviewView.visible);
+      if (webviewView.visible) {
+        // 视图变为可见时执行的操作
+        startTime = Date.now();
       }
     });
   }

@@ -9,15 +9,17 @@ const API_CHAT = origin + "/api/chat";
 const API_STOP = origin + "/api/delete";
 
 export function tags(onText: any) {
+  console.log("[INFO] tags start");
   return axios.get(API_TAGS).then((res) => {
-    console.log("[INFO] tags", res.data);
+    console.log("[INFO] tags end", res.data);
     onText("tags-end", res.data);
   });
 }
 
 export function stop(onText: any) {
+  console.log("[INFO] stop start");
   return axios.get(API_STOP).then((res) => {
-    console.log("[INFO] stop", res.data);
+    console.log("[INFO] stop end", res.data);
     onText("stop-end", res.data);
   });
 }

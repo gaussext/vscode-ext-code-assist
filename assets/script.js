@@ -44,7 +44,7 @@ marked.setOptions({
 const db = new SimpleIDB({
   dbName: "code-assist",
   storeName: "conversations",
-  version: 3,
+  version: 4,
 });
 
 function createConversationInit(params) {
@@ -76,7 +76,7 @@ function resetInfo() {
 const vscode = acquireVsCodeApi();
 let conversations = createConversationInit();
 let messages = [];
-let currentId = "0";
+let conversationId = "0";
 state.model = localStorage.getItem("code-assist.model") || "";
 
 function getModels() {
@@ -115,7 +115,9 @@ function doChatEnd(info) {
     info: {
       model,
       tokens,
-      duration
+      duration,
+      startTime, 
+      endTime
     },
   });
   saveMessages();
@@ -137,7 +139,7 @@ Speed: ${speed.toFixed(2)} Token/s
 
 function saveMessages() {
   db.set({
-    id: currentId,
+    id: conversationId,
     messages: messages,
     timestamp: Date.now(),
   });
@@ -145,7 +147,7 @@ function saveMessages() {
 
 function cleanData() {
   db.set({
-    id: currentId,
+    id: conversationId,
     messages: [],
     timestamp: Date.now(),
   });
@@ -154,9 +156,9 @@ function cleanData() {
 function createConversation() {
   const nextId =
     (Math.max(...conversations.map((item) => Number(item.id))) || 0) + 1;
-  currentId = `${nextId}`;
+  conversationId = `${nextId}`;
   conversations.push({
-    id: currentId,
+    id: conversationId,
     title: "新建对话",
   });
 }
@@ -166,7 +168,7 @@ function deleteConversation(id) {
     return false;
   }
   conversations = conversations.filter((item) => item.id !== id);
-  currentId = conversations[0].id;
+  conversationId = conversations[0].id;
 }
 
 function saveConversation() {
@@ -227,19 +229,29 @@ function onLoad() {
 
   const footer =
     '<a class="link-copy copy-html">复制 HTML</a><a class="link-copy copy-markdown">复制 Markdown</a>';
-  function createMessageForAI(message) {
+
+  function createMessageForAI(message, info) {
     const $message = document.createElement("div");
     $message.classList.add("message-ai");
     $message.classList.add("markdown-body");
-    $message.innerHTML = marked.parse(`AI: ${message}`) + footer;
+    $message.innerHTML = marked.parse(`AI: ${message}`);
     $messages.scrollTo(0, $messages.scrollHeight);
-    addCopyEvent($message, message);
+    if (info) {
+      $message.innerHTML += marked.parse(info) + footer;
+      addCopyEvent($message, message);
+    }
     return $message;
   }
 
   function updateMessageForAI(message) {
     const $message = getLatestMessage();
-    $message.innerHTML = marked.parse(`AI: ${message}`) + footer;
+    $message.innerHTML = marked.parse(`AI: ${message}`);
+    $messages.scrollTo(0, $messages.scrollHeight);
+  }
+
+  function endMessageForAI(message, info) {
+    const $message = getLatestMessage();
+    $message.innerHTML = marked.parse(`AI: ${message} ${info}`) + footer;
     $messages.scrollTo(0, $messages.scrollHeight);
     addCopyEvent($message, message);
   }
@@ -250,19 +262,19 @@ function onLoad() {
       const $option = document.createElement("option");
       $option.value = item.id;
       $option.textContent = `${item.title}`;
-      if ($option.value === currentId) {
+      if ($option.value === conversationId) {
         $option.selected = true;
       }
       $selectHistory.appendChild($option);
     });
   }
-
+  // 获取对话
   function getConversations() {
     try {
       const list = JSON.parse(localStorage.getItem("conversations")) || [];
       if (list.length) {
         conversations = list;
-        currentId = list[0].id;
+        conversationId = list[0].id;
         renderConversation();
       }
     } catch (error) {
@@ -274,7 +286,7 @@ function onLoad() {
   function getMesasges() {
     messages = [];
     $messages.innerHTML = "";
-    db.get(currentId).then((conversation) => {
+    db.get(conversationId).then((conversation) => {
       if (!conversation) {
         return false;
       }
@@ -285,7 +297,7 @@ function onLoad() {
         }
         if (item.role === "assistant") {
           $messages.appendChild(
-            createMessageForAI(item.content + createMarkdownInfo(item.info))
+            createMessageForAI(item.content, createMarkdownInfo(item.info))
           );
         }
       });
@@ -300,7 +312,7 @@ function onLoad() {
       $messages.appendChild(createMessageForYou(message));
       doChatStart(message);
       conversations.forEach((item) => {
-        if (item.id === currentId) {
+        if (item.id === conversationId) {
           item.title = message.slice(0, 10) + "...";
         }
       });
@@ -332,7 +344,7 @@ function onLoad() {
 
   // 删除当前会话
   $buttonDelete.addEventListener("click", () => {
-    deleteConversation(currentId);
+    deleteConversation(conversationId);
     renderConversation();
     saveConversation();
     getMesasges();
@@ -340,8 +352,7 @@ function onLoad() {
 
   // 选择对话
   $selectHistory.addEventListener("change", (e) => {
-    currentId = e.target.value;
-    localStorage.setItem("code-assist.currentId", currentId);
+    conversationId = e.target.value;
     getMesasges();
   });
 
@@ -376,19 +387,26 @@ function onLoad() {
   });
 
   function disableInteraction() {
+    $selectModel.disabled = true;
+    $selectHistory.disabled = true;
+    $buttonCreate.disabled = true;
+    $buttonDelete.disabled = true;
+
     $input.disabled = true;
     $buttonChat.disabled = true;
     $buttonClean.disabled = true;
-    $buttonCreate.disabled = true;
-    $buttonDelete.disabled = true;
   }
 
   function enableInteraction() {
+    $selectModel.disabled = false;
+    $selectHistory.disabled = false;
+    $buttonCreate.disabled = false;
+    $buttonDelete.disabled = false;
+
     $input.disabled = false;
     $buttonChat.disabled = false;
     $buttonClean.disabled = false;
-    $buttonCreate.disabled = false;
-    $buttonDelete.disabled = false;
+    
   }
   // 获取到模型列表
   function onModels(e) {
@@ -439,8 +457,7 @@ function onLoad() {
 
   function onEnd() {
     doChatEnd(state);
-    state.content += createMarkdownInfo(state);
-    updateMessageForAI(state.content);
+    endMessageForAI(state.content, createMarkdownInfo(state));
     hljs.highlightAll();
     resetInfo();
     enableInteraction();
@@ -487,6 +504,10 @@ ${text}
     } else if (type === "explanation") {
       onExplanation(e);
     }
+  });
+
+  vscode.postMessage({
+    command: "loaded",
   });
 }
 
