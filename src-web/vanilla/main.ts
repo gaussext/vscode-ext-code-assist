@@ -1,6 +1,7 @@
 import { Model } from "../Model";
 import { View } from "./View";
-
+// @ts-ignore
+import App from "./App.html?raw";
 declare var marked: any;
 declare var hljs: any;
 
@@ -21,21 +22,7 @@ declare var hljs: any;
 });
 
 function render() {
-  document.getElementById("root")!.innerHTML = `
-  <div class="chat-container">
-        <div class="history-area">
-            <select class="vscode-select" id="model-select"></select>
-            <select class="vscode-select" id="history-select"></select>
-            <button class="vscode-button-small" id="create-button">+</button>
-            <button class="vscode-button-small" id="delete-button">-</button>
-        </div>
-        <div class="messages-area" id="messages"></div>
-        <div class="chat-area">
-            <textarea class="vscode-textarea" id="chat-input" rows="4" placeholder="请输入您的问题" resize="none"></textarea>
-            <button style="margin-top: 6px;" class="vscode-button-full" id="chat-button">发送</button>
-        </div>
-    </div>
-  `
+  document.getElementById("root")!.innerHTML = `${App}`;
 }
 
 function onLoad() {

@@ -25,7 +25,7 @@ const extensionConfig = {
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-    extensions: ['.ts', '.tsx', '.js']
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.html']
   },
   module: {
     rules: [
@@ -37,6 +37,10 @@ const extensionConfig = {
             loader: 'ts-loader'
           }
         ]
+      },
+      {
+        test: /\?raw$/,
+        use: 'raw-loader'
       }
     ]
   },
