@@ -67,6 +67,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   private _getHtmlForWebview(webview: vscode.Webview) {
     // 获取依赖包
 
+    
+
     const markedUri = webview.asWebviewUri(
       vscode.Uri.file(
         path.join(this._extensionUri.fsPath, "assets/lib/js/marked.min.js")
@@ -76,6 +78,12 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     const highlightUri = webview.asWebviewUri(
       vscode.Uri.file(
         path.join(this._extensionUri.fsPath, "assets/lib/js/highlight.min.js")
+      )
+    );
+
+    const resetUri = webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(this._extensionUri.fsPath, "assets/lib/css/reset.css")
       )
     );
 
@@ -97,21 +105,15 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
       )
     );
 
-    const SimpleIDBUri = webview.asWebviewUri(
+    const mainStyleUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets/lib/js/simple-db.js")
+        path.join(this._extensionUri.fsPath, "assets/lib/css/style.css")
       )
     );
 
     const scriptUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets", "script.js")
-      )
-    );
-
-    const mainStyleUri = webview.asWebviewUri(
-      vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets", "style.css")
+        path.join(this._extensionUri.fsPath, "assets/out/bundle.js")
       )
     );
 
@@ -124,12 +126,12 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     let html = fs.readFileSync(htmlPath, "utf-8");
 
     // 替换占位符
-    
     html = html.replace("{{markedUri}}", markedUri.toString());
     html = html.replace("{{highlightUri}}", highlightUri.toString());
-    html = html.replace("{{oneDarkUri}}", oneDarkUri.toString());
-    html = html.replace("{{SimpleIDBUri}}", SimpleIDBUri.toString());
     html = html.replace("{{scriptUri}}", scriptUri.toString());
+  
+    html = html.replace("{{resetUri}}", resetUri.toString());
+    html = html.replace("{{oneDarkUri}}", oneDarkUri.toString());
     html = html.replace("{{vscodeStyleUri}}", vscodeStyleUri.toString());
     html = html.replace("{{markdownStyleUri}}", markdownStyleUri.toString());
     html = html.replace("{{styleUri}}", mainStyleUri.toString());

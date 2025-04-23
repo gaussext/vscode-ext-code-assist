@@ -45,4 +45,16 @@ const extensionConfig = {
     level: "log", // enables logging required for problem matchers
   },
 };
-module.exports = [ extensionConfig ];
+
+const webConfig = {
+  ...extensionConfig,
+  entry: './src-web/main.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+  output: {
+    // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
+    path: path.resolve(__dirname, 'assets/out'),
+    filename: 'bundle.js',
+    libraryTarget: 'umd'
+  },
+};
+
+module.exports = [ extensionConfig, webConfig ];
