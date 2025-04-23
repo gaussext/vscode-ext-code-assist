@@ -2,7 +2,7 @@
   "name": "code-assist",
   "displayName": "Gauss Code Assist",
   "description": "Code Assist With Ollama",
-  "version": "0.0.9",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -50,7 +50,7 @@
     },
     "menus": {
       "editor/context": [
-        {          
+        {
           "submenu": "codeAssist.submenu"
         }
       ],
@@ -95,7 +95,7 @@
   "scripts": {
     "vscode:prepublish": "pnpm run package",
     "compile": "webpack",
-    "watch": "webpack --watch",
+    "watch": "concurrently webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
@@ -105,6 +105,7 @@
     "vsce": "vsce package"
   },
   "devDependencies": {
+    "@types/marked": "^6.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
     "@types/vscode": "^1.98.0",
@@ -112,6 +113,7 @@
     "@typescript-eslint/parser": "^8.28.0",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
+    "concurrently": "^9.1.2",
     "eslint": "^9.23.0",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.2",
