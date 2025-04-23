@@ -25,12 +25,12 @@ const extensionConfig = {
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-    extensions: ['.ts', '.js']
+    extensions: ['.ts', '.tsx', '.js']
   },
   module: {
     rules: [
       {
-        test: /\.ts$/,
+        test: /\.tsx?$/,
         exclude: /node_modules/,
         use: [
           {
@@ -48,7 +48,10 @@ const extensionConfig = {
 
 const webConfig = {
   ...extensionConfig,
-  entry: './src-web/main.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+  target: 'web',
+  mode: 'production', // this minifies the source code and removes comments (when packaging we set this to 'production')
+  // entry: './src-web/react/main.tsx', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+  entry: './src-web/vanilla/main.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
   output: {
     // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
     path: path.resolve(__dirname, 'assets/out'),
@@ -57,4 +60,4 @@ const webConfig = {
   },
 };
 
-module.exports = [ extensionConfig, webConfig ];
+module.exports = [webConfig, extensionConfig];

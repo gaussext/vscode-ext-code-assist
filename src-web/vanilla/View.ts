@@ -1,7 +1,7 @@
-declare var hljs: any;
-import { AIModel, Message, Model } from "./Model";
-import { Utils } from "./Utils";
+import { AIModel, Message, Model } from "../Model";
+import { createMarkdownInfo, Utils } from "./Utils";
 
+declare var hljs: any;
 declare var marked: any;
 
 const footer = '<a class="link-copy copy-html">复制 HTML</a><a class="link-copy copy-markdown">复制 Markdown</a>';
@@ -151,7 +151,7 @@ export class View {
             startTime: startTime,
             endTime: endTime,
         });
-        this.endMessageForAI(this.model.state.content, Utils.createMarkdownInfo(this.model.state));
+        this.endMessageForAI(this.model.state.content, createMarkdownInfo(this.model.state));
         this.enableInteraction();
         hljs.highlightAll();
     }
@@ -207,7 +207,7 @@ export class View {
     getMesasges() {
         this.model.messages = [];
         this.$messages.innerHTML = "";
-        this.model.getMesasges().then(() => {
+        this.model.getMessages().then(() => {
             this.updateMessages(this.model.messages);
             this.model.state.content = "";
             this.model.state.tokens = 0;
@@ -277,7 +277,7 @@ export class View {
             }
             if (item.role === "assistant") {
                 this.$messages.appendChild(
-                    Utils.createMessageForAI(item.content, Utils.createMarkdownInfo(item.info))
+                    Utils.createMessageForAI(item.content, createMarkdownInfo(item.info))
                 );
             }
         });

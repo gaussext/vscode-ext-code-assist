@@ -5,14 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- Custom Script -->
-    <script>
+    <!-- <script>
+        process = {}
         global = {};
-    </script>
+    </script> -->
     <!-- marked -->
     <script src="{{markedUri}}"></script>
     <!-- highlight -->
     <script src="{{highlightUri}}"></script>
-    <script src="{{scriptUri}}"></script>
+    
     <!-- Reset CSS -->
     <link href="{{resetUri}}" rel="stylesheet">
     <!-- Atom One Dark -->
@@ -23,24 +24,12 @@
     <link href="{{markdownStyleUri}}" rel="stylesheet">
     <!-- Custom Styles -->
     <link href="{{styleUri}}" rel="stylesheet">
-
     <title>VS Code Chat</title>
 </head>
 
 <body>
-    <div class="chat-container">
-        <div class="history-area">
-            <select class="vscode-select" id="model-select"></select>
-            <select class="vscode-select" id="history-select"></select>
-            <button class="vscode-button-small" id="create-button">+</button>
-            <button class="vscode-button-small" id="delete-button">-</button>
-        </div>
-        <div class="messages-area" id="messages"></div>
-        <div class="chat-area">
-            <textarea class="vscode-textarea" id="chat-input" rows="4" placeholder="请输入您的问题" resize="none"></textarea>
-            <button style="margin-top: 6px;" class="vscode-button-full" id="chat-button">发送</button>
-        </div>
-    </div>
+    <div id="root"></div>
+    <script src="{{scriptUri}}"></script>
 </body>
 
 </html>

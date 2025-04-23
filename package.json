@@ -105,6 +105,7 @@
     "vsce": "vsce package"
   },
   "devDependencies": {
+    "@babel/preset-react": "^7.26.3",
     "@types/marked": "^6.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
@@ -116,12 +117,17 @@
     "concurrently": "^9.1.2",
     "eslint": "^9.23.0",
     "ts-loader": "^9.5.2",
-    "typescript": "^5.8.2",
+    "typescript": "^5.8.3",
     "webpack": "^5.98.0",
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
     "@vscode/vsce": "^3.3.1",
-    "axios": "^1.8.4"
+    "axios": "^1.8.4",
+    "babel-loader": "^10.0.0",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
   }
 }
