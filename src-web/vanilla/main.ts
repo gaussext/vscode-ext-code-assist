@@ -1,6 +1,7 @@
-import { Model } from "./Model";
+import { Model } from "../Model";
 import { View } from "./View";
-
+// @ts-ignore
+import App from "./App.html?raw";
 declare var marked: any;
 declare var hljs: any;
 
@@ -20,7 +21,12 @@ declare var hljs: any;
   xhtml: false,
 });
 
+function render() {
+  document.getElementById("root")!.innerHTML = `${App}`;
+}
+
 function onLoad() {
+  render();
   new View(new Model());
 }
 

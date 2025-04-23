@@ -3,7 +3,7 @@ declare const acquireVsCodeApi: any;
 
 const vscode = acquireVsCodeApi();
 
-class Conversation {
+export class Conversation {
     id: string = '0';
     title: string = '新建对话';
     messages: any[] = [];
@@ -143,14 +143,14 @@ export class Model {
 
 
     // 获取消息
-    getMesasges() {
+    getMessages(): Promise<Message[]> {
         this.messages = [];
         return this.db.get(this.conversationId).then((conversation) => {
             if (!conversation) {
-                return false;
+                return Promise.resolve([]);
             }
             this.messages = (conversation as Conversation).messages || [];
-            console.log(this.messages);
+            return Promise.resolve(this.messages);
         });
     }
 

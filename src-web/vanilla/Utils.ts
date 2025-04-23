@@ -1,7 +1,7 @@
 const footer = '<a class="link-copy copy-html">复制 HTML</a><a class="link-copy copy-markdown">复制 Markdown</a>';
 declare var marked: any;
 
-import { Info } from "./Model";
+import { Info } from "../Model";
 
 export class Utils {
     static async copyToClipboard(text: string) {
@@ -57,19 +57,7 @@ export class Utils {
         }
     }
 
-    static createMarkdownInfo(info: Info) {
-        const { model, tokens, startTime, endTime } = info;
-        const duration = (endTime - startTime) / 1000;
-        const speed = tokens / duration;
-        return `
-\`\`\`
-Model: ${model} 
-Tokens: ${tokens} 
-Duration: ${duration.toFixed(2)} Sec 
-Speed: ${speed.toFixed(2)} Token/s
-\`\`\`
-`;
-    }
+    
     static createMessageForYou(message: string) {
         const $message = document.createElement("div");
         $message.classList.add("message-you");
@@ -90,4 +78,18 @@ Speed: ${speed.toFixed(2)} Token/s
         return $message;
     }
 
+}
+
+export function createMarkdownInfo(info: Info) {
+    const { model, tokens, startTime, endTime } = info;
+    const duration = (endTime - startTime) / 1000;
+    const speed = tokens / duration;
+    return `
+\`\`\`
+Model: ${model} 
+Tokens: ${tokens} 
+Duration: ${duration.toFixed(2)} Sec 
+Speed: ${speed.toFixed(2)} Token/s
+\`\`\`
+`;
 }
