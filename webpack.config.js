@@ -37,10 +37,6 @@ const extensionConfig = {
             loader: 'ts-loader'
           }
         ]
-      },
-      {
-        test: /\?raw$/,
-        use: 'raw-loader'
       }
     ]
   },

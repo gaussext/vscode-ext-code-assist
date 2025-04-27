@@ -1,7 +1,7 @@
 import { Model } from "../Model";
 import { View } from "./View";
 // @ts-ignore
-import App from "./App.html?raw";
+import App from "raw-loader!./App.html?raw";
 declare var marked: any;
 declare var hljs: any;
 
@@ -22,7 +22,7 @@ declare var hljs: any;
 });
 
 function render() {
-  document.getElementById("root")!.innerHTML = `${App}`;
+  document.getElementById("root")!.innerHTML = App;
 }
 
 function onLoad() {
