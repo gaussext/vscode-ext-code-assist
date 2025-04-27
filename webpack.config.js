@@ -3,6 +3,7 @@
 'use strict';
 
 const path = require('path');
+const { VueLoaderPlugin } = require('vue-loader');
 
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
@@ -25,8 +26,11 @@ const extensionConfig = {
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-    extensions: ['.ts', '.tsx', '.js', '.jsx', '.html']
+    extensions: ['.ts', '.tsx', '.js', '.jsx', '.html', '.vue']
   },
+  plugins: [
+    new VueLoaderPlugin(),
+  ],
   module: {
     rules: [
       {
@@ -37,7 +41,11 @@ const extensionConfig = {
             loader: 'ts-loader'
           }
         ]
-      }
+      },
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      },
     ]
   },
   devtool: 'nosources-source-map',
@@ -50,8 +58,9 @@ const webConfig = {
   ...extensionConfig,
   target: 'web',
   mode: 'production', // this minifies the source code and removes comments (when packaging we set this to 'production')
-  // entry: './src-web/react/main.tsx', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
   entry: './src-web/vanilla/main.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+  // entry: './src-web/react/main.tsx', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+  // entry: './src-web/vue/main.ts',
   output: {
     // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
     path: path.resolve(__dirname, 'assets/out'),
