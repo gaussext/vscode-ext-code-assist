@@ -107,17 +107,17 @@ export class View {
     }
 
     // 接受消息
-    async onChatRequest() {
+    onChatRequest() {
+        this.model.resetState();
         this.model.state.content = `...`;
         this.model.state.isLoading = true;
         this.$buttonChat.innerHTML = "停止";
-        this.$messages.appendChild(await Utils.createMessageForAI(this.model.state.content, ''));
+        this.$messages.appendChild(Utils.createMessageForAI(this.model.state.content, ''));
         this.disableInteraction();
     }
 
     onChatStart() {
         this.model.state.content = "";
-        
         this.updateMessageForAI(this.model.state.content);
     }
 
@@ -162,7 +162,11 @@ export class View {
         if (!text) {
             return false;
         }
-        this.$input.value = `优化一下这段代码\`\`\`${text}\`\`\``;
+        this.$input.value = `
+优化一下这段代码
+\`\`\`
+${text}
+\`\`\``;
         this.$buttonChat.click();
     }
 
@@ -172,7 +176,11 @@ export class View {
         if (!text) {
             return false;
         }
-        this.$input.value = `解释一下这段代码 \`\`\`${text}\`\`\``;
+        this.$input.value = `
+解释一下这段代码
+\`\`\`
+${text}
+\`\`\``;
         this.$buttonChat.click();
     }
 
@@ -219,20 +227,16 @@ export class View {
     disableInteraction() {
         this.$selectModel.disabled = true;
         this.$selectHistory.disabled = true;
-
         this.$buttonCreate.disabled = true;
         this.$buttonDelete.disabled = true;
-
         this.$input.disabled = true;
     }
 
     enableInteraction() {
         this.$selectModel.disabled = false;
         this.$selectHistory.disabled = false;
-
         this.$buttonCreate.disabled = false;
         this.$buttonDelete.disabled = false;
-
         this.$input.disabled = false;
     }
 
@@ -264,9 +268,9 @@ export class View {
         this.model.chat(this.model.state.model, message, this.model.messages);
         this.model.updateConversationTitle(message);
         this.renderConversations();
-
         this.$input.value = "";
         this.$messages.appendChild(Utils.createMessageForYou(message));
+        this.$messages.scrollTo(0, this.$messages.scrollHeight);
         hljs.highlightAll();
     }
 
