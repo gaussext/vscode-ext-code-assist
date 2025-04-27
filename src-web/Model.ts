@@ -59,6 +59,20 @@ export class Model {
         });
     }
 
+    resetState() {
+        this.state.startTime = 0;
+        this.state.endTime = 0;
+        this.state.duration = 0;
+        this.state.tokens = 0;
+    }
+
+    // 更新模型
+    updateModel(model: string) {
+        this.state.model = model;
+        localStorage.setItem("code-assist.model", model);
+    }
+
+
     // 发送聊天消息
     chat(model: string, text: string, messages: Message[]) {
         vscode.postMessage({
@@ -76,11 +90,6 @@ export class Model {
         });
     }
 
-    // 更新模型
-    updateModel(model: string) {
-        this.state.model = model;
-        localStorage.setItem("code-assist.model", model);
-    }
 
     // 切换会话
     updateConversationId(id: string) {

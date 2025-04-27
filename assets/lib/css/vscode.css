@@ -60,6 +60,11 @@ button:hover {
 	background: var(--vscode-button-hoverBackground);
 }
 
+button:disabled {
+	opacity: 0.7;
+	cursor: not-allowed;
+}
+
 button:focus {
 	outline-color: var(--vscode-focusBorder);
 }
@@ -88,6 +93,12 @@ textarea {
 input::placeholder,
 textarea::placeholder {
 	color: var(--vscode-input-placeholderForeground);
+}
+
+input:disabled,
+textarea:disabled {
+	opacity: 0.7;
+	cursor: not-allowed;
 }
 
 .vscode-select {
@@ -136,12 +147,6 @@ textarea::placeholder {
 	padding: 4px;
 	resize: none;
 	
-}
-
-.vscode-textarea[disabled],
-.vscode-input[disabled],
-.vscode-input[disabled]:hover {
-	cursor: not-allowed;
 }
 
 .vscode-button-small {
