@@ -84,5 +84,5 @@ export async function chat(
     end();
   });
 
-  stream.on("chat-end", end);
+  stream.on("end", end);
 }
