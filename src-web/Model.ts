@@ -183,6 +183,10 @@ export class Model {
         this.saveMessages();
     }
 
+    clearMessages() {
+        this.messages = [];
+    }
+
     saveMessages() {
         this.db.set({
             id: this.conversationId,
