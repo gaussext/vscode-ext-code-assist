@@ -15,6 +15,8 @@ export class View {
 
     $buttonCreate = document.getElementById("create-button") as HTMLButtonElement;
     $buttonDelete = document.getElementById("delete-button") as HTMLButtonElement;
+    $buttonClear = document.getElementById("clear-button") as HTMLButtonElement;
+
 
     $input = document.getElementById("chat-input") as HTMLInputElement;
     $buttonChat = document.getElementById("chat-button") as HTMLButtonElement;
@@ -75,6 +77,12 @@ export class View {
             this.model.deleteConversation(this.model.conversationId);
             this.renderConversations();
             this.getMesasges();
+        });
+
+        this.$buttonClear.addEventListener("click", () => {
+            this.model.clearMessages();
+            this.model.saveMessages();
+            this.renderMessages([]);
         });
 
         // 发送消息
@@ -154,6 +162,7 @@ export class View {
         this.endMessageForAI(this.model.state.content, createMarkdownInfo(this.model.state));
         this.enableInteraction();
         hljs.highlightAll();
+        this.$input.value = "";
     }
 
     // 优化代码
@@ -216,7 +225,7 @@ ${text}
         this.model.messages = [];
         this.$messages.innerHTML = "";
         this.model.getMessages().then(() => {
-            this.updateMessages(this.model.messages);
+            this.renderMessages(this.model.messages);
             this.model.state.content = "";
             this.model.state.tokens = 0;
             this.model.state.startTime = 0;
@@ -229,6 +238,7 @@ ${text}
         this.$selectHistory.disabled = true;
         this.$buttonCreate.disabled = true;
         this.$buttonDelete.disabled = true;
+        this.$buttonClear.disabled = true;
         this.$input.disabled = true;
     }
 
@@ -237,6 +247,7 @@ ${text}
         this.$selectHistory.disabled = false;
         this.$buttonCreate.disabled = false;
         this.$buttonDelete.disabled = false;
+        this.$buttonClear.disabled = false;
         this.$input.disabled = false;
     }
 
@@ -246,15 +257,15 @@ ${text}
         return $message;
     }
 
-    async updateMessageForAI(message: string) {
+    updateMessageForAI(message: string) {
         const $message = this.getLatestMessage();
-        $message.innerHTML = await marked.parse(`AI: ${message}`);
+        $message.innerHTML = marked.parse(`AI: ${message}`);
         this.$messages.scrollTo(0, this.$messages.scrollHeight);
     }
 
-    async endMessageForAI(message: string, info: string) {
+    endMessageForAI(message: string, info: string) {
         const $message = this.getLatestMessage();
-        $message.innerHTML = await marked.parse(`AI: ${message} ${info}`) + footer;
+        $message.innerHTML = marked.parse(`AI: ${message} ${info}`) + footer;
         Utils.addCopyEvent($message, message);
         this.$messages.scrollTo(0, this.$messages.scrollHeight);
         hljs.highlightAll();
@@ -268,13 +279,14 @@ ${text}
         this.model.chat(this.model.state.model, message, this.model.messages);
         this.model.updateConversationTitle(message);
         this.renderConversations();
-        this.$input.value = "";
+        this.$input.value = "等待 AI 回复";
         this.$messages.appendChild(Utils.createMessageForYou(message));
         this.$messages.scrollTo(0, this.$messages.scrollHeight);
         hljs.highlightAll();
     }
 
-    updateMessages(messages: Message[]) {
+    renderMessages(messages: Message[]) {
+        this.$messages.innerHTML = "";
         messages.forEach((item) => {
             if (item.role === "user") {
                 this.$messages.appendChild(Utils.createMessageForYou(item.content));
