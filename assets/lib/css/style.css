@@ -66,3 +66,7 @@ body {
   padding: 2px 4px;
   cursor: pointer;
 }
+
+#chat-button {
+  margin-top: 8px;
+}

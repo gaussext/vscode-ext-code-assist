@@ -37,7 +37,6 @@ const AppFooter: React.FC<AppFooterProps> = ({
                 className="vscode-button-full"
                 id="chat-button"
                 onClick={onButtonClick}
-                disabled={!inputValue.trim()}
             >
                 {isLoading ? '停止' : '发送'}
             </button>

@@ -6,7 +6,6 @@ const store = {
     createConversation,
     deleteConversation,
     updateConversationTitle,
-    // 
     getMessagesById,
     setMessagesById
 };

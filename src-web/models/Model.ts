@@ -39,7 +39,8 @@ export class AIModel {
     name: string = "";
     model: string = "";
 }
-export class EventBus {
+
+export class IPC {
     // 获取模型列表
     getModels() {
         vscode.postMessage({
@@ -65,5 +66,4 @@ export class EventBus {
     }
 }
 
-
-export const event = new EventBus();;
+export const event = new IPC();;

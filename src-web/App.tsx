@@ -3,8 +3,8 @@ import AppBody from './components/AppBody';
 import AppFooter from './components/AppFooter';
 import AppHeader from './components/AppHeader';
 import { ChatMessage, event } from "./models/Model";
-import { createMarkdownInfo } from './utils';
 import store from './store/index';
+import { createMarkdownInfo } from './utils';
 
 // 类型定义
 interface ChatState {
@@ -21,8 +21,8 @@ interface ChatState {
 const ChatComponent: React.FC = () => {
 
     const [chatState, setChatState] = useState<ChatState>({
-        modelId: '',
-        conversationId: '',
+        modelId: localStorage.getItem('modelId') || '',
+        conversationId: localStorage.getItem('conversationId') || '',
         isLoading: false,
         content: '',
         tokens: 0,
@@ -30,6 +30,7 @@ const ChatComponent: React.FC = () => {
         endTime: 0,
         duration: 0
     });
+
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState('');
 
@@ -49,9 +50,22 @@ const ChatComponent: React.FC = () => {
         setMessages(loadedMessages);
     };
 
+    // 更新最新的一个回答
+    const updateLatestMessage = (content: string) => {
+        setMessages(prev => {
+            const newMessages = [...prev];
+            const lastIndex = newMessages.length - 1;
+            newMessages[lastIndex] = {
+                ...newMessages[lastIndex],
+                content,
+            };
+            return newMessages;
+        });
+    };
+
     // 接收插件进程消息
     const handleWindowMessage = (e: MessageEvent) => {
-        const { type, data, text } = e.data;
+        const { type, text } = e.data;
         switch (type) {
             case 'chat-pre':
                 handleChatRequest();
@@ -60,7 +74,7 @@ const ChatComponent: React.FC = () => {
                 handleChatStart();
                 break;
             case 'chat-data':
-                handleChatData(data);
+                handleChatData(text);
                 break;
             case 'chat-end':
                 handleChatEnd();
@@ -89,59 +103,40 @@ const ChatComponent: React.FC = () => {
 
     // AI 开始回答
     const handleChatStart = () => {
+        const content = '';
         setChatState(prev => ({
             ...prev,
-            content: '',
-            tokens: 0,
-            startTime: 0,
-            endTime: 0
+            content,
         }));
+        updateLatestMessage(content);
     };
 
     // AI 回答中
-    const handleChatData = (data: any) => {
-        const text = data.message.content;
-        const createdAt = data.created_at ? new Date(data.created_at).getTime() : 0;
-
+    const handleChatData = (text: string) => {
+        const json = JSON.parse(text);
+        const content = json.message.content;
         setChatState(prev => {
-            const newState = {
+            updateLatestMessage(prev.content + content);
+            return {
                 ...prev,
-                content: prev.content + text,
-                tokens: prev.tokens + 1
-            };
-
-            if (createdAt) {
-                if (prev.startTime === 0) {
-                    newState.startTime = createdAt;
-                }
-                newState.endTime = createdAt;
+                content: prev.content + content,
             }
-
-            if (newState.tokens % 2 === 0) {
-                updateAIMessage(newState.content);
-            }
-
-            return newState;
         });
     };
-
+    
     // AI 结束回答
     const handleChatEnd = () => {
-        const { content, modelId: currentModel, tokens, startTime, endTime } = chatState;
-        const duration = (endTime - startTime) / 1000;    
+        const { conversationId, content, startTime, endTime } = chatState;
+        const duration = (endTime - startTime) / 1000;
         const info = {
-            modelId: currentModel,
-            tokens,
+            ...chatState,
             duration,
-            startTime,
-            endTime
         }
-        const message  = new ChatMessage('assistant');
+        const message = new ChatMessage('assistant');
         message.content = content;
         message.info = info;
         setChatState(prev => ({ ...prev, isLoading: false }));
-        updateAIMessage(content + createMarkdownInfo(chatState));
-        loadMessages();
+        store.setMessagesById(conversationId, messages);
     };
 
     const handleOptimization = (code: string) => {
@@ -156,26 +151,13 @@ const ChatComponent: React.FC = () => {
         onButtonClick();
     };
 
-    // 更新消息
-    const updateAIMessage = (content: string) => {
-        setMessages(prev => {
-            const newMessages = [...prev];
-            const lastIndex = newMessages.length - 1;
 
-            if (lastIndex >= 0 && newMessages[lastIndex].role === 'assistant') {
-                newMessages[lastIndex] = {
-                    ...newMessages[lastIndex],
-                    content,
-                };
-            }
-
-            return newMessages;
-        });
-    };
 
     // 发送消息
     const onButtonClick = () => {
-        if (!inputValue.trim()) return;
+        if (!inputValue.trim()) {
+            return;
+        }
         if (chatState.isLoading) {
             event.stop();
             return;
@@ -188,7 +170,7 @@ const ChatComponent: React.FC = () => {
         store.updateConversationTitle(chatState.conversationId, inputValue);
         setInputValue('');
     };
-    
+
     return (
         <div className="chat-container">
             <AppHeader

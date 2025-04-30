@@ -20,11 +20,13 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     const [models, setModels] = useState<AIModel[]>([]);
     const [conversations, setConversations] = useState<Conversation[]>([]);
 
-
     // 更新模型列表
     const handleModels = (models: AIModel[]) => {
         const sortedModels = [...models].sort((a, b) => a.name.localeCompare(b.name));
         setModels(sortedModels);
+        if (!model) {
+            onModelChange(firstElement(sortedModels).model)
+        }
     };
 
     const handleWindowMessage = (e: MessageEvent) => {
@@ -43,7 +45,10 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
     const getConversations = async () => {
         const conversations = await store.getConversations();
-        setConversations(conversations);
+        setConversations([...conversations]);
+        if (!model) {
+            onConversationChange(firstElement(conversations).id)
+        }
         return conversations;
     }
 

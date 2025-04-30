@@ -1,6 +1,5 @@
 import React, { useRef, useEffect } from 'react';
 import { ChatMessage } from "../models/Model";
-import { createMarkdownInfo } from '../utils';
 declare var marked: any;
 
 interface AppBodyProps {
@@ -21,8 +20,7 @@ const AppBody: React.FC<AppBodyProps> = ({ messages }) => {
 
     const renderMessage = (message: ChatMessage, index: number) => {
         const isAI = message.role === 'assistant';
-        const html = marked.parse(`${isAI ? 'AI: ' : ''}${message.content} ${isAI ? createMarkdownInfo(message.info) : ''}`);
-
+        const html = marked.parse(`${isAI ? 'AI: ' : 'You: '}${message.content}`);
         return (
             <div
                 key={index}
