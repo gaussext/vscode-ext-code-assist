@@ -4,7 +4,6 @@
 
 const path = require('path');
 
-
 //@ts-check
 /** @typedef {import('webpack').Configuration} WebpackConfig **/
 
@@ -39,6 +38,10 @@ const extensionConfig = {
           }
         ]
       },
+      {
+        test: /\.vue$/,
+        loader: 'vue-loader'
+      },
     ]
   },
   devtool: 'nosources-source-map',
@@ -51,7 +54,7 @@ const webConfig = {
   ...extensionConfig,
   target: 'web',
   mode: 'production', // this minifies the source code and removes comments (when packaging we set this to 'production')
-  entry: './src-web/main.tsx', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
+  entry: './src-web/main.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
   output: {
     // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
     path: path.resolve(__dirname, 'assets/out'),

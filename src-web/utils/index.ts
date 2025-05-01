@@ -1,5 +1,3 @@
-import { Info } from "../models/Model";
-
 export async function copyToClipboard(text: string) {
     if (navigator.clipboard) {
         return await navigator.clipboard.writeText(text);
@@ -25,21 +23,6 @@ export async function copyToClipboard(text: string) {
             }
         });
     }
-}
-
-
-export function createMarkdownInfo(info: Info) {
-    const { modelId, tokens, startTime, endTime } = info;
-    const duration = (endTime - startTime) / 1000;
-    const speed = tokens / duration;
-    return `
-\`\`\`
-Model: ${modelId} 
-Tokens: ${tokens} 
-Duration: ${duration.toFixed(2)} Sec 
-Speed: ${speed.toFixed(2)} Token/s
-\`\`\`
-`;
 }
 
 export function firstElement<T>(list: T[]) {
