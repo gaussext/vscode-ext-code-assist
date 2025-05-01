@@ -32,3 +32,31 @@ export function firstElement<T>(list: T[]) {
 export function lastElement<T>(list: T[]) {
     return list[list.length - 1];
 }
+
+export type ThrottledFunction<T extends any[]> = (...args: T) => void;
+
+export function throttle<T extends any[]>(
+    func: (...args: T) => void,
+    limit: number
+): ThrottledFunction<T> {
+    let lastFunc: ReturnType<typeof setTimeout> | null = null;
+    let lastRan: number | null = null;
+
+    return function (this: any, ...args: T) {
+        const context = this;
+        if (!lastRan) {
+            func.apply(context, args);
+            lastRan = Date.now();
+        } else {
+            if (lastFunc) {
+                clearTimeout(lastFunc);
+            }
+            lastFunc = setTimeout(() => {
+                if (lastRan && Date.now() - lastRan >= limit) {
+                    func.apply(context, args);
+                    lastRan = Date.now();
+                }
+            }, limit - (Date.now() - (lastRan || 0)));
+        }
+    };
+}

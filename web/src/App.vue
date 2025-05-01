@@ -1,23 +1,23 @@
 <template>
   <div class="chat-container">
-    <AppHeader :model-id="modelId" :conversation-id="conversationId" @model-change="handleModelChange"
-      @conversation-change="handleConversationChange" />
-    <AppBody :messages="messages" :temp-message="tempMessage" :loading="loading" />
+    <AppHeader :modelId="modelId" :conversation-id="conversationId" @update:modelId="handleModelChange"
+      @update:conversationId="handleConversationChange" />
+    <AppBody :messages="messages" :latestMessage="latestMessage" :loading="loading" />
     <AppFooter v-model="prompt" :loading="loading" @click="onButtonClick" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted } from "vue";
+import { ref, watch, onMounted, onUnmounted, unref } from "vue";
 import AppBody from "./components/AppBody.vue";
 import AppFooter from "./components/AppFooter.vue";
 import AppHeader from "./components/AppHeader.vue";
 import { ChatMessage, event } from "./models/Model";
 import store from "./store/index";
 
-const modelId = ref(localStorage.getItem("modelId") || "");
-const conversationId = ref(localStorage.getItem("conversationId") || "");
-const tempMessage = ref(new ChatMessage("assistant"));
+const modelId = ref(localStorage.getItem("code-assist.modelId") || "");
+const conversationId = ref(localStorage.getItem("code-assist.conversationId") || "");
+const latestMessage = ref(new ChatMessage("assistant"));
 const loading = ref(false);
 const messages = ref<ChatMessage[]>([]);
 const prompt = ref("");
@@ -60,28 +60,28 @@ const handleWindowMessage = (e: MessageEvent) => {
 // 等待 AI 回复
 const handleChatRequest = () => {
   loading.value = true;
-  tempMessage.value.content = "...";
+  latestMessage.value.content = "...";
 };
 
 // AI 开始回答
 const handleChatStart = () => {
-  tempMessage.value.content = "";
+  latestMessage.value.content = "";
 };
 
 // AI 回答中
 const handleChatData = (text: string) => {
   const json = JSON.parse(text);
   const delta = json.message.content;
-  tempMessage.value.content += delta;
+  latestMessage.value.content += delta;
 };
 
 // AI 结束回答
 const handleChatEnd = () => {
   loading.value = false;
   const message = new ChatMessage("assistant");
-  message.content = tempMessage.value.content;
+  message.content = latestMessage.value.content;
   messages.value = [...messages.value, message];
-  store.setMessagesById(conversationId.value, messages.value);
+  store.setMessagesById(conversationId.value, unref(messages));
 };
 
 const handleOptimization = (code: string) => {
@@ -118,13 +118,13 @@ const onButtonClick = async () => {
   message.content = content;
   messages.value = [...messages.value, message];
   event.chat(modelId.value, prompt.value, messages.value);
-  store.setMessagesById(conversationId.value, messages.value);
+  store.setMessagesById(conversationId.value, unref(messages));
 };
 
 // 模型变更处理
 const handleModelChange = (id: string) => {
-  modelId.value = id;
   localStorage.setItem("code-assist.modelId", id);
+  modelId.value = id;
 };
 
 // 会话变更处理

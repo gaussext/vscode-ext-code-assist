@@ -30,28 +30,3 @@ const handleKeyPress = (e: KeyboardEvent) => {
     }
 };
 </script>
-
-<style scoped>
-.chat-area {
-    /* 添加你的样式 */
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    padding: 8px;
-}
-
-.vscode-textarea {
-    /* 文本区域样式 */
-    width: 100%;
-    min-height: 80px;
-    padding: 8px;
-    resize: none;
-}
-
-.vscode-button-full {
-    /* 按钮样式 */
-    width: 100%;
-    padding: 8px;
-    cursor: pointer;
-}
-</style>

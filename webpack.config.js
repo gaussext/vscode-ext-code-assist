@@ -25,23 +25,19 @@ const extensionConfig = {
   },
   resolve: {
     // support reading TypeScript and JavaScript files, 📖 -> https://github.com/TypeStrong/ts-loader
-    extensions: ['.ts', '.tsx', '.js', '.jsx', '.html', '.vue']
+    extensions: ['.ts', '.js']
   },
   module: {
     rules: [
       {
-        test: /\.tsx?$/,
+        test: /\.ts$/,
         exclude: /node_modules/,
         use: [
           {
             loader: 'ts-loader'
           }
         ]
-      },
-      {
-        test: /\.vue$/,
-        loader: 'vue-loader'
-      },
+      }
     ]
   },
   devtool: 'nosources-source-map',
@@ -49,18 +45,4 @@ const extensionConfig = {
     level: "log", // enables logging required for problem matchers
   },
 };
-
-const webConfig = {
-  ...extensionConfig,
-  target: 'web',
-  mode: 'production', // this minifies the source code and removes comments (when packaging we set this to 'production')
-  entry: './src-web/main.ts', // the entry point of this extension, 📖 -> https://webpack.js.org/configuration/entry-context/
-  output: {
-    // the bundle is stored in the 'dist' folder (check package.json), 📖 -> https://webpack.js.org/configuration/output/
-    path: path.resolve(__dirname, 'assets/out'),
-    filename: 'bundle.js',
-    libraryTarget: 'umd'
-  },
-};
-
-module.exports = [webConfig, extensionConfig];
+module.exports = [ extensionConfig ];

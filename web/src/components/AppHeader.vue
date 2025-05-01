@@ -68,10 +68,14 @@ import store from '../store'
 import { firstElement, lastElement } from '../utils'
 import { event } from '../models/Model'
 
-const props = defineProps<{
-  modelId: string
-  conversationId: string
-}>()
+const props = defineProps({
+  modelId: {
+    default: ''
+  },
+  conversationId: {
+    default: ''
+  }
+})
 
 const emit = defineEmits<{
   (e: 'update:modelId', value: string): void
@@ -84,7 +88,7 @@ const conversations = ref<Conversation[]>([])
 // 更新模型列表
 const handleModels = (modelsList: AIModel[]) => {
   const sortedModels = [...modelsList].sort((a, b) => a.name.localeCompare(b.name))
-  models.value = sortedModels
+  models.value = sortedModels;
   if (!props.modelId) {
     emit('update:modelId', firstElement(sortedModels).model)
   }
