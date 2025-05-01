@@ -1,6 +1,5 @@
 import * as uuid from 'uuid';
 declare const acquireVsCodeApi: any;
-
 export const vscode = acquireVsCodeApi();
 
 export class Conversation {
@@ -48,11 +47,18 @@ export class IPC {
 
     // 发送聊天消息
     chat(model: string, text: string, messages: ChatMessage[]) {
-        vscode.postMessage({
+        console.log({
             command: "chat",
             model: model,
             text: text,
             messages: messages,
+        });
+        
+        vscode.postMessage({
+            command: "chat",
+            model: model,
+            text: text,
+            messages:  JSON.stringify(messages),
         });
     }
 

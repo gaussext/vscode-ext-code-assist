@@ -4,21 +4,24 @@ import { ChatMessage } from "../../models/Model";
 const storeMessages = localforage.createInstance({
     name: 'code-assist',
     storeName: 'messages',
-    version: 1
+    version: 2
 });
 
-export const getMessagesById = (conversationId: string): Promise<ChatMessage[]> => {
-    return storeMessages.getItem(conversationId).then(res => {
-        return Promise.resolve(res as ChatMessage[] || []);
-    });
+export const getMessagesById = async (conversationId: string): Promise<ChatMessage[]> => {
+    try {
+        const res = await storeMessages.getItem(conversationId)
+        const result = JSON.parse(res as any) as ChatMessage[] || []
+        return Promise.resolve(result);
+    } catch (error) {
+        return Promise.resolve([]);
+    }
 };
 
 export const setMessagesById = (conversationId: string, messages: ChatMessage[]) => {
-    console.log('[Webview][setMessagesById]', conversationId);
     if (!conversationId) {
         return false;
     }
-    return storeMessages.setItem(conversationId, messages);
+    return storeMessages.setItem(conversationId, JSON.stringify(messages));
 };
 
 export const removeMessagesById = (conversationId: string) => {

@@ -37,7 +37,7 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
           controller = new AbortController();
           chat(
             message.text,
-            message.messages || [],
+            JSON.parse(message.messages) || [],
             message.model,
             (type: string, text: string) => {
               webviewView.webview.postMessage({ type, text });
@@ -67,75 +67,82 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   private _getHtmlForWebview(webview: vscode.Webview) {
     // 获取依赖包
 
-    
-
+  
     const markedUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets/lib/js/marked.min.js")
+        path.join(this._extensionUri.fsPath, "dist-web/js/marked.min.js")
       )
     );
 
     const highlightUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets/lib/js/highlight.min.js")
+        path.join(this._extensionUri.fsPath, "dist-web/js/highlight.min.js")
       )
     );
 
     const resetUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets/lib/css/reset.css")
+        path.join(this._extensionUri.fsPath, "dist-web/css/reset.css")
       )
     );
 
     const oneDarkUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets/lib/css/atom-one-dark.min.css")
+        path.join(this._extensionUri.fsPath, "dist-web/css/atom-one-dark.min.css")
       )
     );
 
     const vscodeStyleUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets/lib/css/vscode.css")
+        path.join(this._extensionUri.fsPath, "dist-web/css/vscode.css")
       )
     );
 
     const markdownStyleUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets/lib/css/markdown.css")
+        path.join(this._extensionUri.fsPath, "dist-web/css/markdown.css")
       )
     );
 
     const mainStyleUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets/lib/css/style.css")
+        path.join(this._extensionUri.fsPath, "dist-web/css/style.css")
       )
     );
 
-    const scriptUri = webview.asWebviewUri(
+    const appUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "assets/out/bundle.js")
+        path.join(this._extensionUri.fsPath, "dist-web/js/app.js")
+      )
+    );
+
+    const vendorsUri = webview.asWebviewUri(
+      vscode.Uri.file(
+        path.join(this._extensionUri.fsPath, "dist-web/js/chunk-vendors.js")
       )
     );
 
     // 读取 HTML 模板文件
     const htmlPath = path.join(
       this._extensionUri.fsPath,
-      "assets",
+      "dist-web",
       "index.html"
     );
     let html = fs.readFileSync(htmlPath, "utf-8");
 
     // 替换占位符
-    html = html.replace("{{markedUri}}", markedUri.toString());
-    html = html.replace("{{highlightUri}}", highlightUri.toString());
-    html = html.replace("{{scriptUri}}", scriptUri.toString());
-  
-    html = html.replace("{{resetUri}}", resetUri.toString());
-    html = html.replace("{{oneDarkUri}}", oneDarkUri.toString());
-    html = html.replace("{{vscodeStyleUri}}", vscodeStyleUri.toString());
-    html = html.replace("{{markdownStyleUri}}", markdownStyleUri.toString());
-    html = html.replace("{{styleUri}}", mainStyleUri.toString());
+    html = html.replace("./js/highlight.min.js", markedUri.toString());
+    html = html.replace("./js/marked.min.js", highlightUri.toString());
 
+    html = html.replace("./css/reset.css", resetUri.toString());
+    html = html.replace("./css/atom-one-dark.min.css", oneDarkUri.toString());
+    html = html.replace("./css/vscode.css", vscodeStyleUri.toString());
+    html = html.replace("./css/markdown.css", markdownStyleUri.toString());
+    html = html.replace("./css/style.css", mainStyleUri.toString());
+
+    html = html.replace("/js/app.js", appUri.toString());
+    html = html.replace("/js/chunk-vendors.js", vendorsUri.toString());
+    
     return html;
   }
 
