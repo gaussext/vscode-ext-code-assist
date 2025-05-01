@@ -1,3 +1,4 @@
+import * as uuid from 'uuid';
 declare const acquireVsCodeApi: any;
 
 export const vscode = acquireVsCodeApi();
@@ -5,8 +6,6 @@ export const vscode = acquireVsCodeApi();
 export class Conversation {
     id: string = '0';
     title: string = '新建对话';
-    messages: any[] = [];
-    timestamp: number = Date.now();
 }
 
 export class Info {
@@ -24,12 +23,11 @@ export class State extends Info {
 
 type MessageRole = 'system' | 'user' | 'assistant';
 
-
 export class ChatMessage {
     role: MessageRole = "system";
     content = '';
+    uuid = uuid.v4();
     timestamp = Date.now();
-    info = new Info();
     constructor(role: MessageRole) {
         this.role = role;
     }

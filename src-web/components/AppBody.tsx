@@ -1,29 +1,46 @@
-import React, { useRef, useEffect } from 'react';
-import { ChatMessage } from "../models/Model";
+import React, { useEffect, useRef } from 'react';
+import { ChatMessage } from '../models/Model';
 declare var marked: any;
+declare var hljs: any;
+
+marked.setOptions({
+    highlight: function (code: string, language: string) {
+        const validLanguage = hljs.getLanguage(language) ? language : 'plaintext';
+        return hljs.highlight(validLanguage, code).value;
+    },
+    pedantic: false,
+    gfm: true,
+    breaks: false,
+    sanitize: false,
+    smartLists: true,
+    smartypants: false,
+    xhtml: false
+});
 
 interface AppBodyProps {
     messages: ChatMessage[];
+    tempMessage: ChatMessage;
+    isLoading: boolean;
 }
 
-const AppBody: React.FC<AppBodyProps> = ({ messages }) => {
-    const messagesEndRef = useRef<HTMLDivElement>(null);
+const AppBody: React.FC<AppBodyProps> = ({ messages, tempMessage, isLoading }) => {
 
+    const messagesEndRef = useRef<HTMLDivElement>(null);
     // 当消息更新后，滚动到底部
     useEffect(() => {
         scrollToBottom();
-    }, [messages]);
+    }, [messages, tempMessage]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    const renderMessage = (message: ChatMessage, index: number) => {
+    const renderMessage = (message: ChatMessage) => {
         const isAI = message.role === 'assistant';
         const html = marked.parse(`${isAI ? 'AI: ' : 'You: '}${message.content}`);
         return (
             <div
-                key={index}
+                key={message.uuid}
                 className={`message ${isAI ? 'message-ai' : 'message-you'}`}
                 dangerouslySetInnerHTML={{ __html: html }}
             />
@@ -33,6 +50,7 @@ const AppBody: React.FC<AppBodyProps> = ({ messages }) => {
     return (
         <div className="messages-area" id="messages">
             {messages.map(renderMessage)}
+            {isLoading ? renderMessage(tempMessage) : ''}
             <div ref={messagesEndRef} />
         </div>
     );

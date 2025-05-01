@@ -9,13 +9,18 @@ const storeMessages = localforage.createInstance({
 
 export const getMessagesById = (conversationId: string): Promise<ChatMessage[]> => {
     return storeMessages.getItem(conversationId).then(res => {
-        if (!res) {
-            return Promise.resolve([]);
-        }
-        return Promise.resolve(res as ChatMessage[]);
+        return Promise.resolve(res as ChatMessage[] || []);
     });
 };
 
 export const setMessagesById = (conversationId: string, messages: ChatMessage[]) => {
+    console.log('[Webview][setMessagesById]', conversationId);
+    if (!conversationId) {
+        return false;
+    }
     return storeMessages.setItem(conversationId, messages);
+};
+
+export const removeMessagesById = (conversationId: string) => {
+    return storeMessages.removeItem(conversationId);
 };

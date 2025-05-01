@@ -4,63 +4,34 @@ import AppFooter from './components/AppFooter';
 import AppHeader from './components/AppHeader';
 import { ChatMessage, event } from "./models/Model";
 import store from './store/index';
-import { createMarkdownInfo } from './utils';
 
-// 类型定义
-interface ChatState {
-    modelId: string;
-    conversationId: string;
-    content: string;
-    tokens: number;
-    startTime: number;
-    endTime: number;
-    duration: number
-    isLoading: boolean;
-}
+const modelIdL = localStorage.getItem('modelId') || '';
+const conversationIdL = localStorage.getItem('conversationId') || '';
 
 const ChatComponent: React.FC = () => {
 
-    const [chatState, setChatState] = useState<ChatState>({
-        modelId: localStorage.getItem('modelId') || '',
-        conversationId: localStorage.getItem('conversationId') || '',
-        isLoading: false,
-        content: '',
-        tokens: 0,
-        startTime: 0,
-        endTime: 0,
-        duration: 0
-    });
+    const [modelId, setModelId] = useState(modelIdL)
+    const [conversationId, setConversationId] = useState(conversationIdL)
 
+    console.log('[Webview]', conversationId);
+
+    const [tempMessage, setTempMessage] = useState(new ChatMessage('assistant'));
+    const [isLoading, setLoading] = useState<boolean>(false);
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [inputValue, setInputValue] = useState('');
 
-    // 初始化
     useEffect(() => {
-        loadInitialData();
         window.addEventListener('message', handleWindowMessage);
         return () => window.removeEventListener('message', handleWindowMessage);
     }, []);
 
-    const loadInitialData = async () => {
+    useEffect(() => {
         loadMessages();
-    };
+    }, [conversationId])
 
     const loadMessages = async () => {
-        const loadedMessages = await store.getMessagesById(chatState.conversationId);
-        setMessages(loadedMessages);
-    };
-
-    // 更新最新的一个回答
-    const updateLatestMessage = (content: string) => {
-        setMessages(prev => {
-            const newMessages = [...prev];
-            const lastIndex = newMessages.length - 1;
-            newMessages[lastIndex] = {
-                ...newMessages[lastIndex],
-                content,
-            };
-            return newMessages;
-        });
+        const loadedMessages = await store.getMessagesById(conversationId);
+        setMessages([...loadedMessages]);
     };
 
     // 接收插件进程消息
@@ -90,53 +61,53 @@ const ChatComponent: React.FC = () => {
 
     // 等待 AI 回复
     const handleChatRequest = () => {
-        const content = '...'
-        const message = new ChatMessage('assistant');
-        message.content = content;
-        setChatState(prev => ({
-            ...prev,
-            content,
-            isLoading: true
-        }));
-        setMessages(prev => [...prev, message]);
+        setLoading(true);
+        setTempMessage(prev => {
+            return {
+                ...prev,
+                content: '...',
+            }
+        })
     };
-
     // AI 开始回答
     const handleChatStart = () => {
-        const content = '';
-        setChatState(prev => ({
-            ...prev,
-            content,
-        }));
-        updateLatestMessage(content);
+        setTempMessage(prev => {
+            return {
+                ...prev,
+                content: '',
+            }
+        })
     };
 
     // AI 回答中
     const handleChatData = (text: string) => {
-        const json = JSON.parse(text);
-        const content = json.message.content;
-        setChatState(prev => {
-            updateLatestMessage(prev.content + content);
+        setTempMessage(prev => {
+            const json = JSON.parse(text);
+            const delta = json.message.content;
             return {
                 ...prev,
-                content: prev.content + content,
+                content: prev.content + delta
             }
         });
     };
-    
+
     // AI 结束回答
     const handleChatEnd = () => {
-        const { conversationId, content, startTime, endTime } = chatState;
-        const duration = (endTime - startTime) / 1000;
-        const info = {
-            ...chatState,
-            duration,
-        }
-        const message = new ChatMessage('assistant');
-        message.content = content;
-        message.info = info;
-        setChatState(prev => ({ ...prev, isLoading: false }));
-        store.setMessagesById(conversationId, messages);
+        setLoading(false);
+        setTempMessage(temp => {
+            setMessages(prev => {
+                const message = new ChatMessage('assistant');
+                message.content = temp.content;
+                const next = [...prev, message];
+                setConversationId(id => {
+                    store.setMessagesById(id, next)
+                    return id;
+                })
+                return next;
+            });
+            return temp;
+        })
+
     };
 
     const handleOptimization = (code: string) => {
@@ -150,46 +121,46 @@ const ChatComponent: React.FC = () => {
         setInputValue(`解释一下这段代码\`\`\`${code}\`\`\``);
         onButtonClick();
     };
-
-
-
     // 发送消息
-    const onButtonClick = () => {
+    const onButtonClick = async () => {
         if (!inputValue.trim()) {
             return;
         }
-        if (chatState.isLoading) {
+        if (isLoading) {
             event.stop();
             return;
         }
-        const message = new ChatMessage('user');
-        message.content = inputValue;
-        setMessages(prev => [...prev, message]);
-        event.chat(chatState.modelId, inputValue, messages);
-        store.setMessagesById(chatState.conversationId, [...messages, message])
-        store.updateConversationTitle(chatState.conversationId, inputValue);
+        await store.updateConversationTitle(conversationId, inputValue);
         setInputValue('');
+        setMessages(prev => {
+            const message = new ChatMessage('user');
+            message.content = inputValue;
+            const next = [...prev, message]
+            event.chat(modelId, inputValue, next);
+            store.setMessagesById(conversationId, next)
+            return next;
+        });
     };
 
     return (
         <div className="chat-container">
             <AppHeader
-                model={chatState.modelId}
-                conversationId={chatState.conversationId}
+                modelId={modelId}
+                conversationId={conversationId}
                 onModelChange={(id: string) => {
-                    setChatState(prev => ({ ...prev, modelId: id }))
+                    localStorage.setItem('code-assist.modelId', id);
+                    setModelId(id);
                 }}
                 onConversationChange={(id: string) => {
-                    setChatState(prev => ({ ...prev, conversationId: id }));
-                    loadMessages();
+                    localStorage.setItem('code-assist.conversationId', id);
+                    setMessages([]);
+                    setConversationId(id);
                 }}
             />
-
-            <AppBody messages={messages} />
-
+            <AppBody messages={messages} tempMessage={tempMessage} isLoading={isLoading} />
             <AppFooter
                 inputValue={inputValue}
-                isLoading={chatState.isLoading}
+                isLoading={isLoading}
                 onInputChange={setInputValue}
                 onButtonClick={onButtonClick}
             />

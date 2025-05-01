@@ -30,12 +30,9 @@ export function createConversation() {
     const ids = conversations.map((item) => Number(item.id));
     const nextId = (Math.max(...ids) || 0) + 1;
     const conversationId = `${nextId}`;
-    console.log(ids, conversationId);
     conversations.push({
         id: conversationId,
         title: "新建对话",
-        messages: [],
-        timestamp: Date.now(),
     });
     return setConversations(conversations);
 }

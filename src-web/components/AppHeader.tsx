@@ -4,14 +4,14 @@ import store from '../store';
 import { firstElement, lastElement } from '../utils';
 
 interface AppHeaderProps {
-    model: string;
+    modelId: string;
     conversationId: string;
     onModelChange: (model: string) => void;
     onConversationChange: (id: string) => void;
 }
 
 const AppHeader: React.FC<AppHeaderProps> = ({
-    model,
+    modelId,
     conversationId,
     onModelChange,
     onConversationChange,
@@ -24,7 +24,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     const handleModels = (models: AIModel[]) => {
         const sortedModels = [...models].sort((a, b) => a.name.localeCompare(b.name));
         setModels(sortedModels);
-        if (!model) {
+        if (!modelId) {
             onModelChange(firstElement(sortedModels).model)
         }
     };
@@ -38,15 +38,19 @@ const AppHeader: React.FC<AppHeaderProps> = ({
         }
     };
 
-    const getModels = () => {
+    useEffect(() => {
         window.addEventListener('message', handleWindowMessage);
+        return () => window.removeEventListener('message', handleWindowMessage);
+    }, [])
+
+    const getModels = () => {
         event.getModels();
     }
 
     const getConversations = async () => {
         const conversations = await store.getConversations();
         setConversations([...conversations]);
-        if (!model) {
+        if (!conversationId && firstElement(conversations).id) {
             onConversationChange(firstElement(conversations).id)
         }
         return conversations;
@@ -55,8 +59,9 @@ const AppHeader: React.FC<AppHeaderProps> = ({
     useEffect(() => {
         getModels();
         getConversations();
-        return () => window.removeEventListener('message', handleWindowMessage);
     }, [])
+
+    
 
     const onCreateConversation = async () => {
         await store.createConversation();
@@ -66,6 +71,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
     const onDeleteConversation = async () => {
         await store.deleteConversation(conversationId);
+        await store.removeMessagesById(conversationId);
         const conversations = await getConversations();
         onConversationChange(firstElement(conversations).id)
     }
@@ -80,7 +86,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
             <select
                 className="vscode-select"
                 id="model-select"
-                value={model}
+                value={modelId}
                 onChange={(e) => onModelChange(e.target.value)}
             >
                 {models.map(model => (

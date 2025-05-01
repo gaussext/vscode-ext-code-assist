@@ -7,9 +7,9 @@ const root = createRoot(container!);
 
 window.addEventListener('load', (event) => {
   root.render(
-    <React.StrictMode>
+    // <React.StrictMode>
+    // </React.StrictMode>
       <App />
-    </React.StrictMode>
   );
 })
 
