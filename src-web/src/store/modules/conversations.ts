@@ -1,5 +1,5 @@
 import localforage from "localforage";
-import { Conversation } from "../../models/Model";
+import { Conversation } from "@/models/Model";
 
 const storeConversations = localforage.createInstance({
     name: 'code-assist',

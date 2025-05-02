@@ -1,45 +1,39 @@
-<template>
-  <div class="history-area">
-    <select class="vscode-select" id="vendor-select" :value="vendorId" @change="onVendorChange">
-      <option v-for="vendor in vendors" :key="vendor.value" :value="vendor.value" :selected="vendorId === vendor.value">
-        {{ vendor.label }}
-      </option>
-    </select>
-    <select class="vscode-select" id="model-select" :value="modelId" @change="onModelChange">
-      <option v-for="model in models" :key="model.value" :value="model.value" :selected="modelId === model.value">
-        {{ model.label }}
-      </option>
-    </select>
-    <select class="vscode-select" id="history-select" :value="conversationId" @change="onConversationChange">
-      <option v-for="conv in conversations" :key="conv.id" :value="conv.id">
-        {{ conv.title }}
-      </option>
-    </select>
-
-    <button class="vscode-button-small" id="create-button" @click="onCreateConversation">
-      +
-    </button>
-
-    <button class="vscode-button-small" id="delete-button" @click="onDeleteConversation">
-      -
-    </button>
-
-    <button class="vscode-button-small" id="clear-button" title="清空消息" @click="onClearConversation">
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
-          d="M6 7V18C6 19.1046 6.89543 20 8 20H16C17.1046 20 18 19.1046 18 18V7M4 7H20M10 11V16M14 11V16M15 7V4C15 3.44772 14.5523 3 14 3H10C9.44772 3 9 3.44772 9 4V7"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    </button>
-  </div>
-</template>
+  <template>
+    <div class="header-area">
+      <el-select class="el-select--vscode" :model-value="vendorId" @change="onVendorChange">
+        <el-option v-for="option in vendors" :key="option.value" :value="option.value" :label="option.label">
+        </el-option>
+      </el-select>
+      <el-select class="el-select--vscode" :model-value="modelId" @change="onModelChange">
+        <el-option v-for="option in models" :key="option.value" :value="option.value" :label="option.label">
+        </el-option>
+      </el-select>
+      <el-select class="el-select--vscode" :model-value="conversationId" @change="onConversationChange">
+        <el-option v-for="option in conversations" :key="option.id" :value="option.id" :label="option.title">
+        </el-option>
+      </el-select>
+      <el-button class="vscode-button-small" id="create-button" @click="onCreateConversation">
+        +
+      </el-button>
+      <el-button class="vscode-button-small" id="delete-button" @click="onDeleteConversation">
+        -
+      </el-button>
+      <el-button class="vscode-button-small" id="clear-button" title="清空消息" @click="onClearConversation">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path
+            d="M6 7V18C6 19.1046 6.89543 20 8 20H16C17.1046 20 18 19.1046 18 18V7M4 7H20M10 11V16M14 11V16M15 7V4C15 3.44772 14.5523 3 14 3H10C9.44772 3 9 3.44772 9 4V7"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </el-button>
+    </div>
+  </template>
 
 
 <script setup lang="ts">
-import { chatService, ChatVendor } from '@/api';
+import { chatService, type ChatVendor } from '@/api';
 import { Conversation } from "@/models/Model";
 import store from '@/store';
-import { StandardItem } from '@/types';
+import { type StandardItem } from '@/types';
 import { firstElement, lastElement } from '@/utils';
 import { onMounted, ref } from 'vue';
 
@@ -69,9 +63,8 @@ const vendors: StandardItem<ChatVendor>[] = [
     value: 'deepseek',
     label: 'deepseek',
   },
-]
-const onVendorChange = (e: Event) => {
-  const vendor = (e.target as HTMLSelectElement).value as ChatVendor;
+];
+const onVendorChange = (vendor: ChatVendor) => {
   emit('update:vendorId', vendor)
   setTimeout(() => {
     getModels();
@@ -89,8 +82,7 @@ const getModels = async () => {
   }
 }
 
-const onModelChange = (e: Event) => {
-  const model = (e.target as HTMLSelectElement).value;
+const onModelChange = (model: string) => {
   emit('update:modelId', model)
 }
 
@@ -104,8 +96,7 @@ const getConversations = async () => {
   return convs
 }
 
-const onConversationChange = (e: Event) => {
-  const id = (e.target as HTMLSelectElement).value;
+const onConversationChange = (id: string) => {
   emit('update:conversationId', id)
 }
 

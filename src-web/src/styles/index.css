@@ -1,0 +1,75 @@
+body {
+    font-family: var(--vscode-font-family);
+    padding: 8px;
+    color: var(--vscode-foreground);
+    background-color: #1e1f1c;
+    min-width: 420px;
+}
+
+.chat-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.header-area {
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 36px;
+}
+
+.messages-area {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    border: 1px solid var(--vscode-input-border);
+    padding: 0 8px 0 0;
+    border-radius: 2px;
+    height: calc(100vh - 180px);
+    overflow-y: auto;
+}
+
+.messages-area .message-you,
+.messages-area .message-ai {
+    margin-bottom: 16px;
+    line-height: 1.35;
+    border: 1px solid var(--vscode-input-border);
+    background-color: #272822;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.messages-area .message-you {
+    color: #409eff;
+    border: 1px solid #409eff;
+}
+
+.messages-area .link-copy {
+    display: inline-block;
+    user-select: none;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 2px 4px;
+    cursor: pointer;
+}
+
+.footer-area {
+    height: 100px;
+    position: relative;
+}
+
+.footer-area textarea {
+    height: 100%;
+}
+.footer-area #chat-button {
+    position: absolute;
+    right: 4px;
+    bottom: 4px;
+    width: auto;
+    margin-top: 8px;
+}
+
+.el-button+.el-button.vscode-button-small {
+    margin-left: 0;
+}

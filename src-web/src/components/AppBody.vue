@@ -19,13 +19,10 @@
 import { ChatMessage } from '@/models/Model'
 import { copyToClipboard } from '@/utils'
 import { nextTick, onMounted, ref, watch } from 'vue'
-
-// 声明全局 marked 和 hljs
-declare const marked: any
-declare const hljs: any
-
+import { marked } from 'marked';
+import hljs from 'highlight.js';
 // 配置 marked
-marked.setOptions({
+(marked as any).setOptions({
     highlight: function (code: string, language: string) {
         const validLanguage = hljs.getLanguage(language) ? language : 'plaintext'
         return hljs.highlight(validLanguage, code).value
@@ -69,9 +66,9 @@ const scrollToBottom = () => {
     })
 }
 
-watch(() => props.latestMessage.content, () => {
+watch(() => props.latestMessage.content, async () => {
     if (latestMessageRef.value) {
-        latestMessageRef.value.innerHTML = formatMessage(props.latestMessage);
+        latestMessageRef.value.innerHTML = await formatMessage(props.latestMessage);
     }
     scrollToBottom();
     hljs.highlightAll();

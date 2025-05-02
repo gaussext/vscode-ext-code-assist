@@ -15,14 +15,11 @@ import AppFooter from "./components/AppFooter.vue";
 import AppHeader from "./components/AppHeader.vue";
 import { ChatMessage } from "./models/Model";
 import store from "./store/index";
-import { chatService, ChatVendor } from "./api";
+import { chatService, type ChatVendor } from "./api";
 
 const KEY_VENDOR = "code-assist.vendor";
 const KEY_MODEL = "code-assist.model";
 const KEY_CONV = "code-assist.conversation";
-
-declare const acquireVsCodeApi: any;
-const vscode = acquireVsCodeApi();
 
 const vendorId = ref(localStorage.getItem(KEY_VENDOR) || "ollama");
 const modelId = ref(localStorage.getItem(KEY_MODEL) || "");
@@ -75,14 +72,11 @@ const handleChatRequest = async (
       }
     );
   } catch (error: any) {
-    vscode.postMessage({
-      command: "error",
-      message: error?.message || "",
-    });
+    loading.value = false;
   }
 };
 
-const handleChating = (delta) => {
+const handleChating = (delta: string) => {
   if (latestMessage.value.content === "...") {
     latestMessage.value.content = "";
   }
