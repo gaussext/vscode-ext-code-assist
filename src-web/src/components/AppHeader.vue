@@ -48,6 +48,7 @@ const props = defineProps({
     default: ''
   }
 })
+
 const emit = defineEmits<{
   (e: 'update:vendorId', value: ChatVendor): void
   (e: 'update:modelId', value: string): void
@@ -66,6 +67,7 @@ const vendors: StandardItem<ChatVendor>[] = [
 ];
 const onVendorChange = (vendor: ChatVendor) => {
   emit('update:vendorId', vendor)
+  chatService.setVendor(vendor);
   setTimeout(() => {
     getModels();
   });

@@ -9,26 +9,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, onMounted, onUnmounted, unref } from "vue";
+import { onMounted, onUnmounted, ref, unref } from "vue";
+import { chatService, type ChatVendor } from "./api";
 import AppBody from "./components/AppBody.vue";
 import AppFooter from "./components/AppFooter.vue";
 import AppHeader from "./components/AppHeader.vue";
 import { ChatMessage } from "./models/Model";
 import store from "./store/index";
-import { chatService, type ChatVendor } from "./api";
 
 const KEY_VENDOR = "code-assist.vendor";
 const KEY_MODEL = "code-assist.model";
 const KEY_CONV = "code-assist.conversation";
 
-const vendorId = ref(localStorage.getItem(KEY_VENDOR) || "ollama");
+
+const vendorId = ref(localStorage.getItem(KEY_VENDOR) as ChatVendor);
 const modelId = ref(localStorage.getItem(KEY_MODEL) || "");
 const conversationId = ref(localStorage.getItem(KEY_CONV) || "");
 
+chatService.setVendor(vendorId.value);
+
 const latestMessage = ref(new ChatMessage("assistant"));
-const loading = ref(false);
 const messages = ref<ChatMessage[]>([]);
+const loading = ref(false);
 const prompt = ref("");
+
 // 加载消息
 const loadMessages = async () => {
   const loadedMessages = await store.getMessagesById(conversationId.value);
@@ -73,6 +77,7 @@ const handleChatRequest = async (
     );
   } catch (error: any) {
     loading.value = false;
+    handleChatEnd();
   }
 };
 
@@ -134,7 +139,6 @@ const onButtonClick = async () => {
 const handleVendorChange = (vendor: ChatVendor) => {
   localStorage.setItem(KEY_VENDOR, vendor);
   vendorId.value = vendor;
-  chatService.setVendor(vendor);
 };
 
 // 模型变更处理

@@ -16,26 +16,23 @@
 </template>
 
 <script setup lang="ts">
-import { ChatMessage } from '@/models/Model'
-import { copyToClipboard } from '@/utils'
-import { nextTick, onMounted, ref, watch } from 'vue'
-import { marked } from 'marked';
+import { ChatMessage } from '@/models/Model';
+import { copyToClipboard } from '@/utils';
 import hljs from 'highlight.js';
-// 配置 marked
-(marked as any).setOptions({
-    highlight: function (code: string, language: string) {
-        const validLanguage = hljs.getLanguage(language) ? language : 'plaintext'
-        return hljs.highlight(validLanguage, code).value
-    },
-    pedantic: false,
-    gfm: true,
-    breaks: false,
-    sanitize: false,
-    smartLists: true,
-    smartypants: false,
-    xhtml: false
-})
+import { Marked } from "marked";
+import { markedHighlight } from "marked-highlight";
+import { onMounted, ref, watch } from 'vue';
 
+const marked = new Marked(
+    markedHighlight({
+        emptyLangClass: 'hljs',
+        langPrefix: 'hljs language-',
+        highlight(code, lang, info) {
+            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+            return hljs.highlight(code, { language }).value;
+        }
+    })
+)
 const props = defineProps<{
     messages: ChatMessage[]
     latestMessage: ChatMessage
@@ -51,14 +48,6 @@ const formatMessage = (message: ChatMessage) => {
     return marked.parse(`${prefix}${message.content}`)
 }
 
-const highlightCodeBlocks = () => {
-    nextTick(() => {
-        if (!props.loading) {
-            hljs.highlightAll();
-        }
-    });
-};
-
 // 滚动到底部
 const scrollToBottom = () => {
     setTimeout(() => {
@@ -71,12 +60,10 @@ watch(() => props.latestMessage.content, async () => {
         latestMessageRef.value.innerHTML = await formatMessage(props.latestMessage);
     }
     scrollToBottom();
-    hljs.highlightAll();
 });
 
 watch(() => props.messages, () => {
     scrollToBottom();
-    highlightCodeBlocks();
 });
 
 onMounted(() => {
