@@ -1,7 +1,10 @@
 import * as vscode from "vscode";
+import { debounce } from 'lodash';
 import { ChatWebViewProvider } from "./ChatWebViewProvider";
+import { getAICompletion, getCodeContext, insertCompletion } from "./CodeCompletion";
 
-export function activate(context: vscode.ExtensionContext) {
+// ====== AI 对话聊天 ======
+function setupChatWebview(context: vscode.ExtensionContext) {
   const provider = new ChatWebViewProvider(context.extensionUri);
   const view = vscode.window.registerWebviewViewProvider(
     "code-assist.view",
@@ -19,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
       provider.onSelection(type, text);
     }, 1000);
   };
-  
+
   const chat = vscode.commands.registerCommand(
     "codeAssist.chat",
     () => {
@@ -50,4 +53,32 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   context.subscriptions.push(chat, optimization, explanation);
+}
+
+// ====== AI 自动补全 ======
+function setupAutoComplete(context: vscode.ExtensionContext) {
+  let disposable = vscode.commands.registerCommand('codeAssist.complete', async () => {
+    try {
+      const contextCode = getCodeContext();
+      if (!contextCode) {
+        vscode.window.showInformationMessage(`AI 补全需要提示`);
+        return;
+      }
+      vscode.window.showInformationMessage(`AI 补全中，请稍等`);
+      const suggestions = await getAICompletion(contextCode);
+      vscode.window.showInformationMessage(`AI 补全完成`);
+
+      insertCompletion(suggestions);
+
+    } catch (error) {
+      vscode.window.showErrorMessage(`AI补全失败: ${error}`);
+    }
+  });
+
+  context.subscriptions.push(disposable);
+}
+
+export function activate(context: vscode.ExtensionContext) {
+  setupChatWebview(context);
+  setupAutoComplete(context);
 }

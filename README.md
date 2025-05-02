@@ -36,7 +36,7 @@ VS Code 简单代码小助手，使用本地 Ollama 作为后端
 - [x] 复制回答 - HTML
 - [x] 复制回答 - Markdown
 - [x] 支持 Deepseek
-- [ ] 支持 Deepseek 代码补全
+- [x] 支持 Deepseek 代码补全
 
 ## Build
 

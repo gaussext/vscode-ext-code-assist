@@ -58,35 +58,6 @@
         "description": "Chat Icon"
       }
     },
-    "menus": {
-      "editor/context": [
-        {
-          "submenu": "codeAssist.submenu"
-        }
-      ],
-      "codeAssist.submenu": [
-        {
-          "command": "codeAssist.chat",
-          "label": "开始对话"
-        },
-        {
-          "command": "codeAssist.optimization",
-          "label": "代码优化",
-          "when": "editorHasSelection"
-        },
-        {
-          "command": "codeAssist.explanation",
-          "label": "代码解释",
-          "when": "editorHasSelection"
-        }
-      ]
-    },
-    "submenus": [
-      {
-        "id": "codeAssist.submenu",
-        "label": "代码助手"
-      }
-    ],
     "commands": [
       {
         "command": "codeAssist.chat",
@@ -99,8 +70,51 @@
       {
         "command": "codeAssist.explanation",
         "title": "代码解释"
+      },
+      {
+        "command": "codeAssist.complete",
+        "title": "代码补全"
       }
-    ]
+    ],
+    "submenus": [
+      {
+        "id": "codeAssist.submenu",
+        "label": "代码助手"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "submenu": "codeAssist.submenu",
+          "group": "navigation",
+          "order": 1
+        }
+      ],
+      "codeAssist.submenu": [
+        {
+          "command": "codeAssist.chat",
+          "group": "navigation",
+          "order": 1
+        },
+        {
+          "command": "codeAssist.complete",
+          "group": "1_modification",
+          "order": 1
+        },
+        {
+          "command": "codeAssist.optimization",
+          "group": "1_modification",
+          "order": 2,
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "codeAssist.explanation",
+          "group": "1_modification",
+          "order": 3,
+          "when": "editorHasSelection"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
@@ -116,6 +130,7 @@
   },
   "devDependencies": {
     "@babel/preset-react": "^7.26.3",
+    "@types/lodash": "^4.17.16",
     "@types/marked": "^6.0.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
