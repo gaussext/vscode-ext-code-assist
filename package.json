@@ -83,7 +83,7 @@
       }
     ],
     "menus": {
-      "editor": [
+      "editor/context": [
         {
           "submenu": "codeAssist.submenu",
           "group": "navigation",

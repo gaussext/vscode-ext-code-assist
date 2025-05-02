@@ -19,7 +19,7 @@ function createRequestData({ content, messages, model }: ChatParams) {
         ],
         "model": model,
         "stream": true, // stream
-    }
+    };
 }
 
 class DeepseekService {
@@ -40,7 +40,7 @@ class DeepseekService {
                     }
                 ] as StandardItem<string>[]
             }
-        })
+        });
     }
 
     stop() {
@@ -77,10 +77,10 @@ class DeepseekService {
                     if (obj.choices) {
                         obj.choices.forEach((item: any) => {
                             callback(item.delta?.content || '');
-                        })
+                        });
                     }
                 }
-            })
+            });
 
         }
     }

@@ -53,12 +53,12 @@ class OllamaService {
                         return {
                             value: item.name,
                             label: item.name,
-                        }
+                        };
                     }) as StandardItem<string>[]
                 }
-            }
-            return Promise.resolve(result)
-        })
+            };
+            return Promise.resolve(result);
+        });
     }
     stop() {
         this.controller.abort();
@@ -81,10 +81,14 @@ class OllamaService {
                 break;
             }
             const text = decoder.decode(value, { stream: true });
-            if (text.trim()) {
-                const json = getJsonSafe(text, { message: { content: '' } });
-                const delta = json?.message?.content || '';
+            
+            const json = text.trim();
+            if (json.startsWith('{') && json.endsWith('}')) {
+                const obj = getJsonSafe(json, { message: { content: '' } });
+                const delta = obj?.message?.content || '';
                 callback && callback(delta);
+            } else {
+                console.log(text);
             }
         }
     }
