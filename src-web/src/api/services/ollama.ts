@@ -1,13 +1,13 @@
 import axios from "axios";
-import { ChatParams } from "..";
-import { StandardItem } from "../../types";
+import { type ChatParams } from "..";
+import { type StandardItem } from "../../types";
 
 const setting = (window as any).setting;
 
 const ORIGIN =  setting.get("ollama") || "http://127.0.0.1:11434"; // code-assist.ollama
 const API_TAGS = ORIGIN + "/api/tags";
 const API_CHAT = ORIGIN + "/api/chat";
-const API_STOP = ORIGIN + "/api/delete";
+// const API_STOP = ORIGIN + "/api/delete";
 
 interface IOllamaModelDetails {
     format: string;

@@ -1,11 +1,11 @@
 <template>
-    <div class="chat-area">
-        <textarea ref="inputRef" class="vscode-textarea" id="chat-input" placeholder="请输入您的问题" v-model="modelValue"
-            @keypress="handleKeyPress" :disabled="isLoading">
+    <div class="footer-area">
+        <textarea type="textarea" ref="inputRef" class="vscode-textarea" id="chat-input" placeholder="请输入您的问题" v-model="modelValue"
+            @keypress="handleKeyPress" :disabled="loading">
     </textarea>
-        <button class="vscode-button-full" id="chat-button" @click="$emit('click')">
-            {{ isLoading ? "停止" : "发送" }}
-        </button>
+        <el-button class="vscode-button-full" id="chat-button" type="primary" @click="$emit('click')">
+            {{ loading ? "停止" : "发送" }}
+        </el-button>
     </div>
 </template>
 
@@ -14,7 +14,7 @@ import { ref } from "vue";
 const modelValue = defineModel<string>({ required: true })
 
 const props = defineProps({
-    isLoading: {
+    loading: {
         default: false
     }
 })

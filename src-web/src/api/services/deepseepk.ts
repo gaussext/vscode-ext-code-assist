@@ -1,11 +1,11 @@
 import axios from "axios";
-import { ChatParams } from "../../api";
-import { StandardItem } from "../../types";
+import { type ChatParams } from "../../api";
+import { type StandardItem } from "../../types";
 import { getJsonSafe } from "../utils";
 
 const setting = (window as any).setting;
 const ORIGIN = setting.get("deepseek") || "https://api.deepseek.com"; // code-assist.deepseek
-const TOKEN = setting.get("deepseek_token") || "" // code-assist.deepseek_token
+const TOKEN = setting.get("deepseek_token") || ""; // code-assist.deepseek_token
 const API_CHAT = ORIGIN + "/chat/completions";
 
 function createRequestData({ content, messages, model }: ChatParams) {

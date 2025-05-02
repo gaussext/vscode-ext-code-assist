@@ -143,7 +143,7 @@ textarea:disabled {
 }
 
 .vscode-textarea {
-	height: 72px;
+	height: 100%;
 	padding: 4px;
 	resize: none;
 	
