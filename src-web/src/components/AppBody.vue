@@ -16,11 +16,12 @@
 </template>
 
 <script setup lang="ts">
-import { ChatMessage } from '@/models/Model'
-import { copyToClipboard } from '@/utils'
-import { nextTick, onMounted, ref, watch } from 'vue'
-import { marked } from 'marked';
+import { ChatMessage } from '@/models/Model';
+import { copyToClipboard } from '@/utils';
 import hljs from 'highlight.js';
+import { marked } from 'marked';
+import { nextTick, onMounted, ref, watch } from 'vue';
+
 // 配置 marked
 (marked as any).setOptions({
     highlight: function (code: string, language: string) {

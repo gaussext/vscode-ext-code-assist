@@ -2,7 +2,7 @@
   "name": "code-assist",
   "displayName": "Gauss Code Assist",
   "description": "",
-  "version": "0.1.6",
+  "version": "0.1.6-beta",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -83,7 +83,7 @@
       }
     ],
     "menus": {
-      "editor/context": [
+      "editor": [
         {
           "submenu": "codeAssist.submenu",
           "group": "navigation",

@@ -73,6 +73,7 @@ const handleChatRequest = async (
     );
   } catch (error: any) {
     loading.value = false;
+    handleChatEnd();
   }
 };
 

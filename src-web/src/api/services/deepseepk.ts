@@ -52,7 +52,7 @@ class DeepseekService {
         const response = await axios.post(API_CHAT, data, {
             method: "POST",
             headers: {
-                'Content-Type': 'application/json', 
+                'Content-Type': 'application/json',
                 'Accept': 'application/json',
                 Authorization: `Bearer ${TOKEN}`
             },
@@ -76,7 +76,7 @@ class DeepseekService {
                     const obj = getJsonSafe(json, { choices: [] });
                     if (obj.choices) {
                         obj.choices.forEach((item: any) => {
-                            callback(item.delta.content)
+                            callback(item.delta?.content || '');
                         })
                     }
                 }

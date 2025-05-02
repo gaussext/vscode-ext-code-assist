@@ -1,10 +1,11 @@
 import axios from "axios";
 import { type ChatParams } from "..";
 import { type StandardItem } from "../../types";
+import { getJsonSafe } from "../utils";
 
 const setting = (window as any).setting;
 
-const ORIGIN =  setting.get("ollama") || "http://127.0.0.1:11434"; // code-assist.ollama
+const ORIGIN = setting.get("ollama") || "http://127.0.0.1:11434"; // code-assist.ollama
 const API_TAGS = ORIGIN + "/api/tags";
 const API_CHAT = ORIGIN + "/api/chat";
 // const API_STOP = ORIGIN + "/api/delete";
@@ -61,11 +62,10 @@ class OllamaService {
     }
     stop() {
         this.controller.abort();
-        // return axios.get(API_STOP)
     }
 
     async chat({ content, messages, model }: ChatParams, callback: any, end: any) {
-        const data = createRequestData({model, content, messages});
+        const data = createRequestData({ model, content, messages });
         const response = await axios.post(API_CHAT, data, {
             method: "POST",
             responseType: 'stream',
@@ -82,9 +82,9 @@ class OllamaService {
             }
             const text = decoder.decode(value, { stream: true });
             if (text.trim()) {
-                const json = JSON.parse(text);
-                const delta = json.message.content;
-                callback && callback(delta)
+                const json = getJsonSafe(text, { message: { content: '' } });
+                const delta = json?.message?.content || '';
+                callback && callback(delta);
             }
         }
     }
