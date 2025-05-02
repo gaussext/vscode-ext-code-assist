@@ -17,9 +17,6 @@ export class ChatWebViewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
-    // 获取依赖包
-
-  
     const markedUri = webview.asWebviewUri(
       vscode.Uri.file(
         path.join(this._extensionUri.fsPath, "dist-web/js/marked.min.js")
@@ -96,13 +93,6 @@ export class ChatWebViewProvider implements vscode.WebviewViewProvider {
     html = html.replace("/js/chunk-vendors.js", vendorsUri.toString());
     
     return html;
-  }
-
-  // 添加一个公开的显示方法
-  public show() {
-    if (this._view) {
-      this._view.show(true); // true 参数表示即使已可见也强制聚焦
-    }
   }
 
   public isVisible() {
