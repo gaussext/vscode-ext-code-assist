@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { ChatWebViewProvider } from "./ChatPanel";
+import { ChatWebViewProvider } from "./ChatWebViewProvider";
 
 export function activate(context: vscode.ExtensionContext) {
   const provider = new ChatWebViewProvider(context.extensionUri);
