@@ -1,8 +1,8 @@
 {
   "name": "code-assist",
   "displayName": "Gauss Code Assist",
-  "description": "Code Assist With Ollama",
-  "version": "0.1.3",
+  "description": "",
+  "version": "0.1.4",
   "engines": {
     "vscode": "^1.98.0"
   },
