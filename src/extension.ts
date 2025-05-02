@@ -1,5 +1,4 @@
 import * as vscode from "vscode";
-import { debounce } from 'lodash';
 import { ChatWebViewProvider } from "./ChatWebViewProvider";
 import { getAICompletion, getCodeContext, insertCompletion } from "./CodeCompletion";
 
