@@ -19,6 +19,16 @@
           "type": "string",
           "default": "http://127.0.0.1:11434",
           "description": "Ollama Server Address"
+        },
+        "code-assist.deepseek": {
+          "type": "string",
+          "default": "https://api.deepseek.com",
+          "description": "Deepseek Server Address"
+        },
+        "code-assist.deepseek_token": {
+          "type": "string",
+          "default": "",
+          "description": "Deepseek Server Token"
         }
       }
     },

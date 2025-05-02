@@ -2,6 +2,8 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 
+const setting = vscode.workspace.getConfiguration('code-assist');
+
 export class ChatWebViewProvider implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
   constructor(private readonly _extensionUri: vscode.Uri) {}
@@ -80,6 +82,8 @@ export class ChatWebViewProvider implements vscode.WebviewViewProvider {
     let html = fs.readFileSync(htmlPath, "utf-8");
 
     // 替换占位符
+    
+    html = html.replace("Object.entries({})", `Object.entries(${JSON.stringify(setting)})`);
     html = html.replace("./js/highlight.min.js", markedUri.toString());
     html = html.replace("./js/marked.min.js", highlightUri.toString());
 

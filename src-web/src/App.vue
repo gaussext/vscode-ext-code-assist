@@ -1,16 +1,9 @@
 <template>
   <div class="chat-container">
-    <AppHeader
-      :modelId="modelId"
-      :conversation-id="conversationId"
-      @update:modelId="handleModelChange"
-      @update:conversationId="handleConversationChange"
-    />
-    <AppBody
-      :messages="messages"
-      :latestMessage="latestMessage"
-      :loading="loading"
-    />
+    <AppHeader :vendorId="vendorId" :modelId="modelId" :conversationId="conversationId"
+      @update:vendorId="handleVendorChange" @update:modelId="handleModelChange"
+      @update:conversationId="handleConversationChange" />
+    <AppBody :messages="messages" :latestMessage="latestMessage" :loading="loading" />
     <AppFooter v-model="prompt" :loading="loading" @click="onButtonClick" />
   </div>
 </template>
@@ -20,14 +13,21 @@ import { ref, watch, onMounted, onUnmounted, unref } from "vue";
 import AppBody from "./components/AppBody.vue";
 import AppFooter from "./components/AppFooter.vue";
 import AppHeader from "./components/AppHeader.vue";
-import { ChatMessage, event } from "./models/Model";
+import { ChatMessage } from "./models/Model";
 import store from "./store/index";
-import { ollamaService } from "./api";
+import { chatService, ChatVendor } from "./api";
 
-const modelId = ref(localStorage.getItem("code-assist.modelId") || "");
-const conversationId = ref(
-  localStorage.getItem("code-assist.conversationId") || ""
-);
+const KEY_VENDOR = "code-assist.vendor";
+const KEY_MODEL = "code-assist.model";
+const KEY_CONV = "code-assist.conversation";
+
+declare const acquireVsCodeApi: any;
+const vscode = acquireVsCodeApi();
+
+const vendorId = ref(localStorage.getItem(KEY_VENDOR) || "ollama");
+const modelId = ref(localStorage.getItem(KEY_MODEL) || "");
+const conversationId = ref(localStorage.getItem(KEY_CONV) || "");
+
 const latestMessage = ref(new ChatMessage("assistant"));
 const loading = ref(false);
 const messages = ref<ChatMessage[]>([]);
@@ -37,11 +37,6 @@ const loadMessages = async () => {
   const loadedMessages = await store.getMessagesById(conversationId.value);
   messages.value = loadedMessages;
 };
-
-// 监听会话ID变化
-watch(conversationId, () => {
-  loadMessages();
-});
 
 // 处理窗口消息
 const handleWindowMessage = (e: MessageEvent) => {
@@ -63,28 +58,39 @@ const handleChatRequest = async (
   messages: ChatMessage[]
 ) => {
   loading.value = true;
-  latestMessage.value.content = "...";
-  await ollamaService.chat(
-    {
-      model: modelId,
-      content: content,
-      messages: messages,
-    },
-    (text: string) => {
-      if (latestMessage.value.content === "...") {
-        latestMessage.value.content = "";
+  try {
+    latestMessage.value.content = "...";
+    await chatService.chat(
+      {
+        model: modelId,
+        content: content,
+        messages: messages,
+      },
+      (delta: string) => {
+        handleChating(delta)
+      },
+      () => {
+        loading.value = false;
+        handleChatEnd();      
       }
-      const json = JSON.parse(text);
-      const delta = json.message.content;
-      latestMessage.value.content += delta;
-    }
-  );
-  handleChatEnd();
+    );
+  } catch (error: any) {
+    vscode.postMessage({
+      command: "error",
+      message: error?.message || "",
+    });
+  }
 };
 
+const handleChating = (delta) => {
+  if (latestMessage.value.content === "...") {
+    latestMessage.value.content = "";
+  }
+
+  latestMessage.value.content += delta;
+}
 // AI 结束回答
 const handleChatEnd = () => {
-  loading.value = false;
   const message = new ChatMessage("assistant");
   message.content = latestMessage.value.content;
   messages.value = [...messages.value, message];
@@ -112,11 +118,14 @@ ${code}
 // 发送消息
 const onButtonClick = async () => {
   const content = prompt.value;
-  if (!prompt.value.trim()) {
+  if (loading.value) {
+    chatService.stop();
     return;
   }
-  if (loading.value) {
-    event.stop();
+  if (!modelId.value) {
+    return;
+  }
+  if (!prompt.value.trim()) {
     return;
   }
   prompt.value = "";
@@ -128,17 +137,24 @@ const onButtonClick = async () => {
   handleChatRequest(modelId.value, content, messages.value);
 };
 
+const handleVendorChange = (vendor: ChatVendor) => {
+  localStorage.setItem(KEY_VENDOR, vendor);
+  vendorId.value = vendor;
+  chatService.setVendor(vendor);
+};
+
 // 模型变更处理
 const handleModelChange = (id: string) => {
-  localStorage.setItem("code-assist.modelId", id);
+  localStorage.setItem(KEY_MODEL, id);
   modelId.value = id;
 };
 
 // 会话变更处理
 const handleConversationChange = (id: string) => {
+  localStorage.setItem(KEY_CONV, id);
   conversationId.value = id;
   messages.value = [];
-  localStorage.setItem("code-assist.conversationId", id);
+  loadMessages();
 };
 
 onMounted(() => {

@@ -1,11 +1,15 @@
 <template>
   <div class="history-area">
-    <select class="vscode-select" id="model-select" :value="modelId" @change="onModelChange">
-      <option v-for="model in models" :key="model.name" :value="model.name">
-        {{ model.name }}
+    <select class="vscode-select" id="vendor-select" :value="vendorId" @change="onVendorChange">
+      <option v-for="vendor in vendors" :key="vendor.value" :value="vendor.value" :selected="vendorId === vendor.value">
+        {{ vendor.label }}
       </option>
     </select>
-
+    <select class="vscode-select" id="model-select" :value="modelId" @change="onModelChange">
+      <option v-for="model in models" :key="model.value" :value="model.value" :selected="modelId === model.value">
+        {{ model.label }}
+      </option>
+    </select>
     <select class="vscode-select" id="history-select" :value="conversationId" @change="onConversationChange">
       <option v-for="conv in conversations" :key="conv.id" :value="conv.id">
         {{ conv.title }}
@@ -30,14 +34,19 @@
   </div>
 </template>
 
+
 <script setup lang="ts">
-import { ollamaService } from '@/api';
+import { chatService, ChatVendor } from '@/api';
+import { Conversation } from "@/models/Model";
+import store from '@/store';
+import { StandardItem } from '@/types';
+import { firstElement, lastElement } from '@/utils';
 import { onMounted, ref } from 'vue';
-import type { AIModel, Conversation } from "../models/Model";
-import store from '../store';
-import { firstElement, lastElement } from '../utils';
 
 const props = defineProps({
+  vendorId: {
+    default: ''
+  },
   modelId: {
     default: ''
   },
@@ -46,23 +55,46 @@ const props = defineProps({
   }
 })
 const emit = defineEmits<{
+  (e: 'update:vendorId', value: ChatVendor): void
   (e: 'update:modelId', value: string): void
   (e: 'update:conversationId', value: string): void
 }>()
 
-const models = ref<AIModel[]>([])
-const conversations = ref<Conversation[]>([])
+const vendors: StandardItem<ChatVendor>[] = [
+  {
+    value: 'ollama',
+    label: 'ollama',
+  },
+  {
+    value: 'deepseek',
+    label: 'deepseek',
+  },
+]
+const onVendorChange = (e: Event) => {
+  const vendor = (e.target as HTMLSelectElement).value as ChatVendor;
+  emit('update:vendorId', vendor)
+  setTimeout(() => {
+    getModels();
+  });
+}
 
+const models = ref<StandardItem<string>[]>([])
 const getModels = async () => {
-  const res = await ollamaService.getModels();
+  const res = await chatService.getModels();
   const modelsList = res.data.models || [];
-  const sortedModels = [...modelsList].sort((a, b) => a.name.localeCompare(b.name))
+  const sortedModels = [...modelsList].sort((a, b) => a.label.localeCompare(b.label))
   models.value = sortedModels;
-  if (!props.modelId) {
-    emit('update:modelId', firstElement(sortedModels).model)
+  if (!props.modelId || !sortedModels.find(model => model.value === props.modelId)) {
+    emit('update:modelId', firstElement(sortedModels).value)
   }
 }
 
+const onModelChange = (e: Event) => {
+  const model = (e.target as HTMLSelectElement).value;
+  emit('update:modelId', model)
+}
+
+const conversations = ref<Conversation[]>([])
 const getConversations = async () => {
   const convs = await store.getConversations()
   conversations.value = [...convs]
@@ -72,16 +104,12 @@ const getConversations = async () => {
   return convs
 }
 
-const onModelChange = (e: Event) => {
-  const model = (e.target as HTMLSelectElement).value;
-  emit('update:modelId', model)
-}
-
 const onConversationChange = (e: Event) => {
   const id = (e.target as HTMLSelectElement).value;
   emit('update:conversationId', id)
 }
 
+// 按钮操作
 const onCreateConversation = async () => {
   await store.createConversation()
   const convs = await getConversations()

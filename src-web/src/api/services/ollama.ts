@@ -1,15 +1,43 @@
 import axios from "axios";
-import { createRequestData } from "../utils";
+import { ChatParams } from "..";
+import { StandardItem } from "../../types";
 
-const origin = "http://127.0.0.1:11434"; // code-assist.ollama
-const API_TAGS = origin + "/api/tags";
-const API_CHAT = origin + "/api/chat";
-const API_STOP = origin + "/api/delete";
+const setting = (window as any).setting;
 
-interface ChatParams {
-    model: string;
-    content: string;
-    messages: any[];
+const ORIGIN =  setting.get("ollama") || "http://127.0.0.1:11434"; // code-assist.ollama
+const API_TAGS = ORIGIN + "/api/tags";
+const API_CHAT = ORIGIN + "/api/chat";
+const API_STOP = ORIGIN + "/api/delete";
+
+interface IOllamaModelDetails {
+    format: string;
+    family: string;
+    families: null;
+    parameter_size: string;
+    quantization_level: string;
+}
+
+interface IOllamaModel {
+    name: string;
+    modified_at: string;
+    size: number;
+    digest: string;
+    details: IOllamaModelDetails;
+}
+
+export function createRequestData({ content, messages, model }: ChatParams) {
+    return {
+        model,
+        messages: [
+            ...messages,
+            {
+                role: "user",
+                content: content,
+            },
+        ],
+        stream: true,
+        raw: true,
+    };
 }
 
 class OllamaService {
@@ -17,16 +45,27 @@ class OllamaService {
     private controller = new AbortController();
 
     getModels() {
-        return axios.get(API_TAGS)
+        return axios.get(API_TAGS).then(res => {
+            const result = {
+                data: {
+                    models: res.data.models.map((item: IOllamaModel) => {
+                        return {
+                            value: item.name,
+                            label: item.name,
+                        }
+                    }) as StandardItem<string>[]
+                }
+            }
+            return Promise.resolve(result)
+        })
     }
-
     stop() {
         this.controller.abort();
-        return axios.get(API_STOP)
+        // return axios.get(API_STOP)
     }
 
-    async chat({ content, messages, model }: ChatParams, callback: any) {
-        const data = createRequestData(model, content, messages);
+    async chat({ content, messages, model }: ChatParams, callback: any, end: any) {
+        const data = createRequestData({model, content, messages});
         const response = await axios.post(API_CHAT, data, {
             method: "POST",
             responseType: 'stream',
@@ -38,11 +77,14 @@ class OllamaService {
         while (true) {
             const { done, value } = await reader.read();
             if (done) {
+                end && end();
                 break;
             }
             const text = decoder.decode(value, { stream: true });
             if (text.trim()) {
-                callback(text)
+                const json = JSON.parse(text);
+                const delta = json.message.content;
+                callback && callback(delta)
             }
         }
     }

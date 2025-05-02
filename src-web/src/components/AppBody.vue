@@ -48,10 +48,8 @@ const props = defineProps<{
 const messagesEndRef = ref<HTMLDivElement | null>(null)
 const latestMessageRef = ref<HTMLDivElement | null>(null)
 
-
 // 格式化消息内容
 const formatMessage = (message: ChatMessage) => {
-    console.log('formatMessage');
     const prefix = message.role === 'assistant' ? 'AI: ' : 'You: '
     return marked.parse(`${prefix}${message.content}`)
 }

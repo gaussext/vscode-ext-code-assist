@@ -1,7 +1,4 @@
 import * as uuid from 'uuid';
-declare const acquireVsCodeApi: any;
-export const vscode = acquireVsCodeApi();
-
 export class Conversation {
     id: string = '0';
     title: string = '新建对话';
@@ -33,41 +30,6 @@ export class ChatMessage {
 }
 
 export class AIModel {
-    name: string = "";
-    model: string = "";
+    value: string = "";
+    label: string = "";
 }
-
-export class IPC {
-    // 获取模型列表
-    getModels() {
-        vscode.postMessage({
-            command: "tags",
-        });
-    }
-
-    // 发送聊天消息
-    chat(model: string, text: string, messages: ChatMessage[]) {
-        console.log({
-            command: "chat",
-            model: model,
-            text: text,
-            messages: messages,
-        });
-        
-        vscode.postMessage({
-            command: "chat",
-            model: model,
-            text: text,
-            messages:  JSON.stringify(messages),
-        });
-    }
-
-    // 中止聊天
-    stop() {
-        vscode.postMessage({
-            command: "stop",
-        });
-    }
-}
-
-export const event = new IPC();;
