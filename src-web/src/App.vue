@@ -1,6 +1,7 @@
 <template>
   <div class="chat-container">
-    <AppHeader :modelId="modelId" :conversation-id="conversationId" @update:modelId="handleModelChange"
+    <AppHeader :vendorId="vendorId" :modelId="modelId" :conversationId="conversationId"
+      @update:vendorId="handleVendorChange" @update:modelId="handleModelChange"
       @update:conversationId="handleConversationChange" />
     <AppBody :messages="messages" :latestMessage="latestMessage" :loading="loading" />
     <AppFooter v-model="prompt" :loading="loading" @click="onButtonClick" />
@@ -12,11 +13,21 @@ import { ref, watch, onMounted, onUnmounted, unref } from "vue";
 import AppBody from "./components/AppBody.vue";
 import AppFooter from "./components/AppFooter.vue";
 import AppHeader from "./components/AppHeader.vue";
-import { ChatMessage, event } from "./models/Model";
+import { ChatMessage } from "./models/Model";
 import store from "./store/index";
+import { chatService, ChatVendor } from "./api";
 
-const modelId = ref(localStorage.getItem("code-assist.modelId") || "");
-const conversationId = ref(localStorage.getItem("code-assist.conversationId") || "");
+const KEY_VENDOR = "code-assist.vendor";
+const KEY_MODEL = "code-assist.model";
+const KEY_CONV = "code-assist.conversation";
+
+declare const acquireVsCodeApi: any;
+const vscode = acquireVsCodeApi();
+
+const vendorId = ref(localStorage.getItem(KEY_VENDOR) || "ollama");
+const modelId = ref(localStorage.getItem(KEY_MODEL) || "");
+const conversationId = ref(localStorage.getItem(KEY_CONV) || "");
+
 const latestMessage = ref(new ChatMessage("assistant"));
 const loading = ref(false);
 const messages = ref<ChatMessage[]>([]);
@@ -27,27 +38,10 @@ const loadMessages = async () => {
   messages.value = loadedMessages;
 };
 
-// 监听会话ID变化
-watch(conversationId, () => {
-  loadMessages();
-});
-
 // 处理窗口消息
 const handleWindowMessage = (e: MessageEvent) => {
   const { type, text } = e.data;
   switch (type) {
-    case "chat-pre":
-      handleChatRequest();
-      break;
-    case "chat-start":
-      handleChatStart();
-      break;
-    case "chat-data":
-      handleChatData(text);
-      break;
-    case "chat-end":
-      handleChatEnd();
-      break;
     case "optimization":
       handleOptimization(text);
       break;
@@ -58,26 +52,45 @@ const handleWindowMessage = (e: MessageEvent) => {
 };
 
 // 等待 AI 回复
-const handleChatRequest = () => {
+const handleChatRequest = async (
+  modelId: string,
+  content: string,
+  messages: ChatMessage[]
+) => {
   loading.value = true;
-  latestMessage.value.content = "...";
+  try {
+    latestMessage.value.content = "...";
+    await chatService.chat(
+      {
+        model: modelId,
+        content: content,
+        messages: messages,
+      },
+      (delta: string) => {
+        handleChating(delta)
+      },
+      () => {
+        loading.value = false;
+        handleChatEnd();      
+      }
+    );
+  } catch (error: any) {
+    vscode.postMessage({
+      command: "error",
+      message: error?.message || "",
+    });
+  }
 };
 
-// AI 开始回答
-const handleChatStart = () => {
-  latestMessage.value.content = "";
-};
+const handleChating = (delta) => {
+  if (latestMessage.value.content === "...") {
+    latestMessage.value.content = "";
+  }
 
-// AI 回答中
-const handleChatData = (text: string) => {
-  const json = JSON.parse(text);
-  const delta = json.message.content;
   latestMessage.value.content += delta;
-};
-
+}
 // AI 结束回答
 const handleChatEnd = () => {
-  loading.value = false;
   const message = new ChatMessage("assistant");
   message.content = latestMessage.value.content;
   messages.value = [...messages.value, message];
@@ -104,12 +117,15 @@ ${code}
 
 // 发送消息
 const onButtonClick = async () => {
-  const content = prompt.value
-  if (!prompt.value.trim()) {
+  const content = prompt.value;
+  if (loading.value) {
+    chatService.stop();
     return;
   }
-  if (loading.value) {
-    event.stop();
+  if (!modelId.value) {
+    return;
+  }
+  if (!prompt.value.trim()) {
     return;
   }
   prompt.value = "";
@@ -117,21 +133,28 @@ const onButtonClick = async () => {
   const message = new ChatMessage("user");
   message.content = content;
   messages.value = [...messages.value, message];
-  event.chat(modelId.value, prompt.value, messages.value);
   store.setMessagesById(conversationId.value, unref(messages));
+  handleChatRequest(modelId.value, content, messages.value);
+};
+
+const handleVendorChange = (vendor: ChatVendor) => {
+  localStorage.setItem(KEY_VENDOR, vendor);
+  vendorId.value = vendor;
+  chatService.setVendor(vendor);
 };
 
 // 模型变更处理
 const handleModelChange = (id: string) => {
-  localStorage.setItem("code-assist.modelId", id);
+  localStorage.setItem(KEY_MODEL, id);
   modelId.value = id;
 };
 
 // 会话变更处理
 const handleConversationChange = (id: string) => {
+  localStorage.setItem(KEY_CONV, id);
   conversationId.value = id;
   messages.value = [];
-  localStorage.setItem("code-assist.conversationId", id);
+  loadMessages();
 };
 
 onMounted(() => {

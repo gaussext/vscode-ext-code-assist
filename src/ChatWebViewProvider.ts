@@ -1,11 +1,10 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
-import { chat, tags } from "./prompt";
 
-let controller = new AbortController();
+const setting = vscode.workspace.getConfiguration('code-assist');
 
-export class ChatViewProvider implements vscode.WebviewViewProvider {
+export class ChatWebViewProvider implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
   constructor(private readonly _extensionUri: vscode.Uri) {}
 
@@ -17,57 +16,9 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     };
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-
-    // 处理来自 webview 的消息
-    let startTime = Date.now();
-    webviewView.webview.onDidReceiveMessage(async (message) => {
-      switch (message.command) {
-        case "loaded": {
-          const loadTime = Date.now() - startTime;
-          console.log(`[INFO] Webview loaded in ${loadTime}ms`);
-          break;
-        }
-        case "tags": {
-          tags((type: string, text: string) => {
-            webviewView.webview.postMessage({ type, text });
-          });
-          break;
-        }
-        case "chat": {
-          controller = new AbortController();
-          chat(
-            message.text,
-            JSON.parse(message.messages) || [],
-            message.model,
-            (type: string, text: string) => {
-              webviewView.webview.postMessage({ type, text });
-            },
-            controller
-          );
-          break;
-        }
-        case "stop": {
-          controller.abort();
-          break;
-        }
-        default:
-          return;
-      }
-    });
-
-    webviewView.onDidChangeVisibility(() => {
-      console.log("[INFO] visible", webviewView.visible);
-      if (webviewView.visible) {
-        // 视图变为可见时执行的操作
-        startTime = Date.now();
-      }
-    });
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
-    // 获取依赖包
-
-  
     const markedUri = webview.asWebviewUri(
       vscode.Uri.file(
         path.join(this._extensionUri.fsPath, "dist-web/js/marked.min.js")
@@ -131,6 +82,8 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     let html = fs.readFileSync(htmlPath, "utf-8");
 
     // 替换占位符
+    
+    html = html.replace("Object.entries({})", `Object.entries(${JSON.stringify(setting)})`);
     html = html.replace("./js/highlight.min.js", markedUri.toString());
     html = html.replace("./js/marked.min.js", highlightUri.toString());
 
@@ -146,13 +99,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     return html;
   }
 
-  // 添加一个公开的显示方法
-  public show() {
-    if (this._view) {
-      this._view.show(true); // true 参数表示即使已可见也强制聚焦
-    }
-  }
-
   public isVisible() {
     return this._view?.visible;
   }
@@ -160,7 +106,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   public onSelection(type: string, text: string) {
     if (this._view) {
       this._view.webview.postMessage({ type, text });
-
     }
   }
 }
