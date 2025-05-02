@@ -66,6 +66,7 @@ const vendors: StandardItem<ChatVendor>[] = [
 ];
 const onVendorChange = (vendor: ChatVendor) => {
   emit('update:vendorId', vendor)
+  chatService.setVendor(vendor);
   setTimeout(() => {
     getModels();
   });
