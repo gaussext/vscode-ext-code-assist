@@ -1,11 +1,8 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
-import { chat, tags } from "./prompt";
 
-let controller = new AbortController();
-
-export class ChatViewProvider implements vscode.WebviewViewProvider {
+export class ChatWebViewProvider implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
   constructor(private readonly _extensionUri: vscode.Uri) {}
 
@@ -17,51 +14,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
     };
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-
-    // 处理来自 webview 的消息
-    let startTime = Date.now();
-    webviewView.webview.onDidReceiveMessage(async (message) => {
-      switch (message.command) {
-        case "loaded": {
-          const loadTime = Date.now() - startTime;
-          console.log(`[INFO] Webview loaded in ${loadTime}ms`);
-          break;
-        }
-        case "tags": {
-          tags((type: string, text: string) => {
-            webviewView.webview.postMessage({ type, text });
-          });
-          break;
-        }
-        case "chat": {
-          controller = new AbortController();
-          chat(
-            message.text,
-            JSON.parse(message.messages) || [],
-            message.model,
-            (type: string, text: string) => {
-              webviewView.webview.postMessage({ type, text });
-            },
-            controller
-          );
-          break;
-        }
-        case "stop": {
-          controller.abort();
-          break;
-        }
-        default:
-          return;
-      }
-    });
-
-    webviewView.onDidChangeVisibility(() => {
-      console.log("[INFO] visible", webviewView.visible);
-      if (webviewView.visible) {
-        // 视图变为可见时执行的操作
-        startTime = Date.now();
-      }
-    });
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
@@ -160,7 +112,6 @@ export class ChatViewProvider implements vscode.WebviewViewProvider {
   public onSelection(type: string, text: string) {
     if (this._view) {
       this._view.webview.postMessage({ type, text });
-
     }
   }
 }

@@ -1,57 +1,26 @@
 <template>
   <div class="history-area">
-    <select
-      class="vscode-select"
-      id="model-select"
-      :value="modelId"
-      @change="onModelChange"
-    >
-      <option 
-        v-for="model in models" 
-        :key="model.name" 
-        :value="model.name"
-      >
+    <select class="vscode-select" id="model-select" :value="modelId" @change="onModelChange">
+      <option v-for="model in models" :key="model.name" :value="model.name">
         {{ model.name }}
       </option>
     </select>
 
-    <select
-      class="vscode-select"
-      id="history-select"
-      :value="conversationId"
-      @change="onConversationChange"
-    >
-      <option 
-        v-for="conv in conversations" 
-        :key="conv.id" 
-        :value="conv.id"
-      >
+    <select class="vscode-select" id="history-select" :value="conversationId" @change="onConversationChange">
+      <option v-for="conv in conversations" :key="conv.id" :value="conv.id">
         {{ conv.title }}
       </option>
     </select>
 
-    <button
-      class="vscode-button-small"
-      id="create-button"
-      @click="onCreateConversation"
-    >
+    <button class="vscode-button-small" id="create-button" @click="onCreateConversation">
       +
     </button>
 
-    <button
-      class="vscode-button-small"
-      id="delete-button"
-      @click="onDeleteConversation"
-    >
+    <button class="vscode-button-small" id="delete-button" @click="onDeleteConversation">
       -
     </button>
 
-    <button
-      class="vscode-button-small"
-      id="clear-button"
-      title="清空消息"
-      @click="onClearConversation"
-    >
+    <button class="vscode-button-small" id="clear-button" title="清空消息" @click="onClearConversation">
       <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path
           d="M6 7V18C6 19.1046 6.89543 20 8 20H16C17.1046 20 18 19.1046 18 18V7M4 7H20M10 11V16M14 11V16M15 7V4C15 3.44772 14.5523 3 14 3H10C9.44772 3 9 3.44772 9 4V7"
@@ -62,11 +31,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import type { AIModel, Conversation } from "../models/Model"
-import store from '../store'
-import { firstElement, lastElement } from '../utils'
-import { event } from '../models/Model'
+import { ollamaService } from '@/api';
+import { onMounted, ref } from 'vue';
+import type { AIModel, Conversation } from "../models/Model";
+import store from '../store';
+import { firstElement, lastElement } from '../utils';
 
 const props = defineProps({
   modelId: {
@@ -76,7 +45,6 @@ const props = defineProps({
     default: ''
   }
 })
-
 const emit = defineEmits<{
   (e: 'update:modelId', value: string): void
   (e: 'update:conversationId', value: string): void
@@ -85,26 +53,14 @@ const emit = defineEmits<{
 const models = ref<AIModel[]>([])
 const conversations = ref<Conversation[]>([])
 
-// 更新模型列表
-const handleModels = (modelsList: AIModel[]) => {
+const getModels = async () => {
+  const res = await ollamaService.getModels();
+  const modelsList = res.data.models || [];
   const sortedModels = [...modelsList].sort((a, b) => a.name.localeCompare(b.name))
   models.value = sortedModels;
   if (!props.modelId) {
     emit('update:modelId', firstElement(sortedModels).model)
   }
-}
-
-const handleWindowMessage = (e: MessageEvent) => {
-  const { type, text } = e.data
-  switch (type) {
-    case 'tags-end':
-      handleModels(text.models as AIModel[])
-      break
-  }
-}
-
-const getModels = () => {
-  event.getModels()
 }
 
 const getConversations = async () => {
@@ -147,10 +103,5 @@ const onClearConversation = async () => {
 onMounted(() => {
   getModels();
   getConversations()
-  window.addEventListener('message', handleWindowMessage)
-})
-
-onUnmounted(() => {
-  window.removeEventListener('message', handleWindowMessage)
 })
 </script>

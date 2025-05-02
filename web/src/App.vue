@@ -1,8 +1,16 @@
 <template>
   <div class="chat-container">
-    <AppHeader :modelId="modelId" :conversation-id="conversationId" @update:modelId="handleModelChange"
-      @update:conversationId="handleConversationChange" />
-    <AppBody :messages="messages" :latestMessage="latestMessage" :loading="loading" />
+    <AppHeader
+      :modelId="modelId"
+      :conversation-id="conversationId"
+      @update:modelId="handleModelChange"
+      @update:conversationId="handleConversationChange"
+    />
+    <AppBody
+      :messages="messages"
+      :latestMessage="latestMessage"
+      :loading="loading"
+    />
     <AppFooter v-model="prompt" :loading="loading" @click="onButtonClick" />
   </div>
 </template>
@@ -14,9 +22,12 @@ import AppFooter from "./components/AppFooter.vue";
 import AppHeader from "./components/AppHeader.vue";
 import { ChatMessage, event } from "./models/Model";
 import store from "./store/index";
+import { ollamaService } from "./api";
 
 const modelId = ref(localStorage.getItem("code-assist.modelId") || "");
-const conversationId = ref(localStorage.getItem("code-assist.conversationId") || "");
+const conversationId = ref(
+  localStorage.getItem("code-assist.conversationId") || ""
+);
 const latestMessage = ref(new ChatMessage("assistant"));
 const loading = ref(false);
 const messages = ref<ChatMessage[]>([]);
@@ -36,18 +47,6 @@ watch(conversationId, () => {
 const handleWindowMessage = (e: MessageEvent) => {
   const { type, text } = e.data;
   switch (type) {
-    case "chat-pre":
-      handleChatRequest();
-      break;
-    case "chat-start":
-      handleChatStart();
-      break;
-    case "chat-data":
-      handleChatData(text);
-      break;
-    case "chat-end":
-      handleChatEnd();
-      break;
     case "optimization":
       handleOptimization(text);
       break;
@@ -58,21 +57,29 @@ const handleWindowMessage = (e: MessageEvent) => {
 };
 
 // 等待 AI 回复
-const handleChatRequest = () => {
+const handleChatRequest = async (
+  modelId: string,
+  content: string,
+  messages: ChatMessage[]
+) => {
   loading.value = true;
   latestMessage.value.content = "...";
-};
-
-// AI 开始回答
-const handleChatStart = () => {
-  latestMessage.value.content = "";
-};
-
-// AI 回答中
-const handleChatData = (text: string) => {
-  const json = JSON.parse(text);
-  const delta = json.message.content;
-  latestMessage.value.content += delta;
+  await ollamaService.chat(
+    {
+      model: modelId,
+      content: content,
+      messages: messages,
+    },
+    (text: string) => {
+      if (latestMessage.value.content === "...") {
+        latestMessage.value.content = "";
+      }
+      const json = JSON.parse(text);
+      const delta = json.message.content;
+      latestMessage.value.content += delta;
+    }
+  );
+  handleChatEnd();
 };
 
 // AI 结束回答
@@ -104,7 +111,7 @@ ${code}
 
 // 发送消息
 const onButtonClick = async () => {
-  const content = prompt.value
+  const content = prompt.value;
   if (!prompt.value.trim()) {
     return;
   }
@@ -117,8 +124,8 @@ const onButtonClick = async () => {
   const message = new ChatMessage("user");
   message.content = content;
   messages.value = [...messages.value, message];
-  event.chat(modelId.value, prompt.value, messages.value);
   store.setMessagesById(conversationId.value, unref(messages));
+  handleChatRequest(modelId.value, content, messages.value);
 };
 
 // 模型变更处理
