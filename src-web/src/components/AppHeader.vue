@@ -39,7 +39,7 @@ import { onMounted, ref } from 'vue';
 
 const props = defineProps({
   vendorId: {
-    default: ''
+    default: 'ollama' as ChatVendor
   },
   modelId: {
     default: ''
@@ -48,6 +48,9 @@ const props = defineProps({
     default: ''
   }
 })
+
+chatService.setVendor(props.vendorId);
+
 const emit = defineEmits<{
   (e: 'update:vendorId', value: ChatVendor): void
   (e: 'update:modelId', value: string): void

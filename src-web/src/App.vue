@@ -21,7 +21,7 @@ const KEY_VENDOR = "code-assist.vendor";
 const KEY_MODEL = "code-assist.model";
 const KEY_CONV = "code-assist.conversation";
 
-const vendorId = ref(localStorage.getItem(KEY_VENDOR) || "ollama");
+const vendorId = ref(localStorage.getItem(KEY_VENDOR) as ChatVendor || "ollama");
 const modelId = ref(localStorage.getItem(KEY_MODEL) || "");
 const conversationId = ref(localStorage.getItem(KEY_CONV) || "");
 
@@ -135,7 +135,6 @@ const onButtonClick = async () => {
 const handleVendorChange = (vendor: ChatVendor) => {
   localStorage.setItem(KEY_VENDOR, vendor);
   vendorId.value = vendor;
-  chatService.setVendor(vendor);
 };
 
 // 模型变更处理
