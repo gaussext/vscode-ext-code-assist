@@ -31,7 +31,7 @@
 
 <script setup lang="ts">
 import { chatService, type ChatVendor } from '@/api';
-import { Conversation } from "@/models/Model";
+import { ChatConversation } from "@/models/Model";
 import store from '@/store';
 import { type StandardItem } from '@/types';
 import { firstElement, lastElement } from '@/utils';
@@ -88,7 +88,7 @@ const onModelChange = (model: string) => {
   emit('update:modelId', model)
 }
 
-const conversations = ref<Conversation[]>([])
+const conversations = ref<ChatConversation[]>([])
 const getConversations = async () => {
   const convs = await store.getConversations()
   conversations.value = [...convs]

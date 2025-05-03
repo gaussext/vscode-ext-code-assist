@@ -1,5 +1,5 @@
 import localforage from "localforage";
-import { Conversation } from "@/models/Model";
+import { ChatConversation } from "@/models/Model";
 
 const storeConversations = localforage.createInstance({
     name: 'code-assist',
@@ -7,21 +7,21 @@ const storeConversations = localforage.createInstance({
     version: 1
 });
 
-let conversations: Conversation[] = [];
+let conversations: ChatConversation[] = [];
 
-export const getConversations = (): Promise<Conversation[]> => {
+export const getConversations = (): Promise<ChatConversation[]> => {
     return storeConversations.getItem('data').then(res => {
         if (res) {
-            conversations = res as Conversation[];
+            conversations = res as ChatConversation[];
         }
         if (conversations.length === 0) {
-            conversations.push(new Conversation());
+            conversations.push(new ChatConversation());
         }
         return Promise.resolve([...conversations]);
     });
 };
 
-const setConversations = (conversations: Conversation[]) => {
+const setConversations = (conversations: ChatConversation[]) => {
     return storeConversations.setItem('data', conversations);
 };
 
