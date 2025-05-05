@@ -49,7 +49,8 @@ class DeepseekService {
 
     async chat({ content, messages, model }: ChatParams, callback: any, end: any) {
         if (!TOKEN) {
-            end('请配置 code-assist.deepseek_token');
+            callback('请配置 code-assist.deepseek_token');
+            end('');
             return;
         }
         this.controller = new AbortController();
