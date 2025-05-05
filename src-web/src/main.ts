@@ -1,5 +1,4 @@
 import { createApp } from "vue";
-import { ElButton, ElOption, ElSelect } from "element-plus";
 import App from "./App.vue";
 
 import "./styles/reset.css";
@@ -15,8 +14,4 @@ const app = createApp(App);
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
    app.component(key, component);
 }
-
-app.use(ElButton);
-app.use(ElSelect);
-app.use(ElOption);
 app.mount("#app");
