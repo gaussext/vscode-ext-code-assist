@@ -77,6 +77,7 @@ const handleChatRequest = async (
     );
   } catch (error: any) {
     loading.value = false;
+    handleChating('请求失败: ' + error.message)
     handleChatEnd();
   }
 };

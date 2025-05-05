@@ -35,15 +35,20 @@ export async function getAICompletion(context: string): Promise<string> {
         vscode.window.showErrorMessage('请配置 code-assist.deepseek_token');
         return '';
     }
-    const data = createRequestData(context);
-    const response = await axios.post('https://api.deepseek.com/beta/completions', data, {
-        headers: {
-            'Content-Type': 'application/json', 
-            'Accept': 'application/json',
-            Authorization: `Bearer ${TOKEN}`
-        },
-    });
-    return response.data.choices[0].text;
+    try {
+        const data = createRequestData(context);
+        const response = await axios.post('https://api.deepseek.com/beta/completions', data, {
+            headers: {
+                'Content-Type': 'application/json', 
+                'Accept': 'application/json',
+                Authorization: `Bearer ${TOKEN}`
+            },
+        });
+        return response.data.choices[0].text;    
+    } catch (error: any) {
+        vscode.window.showErrorMessage('请求失败: ' + error.message);
+        return '';
+    }
 }
 
 export function insertCompletion(text: string) {
