@@ -27,7 +27,7 @@ class ChatService {
     }
 
     getModels() {
-        return this.getService().getModels()
+        return this.getService().getModels();
     }
 
     chat(params: ChatParams, callback: any, end: any) {
