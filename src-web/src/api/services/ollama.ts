@@ -8,7 +8,6 @@ const setting = (window as any).setting;
 const ORIGIN = setting.get("ollama") || "http://127.0.0.1:11434"; // code-assist.ollama
 const API_TAGS = ORIGIN + "/api/tags";
 const API_CHAT = ORIGIN + "/api/chat";
-// const API_STOP = ORIGIN + "/api/delete";
 
 interface IOllamaModelDetails {
     format: string;
@@ -65,6 +64,7 @@ class OllamaService {
     }
 
     async chat({ content, messages, model }: ChatParams, callback: any, end: any) {
+        this.controller = new AbortController();
         const data = createRequestData({ model, content, messages });
         const response = await axios.post(API_CHAT, data, {
             method: "POST",

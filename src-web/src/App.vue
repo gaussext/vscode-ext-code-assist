@@ -120,6 +120,7 @@ const onButtonClick = async () => {
   const content = prompt.value;
   if (loading.value) {
     chatService.stop();
+    loading.value = false;
     return;
   }
   if (!modelId.value) {
