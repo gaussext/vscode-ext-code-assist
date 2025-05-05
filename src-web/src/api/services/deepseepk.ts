@@ -49,8 +49,11 @@ class DeepseekService {
 
     async chat({ content, messages, model }: ChatParams, callback: any, end: any) {
         if (!TOKEN) {
-            end('请配置 code-assist.deepseek_token');
+            callback('请配置 code-assist.deepseek_token');
+            end('');
+            return;
         }
+        this.controller = new AbortController();
         const data = createRequestData({ model, content, messages });
         const response = await axios.post(API_CHAT, data, {
             method: "POST",

@@ -21,7 +21,6 @@ const KEY_VENDOR = "code-assist.vendor";
 const KEY_MODEL = "code-assist.model";
 const KEY_CONV = "code-assist.conversation";
 
-
 const vendorId = ref(localStorage.getItem(KEY_VENDOR) as ChatVendor);
 const modelId = ref(localStorage.getItem(KEY_MODEL) || "");
 const conversationId = ref(localStorage.getItem(KEY_CONV) || "");
@@ -100,7 +99,7 @@ const handleChatEnd = () => {
 const handleOptimization = (code: string) => {
   if (!code) return;
   prompt.value = `优化一下这段代码
-\`\`\`
+\`\`\`typescript
 ${code}
 \`\`\``;
   onButtonClick();
@@ -109,7 +108,7 @@ ${code}
 const handleExplanation = (code: string) => {
   if (!code) return;
   prompt.value = `解释一下这段代码
-\`\`\`
+\`\`\`typescript
 ${code}
 \`\`\``;
   onButtonClick();
@@ -120,6 +119,7 @@ const onButtonClick = async () => {
   const content = prompt.value;
   if (loading.value) {
     chatService.stop();
+    loading.value = false;
     return;
   }
   if (!modelId.value) {
