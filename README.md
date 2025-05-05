@@ -2,7 +2,7 @@
 
 VS Code 简单代码小助手，使用本地 Ollama 作为后端
 
-![](https://www.gausszhou.top/static/data/github/code-assist.webp)
+![](https://www.gausszhou.top/static/data/github/code-assist/1.webp)
 
 ## Configuration
 
