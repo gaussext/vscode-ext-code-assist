@@ -1,3 +1,12 @@
+import { Tiktoken } from "js-tiktoken/lite";
+import o200k_base from "js-tiktoken/ranks/o200k_base";
+
+const enc = new Tiktoken(o200k_base);
+
+export function getTokenCount(text: string) {
+    return enc.encode(text).length;
+}
+
 export async function copyToClipboard(text: string) {
     if (navigator.clipboard) {
         return await navigator.clipboard.writeText(text);

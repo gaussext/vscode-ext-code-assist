@@ -20,10 +20,9 @@
 
 <script setup lang="ts">
 import { chatService, type ChatVendor } from "@/api";
-import { ChatConversation } from "@/models/Model";
 import store from "@/store";
 import { firstElement, lastElement } from "@/utils";
-import { onMounted, ref } from "vue";
+import { ref } from "vue";
 import SettingDialog from "./AppSettingDialog.vue";
 
 const props = defineProps({
@@ -36,23 +35,18 @@ const props = defineProps({
   conversationId: {
     default: "",
   },
+  conversations: {
+    default: () => []
+  }
 });
 
 const emit = defineEmits<{
+  (e: "create"): void;
+  (e: "delete"): void;
   (e: "update:vendorId", value: ChatVendor): void;
   (e: "update:modelId", value: string): void;
   (e: "update:conversationId", value: string): void;
 }>();
-
-const conversations = ref<ChatConversation[]>([]);
-const getConversations = async () => {
-  const convs = await store.getConversations();
-  conversations.value = [...convs];
-  if (!props.conversationId && firstElement(convs).id) {
-    emit("update:conversationId", firstElement(convs).id);
-  }
-  return convs;
-};
 
 const onConversationChange = (id: string) => {
   emit("update:conversationId", id);
@@ -61,14 +55,16 @@ const onConversationChange = (id: string) => {
 // 按钮操作
 const onCreateConversation = async () => {
   await store.createConversation();
-  const convs = await getConversations();
+  const convs = await store.getConversations();
+  emit('create')
   emit("update:conversationId", lastElement(convs).id);
 };
 
 const onDeleteConversation = async () => {
   await store.deleteConversation(props.conversationId);
   await store.removeMessagesById(props.conversationId);
-  const convs = await getConversations();
+  const convs = await store.getConversations();
+  emit('delete')
   emit("update:conversationId", firstElement(convs).id);
 };
 
@@ -96,8 +92,4 @@ const onDialogSubmit = ({ vendorId, modelId }) => {
   emit("update:vendorId", vendorId);
   emit("update:modelId", modelId);
 };
-
-onMounted(() => {
-  getConversations();
-});
 </script>

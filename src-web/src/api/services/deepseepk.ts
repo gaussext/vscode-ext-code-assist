@@ -33,10 +33,6 @@ class DeepseekService {
                     {
                         "value": "deepseek-chat",
                         "label": "deepseek-chat",
-                    },
-                    {
-                        "value": "deepseek-reasoner",
-                        "label": "deepseek-reasoner",
                     }
                 ] as StandardItem<string>[]
             }

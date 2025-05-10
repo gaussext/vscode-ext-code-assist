@@ -11,6 +11,7 @@ export class ChatMessage {
     role: MessageRole = "system";
     content = '';
     uuid = uuid.v4();
+    startTime = Date.now();
     timestamp = Date.now();
     constructor(role: MessageRole) {
         this.role = role;
