@@ -1,20 +1,25 @@
 <template>
   <div class="chat-container">
-    <AppHeader :vendorId="vendorId" :modelId="modelId" :conversationId="conversationId"
+    <AppHeader
+      :conversations="conversations"
+      :vendorId="vendorId" :modelId="modelId" :conversationId="conversationId"
       @update:vendorId="handleVendorChange" @update:modelId="handleModelChange"
-      @update:conversationId="handleConversationChange" />
+      @update:conversationId="handleConversationChange"
+      @create="getConversations"
+      @delete="getConversations" />
     <AppBody :messages="messages" :latestMessage="latestMessage" :loading="loading" />
     <AppFooter v-model="prompt" :loading="loading" @click="onButtonClick" />
   </div>
 </template>
 
 <script setup lang="ts">
+import { firstElement } from "@/utils";
 import { onMounted, onUnmounted, ref, unref } from "vue";
 import { chatService, type ChatVendor } from "./api";
 import AppBody from "./components/AppBody.vue";
 import AppFooter from "./components/AppFooter.vue";
 import AppHeader from "./components/AppHeader.vue";
-import { ChatMessage } from "./models/Model";
+import { ChatConversation, ChatMessage } from "./models/Model";
 import store from "./store/index";
 
 const KEY_VENDOR = "code-assist.vendor";
@@ -31,6 +36,16 @@ const latestMessage = ref(new ChatMessage("assistant"));
 const messages = ref<ChatMessage[]>([]);
 const loading = ref(false);
 const prompt = ref("");
+const conversations = ref<ChatConversation[]>([]);
+
+const getConversations = async () => {
+  const convs = await store.getConversations();
+  conversations.value = [...convs];
+  if (!conversationId.value && firstElement(convs).id) {
+    conversationId.value = firstElement(convs).id
+  }
+  return convs;
+};
 
 // 加载消息
 const loadMessages = async () => {
@@ -58,6 +73,7 @@ const handleChatRequest = async (
   messages: ChatMessage[]
 ) => {
   loading.value = true;
+  const startTime = Date.now();
   try {
     latestMessage.value.content = "...";
     await chatService.chat(
@@ -71,13 +87,13 @@ const handleChatRequest = async (
       },
       () => {
         loading.value = false;
-        handleChatEnd();      
+        handleChatEnd(startTime);
       }
     );
   } catch (error: any) {
     loading.value = false;
     handleChating('请求失败: ' + error.message)
-    handleChatEnd();
+    handleChatEnd(startTime);
   }
 };
 
@@ -89,9 +105,10 @@ const handleChating = (delta: string) => {
   latestMessage.value.content += delta;
 }
 // AI 结束回答
-const handleChatEnd = () => {
+const handleChatEnd = (startTime: number) => {
   const message = new ChatMessage("assistant");
   message.content = latestMessage.value.content;
+  message.startTime = startTime;
   messages.value = [...messages.value, message];
   store.setMessagesById(conversationId.value, unref(messages));
 };
@@ -130,6 +147,7 @@ const onButtonClick = async () => {
   }
   prompt.value = "";
   await store.updateConversationTitle(conversationId.value, content);
+  await getConversations();
   const message = new ChatMessage("user");
   message.content = content;
   messages.value = [...messages.value, message];
@@ -156,8 +174,9 @@ const handleConversationChange = (id: string) => {
   loadMessages();
 };
 
-onMounted(() => {
+onMounted(async () => {
   window.addEventListener("message", handleWindowMessage);
+  await getConversations()
   loadMessages();
 });
 

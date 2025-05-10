@@ -5,6 +5,7 @@
             <div v-html="formatMessage(message)"></div>
             <div style="margin-top: 4px;">
                 <a class="link-copy copy-markdown" @click="copyToClipboard(message.content)">复制 Markdown</a>
+                <span v-if="message.role === 'assistant'">{{ getSpeedFromMessage(message) }}</span>
             </div>
         </div>
         <div v-show="loading" :key="latestMessage.uuid"
@@ -17,7 +18,7 @@
 
 <script setup lang="ts">
 import { ChatMessage } from '@/models/Model';
-import { copyToClipboard } from '@/utils';
+import { copyToClipboard, getTokenCount } from '@/utils';
 import hljs from 'highlight.js';
 import { Marked } from "marked";
 import { markedHighlight } from "marked-highlight";
@@ -46,6 +47,14 @@ const latestMessageRef = ref<HTMLDivElement | null>(null)
 const formatMessage = (message: ChatMessage) => {
     const prefix = message.role === 'assistant' ? 'AI: ' : 'You: '
     return marked.parse(`${prefix}${message.content}`)
+}
+
+const getSpeedFromMessage = (message: ChatMessage) => {
+    const duration = message.timestamp - message.startTime || 1000;
+    const second = (duration / 1000).toFixed(2)
+    const tokens = getTokenCount(message.content);
+    const speed = (tokens * 1000 / duration).toFixed(2);
+    return  `${tokens} tokens in ${second} second = ${speed} token/s`;
 }
 
 // 滚动到底部
