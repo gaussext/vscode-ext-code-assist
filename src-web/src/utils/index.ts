@@ -1,10 +1,21 @@
-import { Tiktoken } from "js-tiktoken/lite";
-import o200k_base from "js-tiktoken/ranks/o200k_base";
-
-const enc = new Tiktoken(o200k_base);
-
-export function getTokenCount(text: string) {
-    return enc.encode(text).length;
+/**
+ * 简易 Token 计算方法
+ * @param text 
+ * @returns 
+ */
+export function getTokenCount(text: string): number {
+    let tokenCount = 0;
+    for (const char of text) {
+        const code = char.charCodeAt(0);
+        // Simplified check: Chinese characters are mostly in 0x4E00-0x9FFF
+        if (code >= 0x4E00 && code <= 0x9FFF) {
+            tokenCount += 0.6; // Chinese character
+        } else {
+            tokenCount += 0.3; // English or other
+        }
+    }
+    
+    return Math.ceil(tokenCount);
 }
 
 export async function copyToClipboard(text: string) {

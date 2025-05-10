@@ -2,7 +2,7 @@
   "name": "code-assist",
   "displayName": "Gauss Code Assist",
   "description": "",
-  "version": "0.1.9",
+  "version": "0.1.10",
   "engines": {
     "vscode": "^1.98.0"
   },
