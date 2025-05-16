@@ -2,41 +2,54 @@
   <div class="chat-container">
     <AppHeader
       :conversations="conversations"
-      :vendorId="vendorId" :modelId="modelId" :conversationId="conversationId"
-      @update:vendorId="handleVendorChange" @update:modelId="handleModelChange"
+      :conversationId="conversationId"
       @update:conversationId="handleConversationChange"
       @create="getConversations"
-      @delete="getConversations" />
+      @delete="getConversations" 
+      @change="onSettingChange"
+      />
     <AppBody :messages="messages" :latestMessage="latestMessage" :loading="loading" />
-    <AppFooter v-model="prompt" :loading="loading" @click="onButtonClick" />
+    <AppFooter v-model="prompt" :loading="loading" :models="models" :model="model" @update:model="onModelChange" @click="onButtonClick" />
   </div>
 </template>
 
 <script setup lang="ts">
-import { firstElement } from "@/utils";
-import { onMounted, onUnmounted, ref, unref } from "vue";
+import { firstElement, getJsonSafe } from "@/utils";
+import { onMounted, onUnmounted, reactive, ref, unref } from "vue";
 import { chatService, type ChatVendor } from "./api";
 import AppBody from "./components/AppBody.vue";
 import AppFooter from "./components/AppFooter.vue";
 import AppHeader from "./components/AppHeader.vue";
 import { ChatConversation, ChatMessage } from "./models/Model";
 import store from "./store/index";
+import { ChatModel, type IModel } from "./setting";
 
-const KEY_VENDOR = "code-assist.vendor";
 const KEY_MODEL = "code-assist.model";
 const KEY_CONV = "code-assist.conversation";
 
-const vendorId = ref(localStorage.getItem(KEY_VENDOR) as ChatVendor);
-const modelId = ref(localStorage.getItem(KEY_MODEL) || "");
 const conversationId = ref(localStorage.getItem(KEY_CONV) || "");
-
-chatService.setVendor(vendorId.value);
-
 const latestMessage = ref(new ChatMessage("assistant"));
 const messages = ref<ChatMessage[]>([]);
 const loading = ref(false);
 const prompt = ref("");
 const conversations = ref<ChatConversation[]>([]);
+const models = ref<IModel[]>([]);
+const model = ref<IModel>(getJsonSafe(localStorage.getItem(KEY_MODEL), new ChatModel()));
+
+const onSettingChange = async () => {
+  getModels()
+}
+
+const getModels = async () => {
+  const res = await chatService.getModels();
+  models.value = res;
+  return res;
+};
+
+const onModelChange = (value: IModel) => {
+  model.value = value;
+  localStorage.setItem(KEY_MODEL, JSON.stringify(unref(model)));
+}
 
 const getConversations = async () => {
   const convs = await store.getConversations();
@@ -63,11 +76,15 @@ const handleWindowMessage = (e: MessageEvent) => {
     case "explanation":
       handleExplanation(text);
       break;
+    case "comment":
+      handleComment(text);
+      break;
   }
 };
 
 // 等待 AI 回复
 const handleChatRequest = async (
+  vendorId: ChatVendor,
   modelId: string,
   content: string,
   messages: ChatMessage[]
@@ -78,6 +95,7 @@ const handleChatRequest = async (
     latestMessage.value.content = "...";
     await chatService.chat(
       {
+        vendor: vendorId,
         model: modelId,
         content: content,
         messages: messages,
@@ -131,6 +149,15 @@ ${code}
   onButtonClick();
 };
 
+const handleComment = (code: string) => {
+  if (!code) return;
+  prompt.value = `给下面这段代码补充注释
+\`\`\`typescript
+${code}
+\`\`\``;
+  onButtonClick();
+};
+
 // 发送消息
 const onButtonClick = async () => {
   const content = prompt.value;
@@ -139,7 +166,7 @@ const onButtonClick = async () => {
     loading.value = false;
     return;
   }
-  if (!modelId.value) {
+  if (!model.value) {
     return;
   }
   if (!prompt.value.trim()) {
@@ -152,18 +179,7 @@ const onButtonClick = async () => {
   message.content = content;
   messages.value = [...messages.value, message];
   store.setMessagesById(conversationId.value, unref(messages));
-  handleChatRequest(modelId.value, content, messages.value);
-};
-
-const handleVendorChange = (vendor: ChatVendor) => {
-  localStorage.setItem(KEY_VENDOR, vendor);
-  vendorId.value = vendor;
-};
-
-// 模型变更处理
-const handleModelChange = (id: string) => {
-  localStorage.setItem(KEY_MODEL, id);
-  modelId.value = id;
+  handleChatRequest(model.value.vendor, model.value.value, content, messages.value);
 };
 
 // 会话变更处理
@@ -176,7 +192,8 @@ const handleConversationChange = (id: string) => {
 
 onMounted(async () => {
   window.addEventListener("message", handleWindowMessage);
-  await getConversations()
+  getModels()
+  await getConversations();
   loadMessages();
 });
 

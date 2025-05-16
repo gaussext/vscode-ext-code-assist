@@ -1,13 +1,8 @@
 import axios from "axios";
-import { type ChatParams } from "..";
-import { type StandardItem } from "../../types";
-import { getJsonSafe } from "../utils";
-
-const setting = (window as any).setting;
-
-const ORIGIN = setting.get("ollama") || "http://127.0.0.1:11434"; // code-assist.ollama
-const API_TAGS = ORIGIN + "/api/tags";
-const API_CHAT = ORIGIN + "/api/chat";
+import { type ChatParams } from "@/api";
+import { type StandardItem } from "@/types";
+import { getJsonSafe } from "@/utils";
+import setting from "@/setting";
 
 interface IOllamaModelDetails {
     format: string;
@@ -45,7 +40,8 @@ class OllamaService {
     private controller = new AbortController();
 
     getModels() {
-        return axios.get(API_TAGS).then(res => {
+        const URL = setting.ollama + "/api/tags";
+        return axios.get(URL).then(res => {
             const result = {
                 data: {
                     models: res.data.models.map((item: IOllamaModel) => {
@@ -64,9 +60,10 @@ class OllamaService {
     }
 
     async chat({ content, messages, model }: ChatParams, callback: any, end: any) {
+        const URL = setting.ollama + "/api/chat";
         this.controller = new AbortController();
-        const data = createRequestData({ model, content, messages });
-        const response = await axios.post(API_CHAT, data, {
+        const data = createRequestData({ vendor: 'ollama', model, content, messages });
+        const response = await axios.post(URL, data, {
             method: "POST",
             responseType: 'stream',
             signal: this.controller.signal,

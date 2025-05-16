@@ -1,24 +1,22 @@
 import axios from "axios";
-import { type ChatParams } from "../../api";
-import { type StandardItem } from "../../types";
-import { getJsonSafe } from "../utils";
-
-const setting = (window as any).setting;
-const ORIGIN = setting.get("deepseek") || "https://api.deepseek.com"; // code-assist.deepseek
-const TOKEN = setting.get("deepseek_token") || ""; // code-assist.deepseek_token
-const API_CHAT = ORIGIN + "/chat/completions";
+import { type ChatParams } from "@/api";
+import { type StandardItem } from "@/types";
+import { getJsonSafe } from "@/utils";
+import setting from "@/setting";
 
 function createRequestData({ content, messages, model }: ChatParams) {
     return {
-        "messages": [
+        messages: [
             ...messages,
             {
-                "content": content,
-                "role": "user"
+                content: content,
+                role: "user"
             }
         ],
-        "model": model,
-        "stream": true, // stream
+        model: model,
+        stream: true, // stream
+        temperature: 0.2,
+        max_tokens: 1024
     };
 }
 
@@ -44,14 +42,16 @@ class DeepseekService {
     }
 
     async chat({ content, messages, model }: ChatParams, callback: any, end: any) {
+        const URL = setting.deepseek + "/chat/completions";
+        const TOKEN = setting.deepseekToken;
         if (!TOKEN) {
             callback('请配置 code-assist.deepseek_token');
             end('');
             return;
         }
         this.controller = new AbortController();
-        const data = createRequestData({ model, content, messages });
-        const response = await axios.post(API_CHAT, data, {
+        const data = createRequestData({ vendor: 'deepseek', model, content, messages });
+        const response = await axios.post(URL, data, {
             method: "POST",
             headers: {
                 'Content-Type': 'application/json',

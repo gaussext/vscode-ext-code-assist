@@ -1,37 +1,34 @@
+import setting from "@/setting";
 import { deepseekService } from "./services/deepseepk";
 import { ollamaService } from "./services/ollama";
 
+export type ChatVendor = 'ollama' | 'deepseek';
+
 export interface ChatParams {
+    vendor: ChatVendor;
     model: string;
     content: string;
     messages: any[];
 }
 
-export type ChatVendor = 'ollama' | 'deepseek';
-
 class ChatService {
 
-    // 服务提供商
-    vendor: ChatVendor = 'ollama';
-
-    private getService() {
-        if (this.vendor === 'ollama') {
+    private getService(vendor?: ChatVendor) {
+        if (vendor === 'ollama') {
             return ollamaService;
-        } else {
+        } 
+        if (vendor === 'deepseek')  {
             return deepseekService;
         }
-    }
-
-    setVendor(vendor: ChatVendor) {
-        this.vendor = vendor;
+        return ollamaService;
     }
 
     getModels() {
-        return this.getService().getModels();
+        return Promise.resolve(setting.selectedModels);
     }
 
     chat(params: ChatParams, callback: any, end: any) {
-        return this.getService().chat(params, callback, end)
+        return this.getService(params.vendor).chat(params, callback, end);
     }
 
     stop() {

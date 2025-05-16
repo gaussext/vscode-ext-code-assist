@@ -14,24 +14,17 @@
     <el-button class="vscode-button-small" id="clear-button" title="清空消息" icon="Delete" @click="onClearConversation">
     </el-button>
   </div>
-  <SettingDialog v-if="dialogVisible" :vendor-id="vendorId" :model-id="modelId" @cancel="onDialogCancel"
+  <SettingDialog v-if="dialogVisible" @cancel="onDialogCancel"
     @submit="onDialogSubmit"></SettingDialog>
 </template>
 
 <script setup lang="ts">
-import { chatService, type ChatVendor } from "@/api";
 import store from "@/store";
 import { firstElement, lastElement } from "@/utils";
 import { ref } from "vue";
 import SettingDialog from "./AppSettingDialog.vue";
 
 const props = defineProps({
-  vendorId: {
-    default: "",
-  },
-  modelId: {
-    default: "",
-  },
   conversationId: {
     default: "",
   },
@@ -43,9 +36,8 @@ const props = defineProps({
 const emit = defineEmits<{
   (e: "create"): void;
   (e: "delete"): void;
-  (e: "update:vendorId", value: ChatVendor): void;
-  (e: "update:modelId", value: string): void;
   (e: "update:conversationId", value: string): void;
+  (e: "change"): void;
 }>();
 
 const onConversationChange = (id: string) => {
@@ -81,15 +73,10 @@ const openDialog = () => {
 
 const onDialogCancel = () => {
   dialogVisible.value = false;
-  if (props.vendorId) {
-    chatService.setVendor(props.vendorId as ChatVendor);
-  }
 };
 
-const onDialogSubmit = ({ vendorId, modelId }) => {
+const onDialogSubmit = () => {
+  emit("change");
   dialogVisible.value = false;
-  chatService.setVendor(vendorId);
-  emit("update:vendorId", vendorId);
-  emit("update:modelId", modelId);
 };
 </script>
