@@ -72,8 +72,8 @@
         "title": "代码解释"
       },
       {
-        "command": "codeAssist.complete",
-        "title": "代码补全"
+        "command": "codeAssist.comment",
+        "title": "代码注释"
       }
     ],
     "submenus": [
@@ -97,9 +97,10 @@
           "order": 1
         },
         {
-          "command": "codeAssist.complete",
+          "command": "codeAssist.comment",
           "group": "1_modification",
-          "order": 1
+          "order": 1,
+          "when": "editorHasSelection"
         },
         {
           "command": "codeAssist.optimization",

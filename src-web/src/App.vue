@@ -63,6 +63,9 @@ const handleWindowMessage = (e: MessageEvent) => {
     case "explanation":
       handleExplanation(text);
       break;
+    case "comment":
+      handleComment(text);
+      break;
   }
 };
 
@@ -125,6 +128,15 @@ ${code}
 const handleExplanation = (code: string) => {
   if (!code) return;
   prompt.value = `解释一下这段代码
+\`\`\`typescript
+${code}
+\`\`\``;
+  onButtonClick();
+};
+
+const handleComment = (code: string) => {
+  if (!code) return;
+  prompt.value = `给下面这段代码补充注释
 \`\`\`typescript
 ${code}
 \`\`\``;
