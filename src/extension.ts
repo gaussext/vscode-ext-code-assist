@@ -60,13 +60,12 @@ function setupAutoComplete(context: vscode.ExtensionContext) {
     try {
       const contextCode = getCodeContext();
       if (!contextCode) {
-        vscode.window.showInformationMessage(`AI 补全需要提示`);
+        vscode.window.showInformationMessage(`AI 补全需要在代码文件中`);
         return;
       }
-      vscode.window.showInformationMessage(`AI 补全中，请稍等`);
+      vscode.window.showInformationMessage(`AI 补全中，请稍等...`);
       const suggestions = await getAICompletion(contextCode);
       vscode.window.showInformationMessage(`AI 补全完成`);
-
       insertCompletion(suggestions);
 
     } catch (error) {
