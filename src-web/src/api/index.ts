@@ -31,8 +31,8 @@ class ChatService {
         return this.getService(params.vendor).chat(params, callback, end);
     }
 
-    stop() {
-        return this.getService().stop();
+    stop(vendor: ChatVendor) {
+        return this.getService(vendor).stop();
     }
 }
 export const chatService = new ChatService();
