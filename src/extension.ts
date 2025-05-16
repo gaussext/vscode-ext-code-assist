@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import { ChatWebViewProvider } from "./ChatWebViewProvider";
-import { getAICompletion, getCodeContext, insertCompletion } from "./CodeCompletion";
 
 // ====== AI 对话聊天 ======
 function setupChatWebview(context: vscode.ExtensionContext) {
@@ -54,29 +53,6 @@ function setupChatWebview(context: vscode.ExtensionContext) {
   context.subscriptions.push(chat, optimization, explanation);
 }
 
-// ====== AI 自动补全 ======
-function setupAutoComplete(context: vscode.ExtensionContext) {
-  let disposable = vscode.commands.registerCommand('codeAssist.complete', async () => {
-    try {
-      const contextCode = getCodeContext();
-      if (!contextCode) {
-        vscode.window.showInformationMessage(`AI 补全需要在代码文件中`);
-        return;
-      }
-      vscode.window.showInformationMessage(`AI 补全中，请稍等...`);
-      const suggestions = await getAICompletion(contextCode);
-      vscode.window.showInformationMessage(`AI 补全完成`);
-      insertCompletion(suggestions);
-
-    } catch (error) {
-      vscode.window.showErrorMessage(`AI补全失败: ${error}`);
-    }
-  });
-
-  context.subscriptions.push(disposable);
-}
-
 export function activate(context: vscode.ExtensionContext) {
   setupChatWebview(context);
-  setupAutoComplete(context);
 }

@@ -22,7 +22,7 @@ export class ChatWebViewProvider implements vscode.WebviewViewProvider {
 
     const mainStyleUri = webview.asWebviewUri(
       vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "dist-web//css/style.css")
+        path.join(this._extensionUri.fsPath, "dist-web/css/style.css")
       )
     );
 
