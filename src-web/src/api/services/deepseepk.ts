@@ -10,15 +10,17 @@ const API_CHAT = ORIGIN + "/chat/completions";
 
 function createRequestData({ content, messages, model }: ChatParams) {
     return {
-        "messages": [
+        messages: [
             ...messages,
             {
-                "content": content,
-                "role": "user"
+                content: content,
+                role: "user"
             }
         ],
-        "model": model,
-        "stream": true, // stream
+        model: model,
+        stream: true, // stream
+        temperature: 0.2,
+        max_tokens: 1024
     };
 }
 
