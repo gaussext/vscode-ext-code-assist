@@ -60,14 +60,28 @@ body {
 }
 
 .footer-area textarea {
+    width: 100%;
     height: 100%;
+    background-color: #414339;
+    border-radius: 4px;
 }
-.footer-area #chat-button {
+
+.footer-area #chat-tool {
     position: absolute;
-    right: 4px;
+    width: 100%;
     bottom: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 4px;
+}
+
+.footer-area .chat-select {
+    max-width: 320px;
+}
+
+.footer-area #chat-button {
     width: auto;
-    margin-top: 8px;
 }
 
 .el-button+.el-button.vscode-button-small {

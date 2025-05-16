@@ -1,31 +1,26 @@
 <template>
   <el-dialog v-model="visible" title="配置模型" width="500" @closed="onClosed">
-    <el-form :model="form" :label-width="100">
-      <el-form-item label="模型供应商">
-        <el-select
-          class="el-select--vscode"
-          v-model="form.vendorId"
-          @change="onVendorChange"
-        >
-          <el-option
-            v-for="option in vendors"
-            :key="option.value"
-            :value="option.value"
-            :label="option.label"
-          >
-          </el-option>
-        </el-select>
+    <el-form :model="form" :label-width="100" label-position="top">
+      <h3>模型</h3>
+      <el-form-item v-for="vendor in form.models" :key="vendor.value" :label="vendor.label">
+        <div class="vendor-block">
+          <div class="model-block" v-for="(model, index) in vendor.children" :key="model.value">
+            <label>{{ model.label }}</label>
+            <el-form-item label-position="left">
+              <el-checkbox v-model="model.checked"></el-checkbox>
+            </el-form-item>
+          </div>
+        </div>
       </el-form-item>
-      <el-form-item label="模型类别">
-        <el-select class="el-select--vscode" v-model="form.modelId">
-          <el-option
-            v-for="option in models"
-            :key="option.value"
-            :value="option.value"
-            :label="option.label"
-          >
-          </el-option>
-        </el-select>
+      <h3>供应商</h3>
+      <el-form-item label="Ollama">
+        <el-input v-model="form.ollama" placeholder="http://127.0.0.1:11434"></el-input>
+      </el-form-item>
+      <el-form-item label="DeepSeek">
+        <el-input v-model="form.deepseek" placeholder="https://api.deepseek.com"></el-input>
+      </el-form-item>
+      <el-form-item label="DeepSeek Token">
+        <el-input v-model="form.deepseekToken" type="password" show-password></el-input>
       </el-form-item>
     </el-form>
     <template #footer>
@@ -37,59 +32,16 @@
   </el-dialog>
 </template>
 <script lang="ts" setup>
-import { chatService, type ChatVendor } from "@/api";
-import { type StandardItem } from "@/types";
-import { firstElement } from "@/utils";
-import { onMounted, reactive, ref } from "vue";
+import setting, { type IModel } from "@/setting";
+import { reactive, ref } from "vue";
 
 const visible = ref(true);
-const props = defineProps({
-  vendorId: {
-    default: "",
-  },
-  modelId: {
-    default: "",
-  },
-});
-
 const form = reactive({
-  vendorId: props.vendorId,
-  modelId: props.modelId,
+  ollama: setting.ollama,
+  deepseek: setting.deepseek,
+  deepseekToken: setting.deepseekToken,
+  models: setting.models,
 });
-
-const vendors: StandardItem<ChatVendor>[] = [
-  {
-    value: "ollama",
-    label: "ollama",
-  },
-  {
-    value: "deepseek",
-    label: "deepseek",
-  },
-];
-
-const onVendorChange = (vendor: ChatVendor) => {
-  chatService.setVendor(vendor);
-  setTimeout(() => {
-    getModels();
-  });
-};
-
-const models = ref<StandardItem<string>[]>([]);
-const getModels = async () => {
-  const res = await chatService.getModels();
-  const modelsList = res.data.models || [];
-  const sortedModels = [...modelsList].sort((a, b) =>
-    a.label.localeCompare(b.label)
-  );
-  models.value = sortedModels;
-  if (
-    !props.modelId ||
-    !sortedModels.find((model) => model.value === props.modelId)
-  ) {
-    form.modelId = firstElement(sortedModels).value;
-  }
-};
 
 let operation: "submit" | "cancel" = "submit";
 const onCancelClick = () => {
@@ -98,17 +50,47 @@ const onCancelClick = () => {
 };
 
 const onConfirmClick = () => {
-  operation = "submit";
+  const selectedModels: IModel[] = []
+  form.models.forEach((vendor) => {
+    vendor.children.forEach((model) => {
+      if (model.checked) {
+        selectedModels.push({
+          vendor: model.vendor,
+          label: model.label,
+          value: model.value,
+          checked: model.checked,
+        });
+      }
+    });
+  })
+  setting.ollama = form.ollama;
+  setting.deepseek = form.deepseek;
+  setting.deepseekToken = form.deepseekToken;
+  setting.selectedModels = selectedModels;
   visible.value = false;
 };
 
 const emit = defineEmits(["cancel", "submit"]);
 
 const onClosed = () => {
-  emit(operation, form);
+  emit(operation);
 };
-
-onMounted(() => {
-    getModels();
-});
 </script>
+
+<style>
+.vendor-block {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.model-block {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  border-radius: 4px;
+  background-color: #414339;
+}
+</style>

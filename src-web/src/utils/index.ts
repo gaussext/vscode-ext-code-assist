@@ -1,4 +1,18 @@
 /**
+ *  获取 Json 数据
+ * @param str 
+ * @param defValue 
+ * @returns 
+ */
+export function getJsonSafe(str: string, defValue: any = null) {
+    try {
+        return JSON.parse(str);
+    }   catch (e) {
+        return defValue;
+    }
+}
+
+/**
  * 简易 Token 计算方法
  * @param text 
  * @returns 
