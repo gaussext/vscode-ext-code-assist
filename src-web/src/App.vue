@@ -81,7 +81,6 @@ const handleWindowMessage = (e: MessageEvent) => {
   }
 };
 
-const interval = 20; // 控制速度为 50 Token/s
 const enqueue = async (value: any) => {
   queueAsync(value, (result) => {
     switch (result.type) {
@@ -92,7 +91,7 @@ const enqueue = async (value: any) => {
         handleChatEnd(result.startTime, result.endTime);
         break;
     }
-  }, interval)
+  })
 }
 
 // 等待 AI 回复
@@ -125,7 +124,8 @@ const handleChatRequest = async (
     );
   } catch (error: any) {
     enqueue({ type: 'delta', delta: '请求失败: ' + error.message })
-    enqueue({ type: 'end', startTime });
+    const endTime = Date.now();
+    enqueue({ type: 'end', startTime, endTime });
   }
 };
 

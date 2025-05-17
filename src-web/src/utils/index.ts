@@ -67,25 +67,34 @@ export function lastElement<T>(list: T[]) {
     return list[list.length - 1];
 }
 
+function lerp(start: number, end: number, t: number): number {
+    return start + (end - start) * t;
+}
+
+// 控制速度为 33 - 60 Token/s
+const calcDelay = (count, min = 1000 / 60, max = 1000 / 30) => {
+    const progress = Math.max(0, (max + min - count) / (max + min));
+    return Math.ceil(lerp(min, max, progress));
+};
+
 let isExecuting = false;
 const resultQueue: any[] = [];
 // 执行队列中的任务
-const executeNextTask = async (callback, delay) => {
+const executeNextTask = async (callback) => {
     while (resultQueue.length > 0 && !isExecuting) {
         isExecuting = true;            
         const result = resultQueue.shift();
-        console.log('output', result);
         callback(result);
+        const delay = calcDelay(resultQueue.length);
         await new Promise(resolve => setTimeout(resolve, delay));
         isExecuting = false;
     }
 };
 
-export const queueAsync = <T extends any>(result: T, callback, delay) => {
-    console.log('input', result);
+export const queueAsync = (result: any, callback) => {
     resultQueue.push(result);
     // 如果没有正在执行的任务，开始执行
     if (!isExecuting) {
-        executeNextTask(callback, delay);
+        executeNextTask(callback);
     }
 };
