@@ -91,6 +91,6 @@ const onClosed = () => {
   justify-content: space-between;
   padding: 0 8px;
   border-radius: 4px;
-  background-color: #414339;
+  background-color: #272822;
 }
 </style>
