@@ -9,7 +9,7 @@
 </template>
 
 <script setup lang="ts">
-import { firstElement, getJsonSafe } from "@/utils";
+import { firstElement, getJsonSafe, queueAsync } from "@/utils";
 import { onMounted, onUnmounted, ref, unref } from "vue";
 import { chatService, type ChatVendor } from "./api";
 import AppBody from "./components/AppBody.vue";
@@ -81,6 +81,20 @@ const handleWindowMessage = (e: MessageEvent) => {
   }
 };
 
+const interval = 20; // 控制速度为 50 Token/s
+const enqueue = async (value: any) => {
+  queueAsync(value, (result) => {
+    switch (result.type) {
+      case 'delta':
+        handleChating(result.delta);
+        break;
+      case 'end':
+        handleChatEnd(result.startTime, result.endTime);
+        break;
+    }
+  }, interval)
+}
+
 // 等待 AI 回复
 const handleChatRequest = async (
   vendorId: ChatVendor,
@@ -102,17 +116,16 @@ const handleChatRequest = async (
         messages: messages,
       },
       (delta: string) => {
-        handleChating(delta)
+        enqueue({ type: 'delta', delta })
       },
       () => {
-        loading.value = false;
-        handleChatEnd(startTime);
+        const endTime = Date.now();
+        enqueue({ type: 'end', startTime, endTime });
       }
     );
   } catch (error: any) {
-    loading.value = false;
-    handleChating('请求失败: ' + error.message)
-    handleChatEnd(startTime);
+    enqueue({ type: 'delta', delta: '请求失败: ' + error.message })
+    enqueue({ type: 'end', startTime });
   }
 };
 
@@ -120,16 +133,18 @@ const handleChating = (delta: string) => {
   if (latestMessage.value.content === "...") {
     latestMessage.value.content = "";
   }
-
   latestMessage.value.content += delta;
 }
+
 // AI 结束回答
-const handleChatEnd = (startTime: number) => {
+const handleChatEnd = (startTime: number, endTime) => {
+  loading.value = false;
   const message = new ChatMessage("assistant");
   message.vendor = latestMessage.value.vendor;
   message.model = latestMessage.value.model;
   message.content = latestMessage.value.content;
   message.startTime = startTime;
+  message.timestamp = endTime;
   messages.value = [...messages.value, message];
   store.setMessagesById(conversationId.value, unref(messages));
 };
