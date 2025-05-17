@@ -1,15 +1,31 @@
 <template>
     <div class="messages-area" id="messages">
         <div v-for="message in messages" :key="message.uuid"
-            :class="['message', message.role === 'assistant' ? 'message-ai' : 'message-you']">
-            <div v-html="formatMessage(message)"></div>
-            <div style="margin-top: 4px;">
-                <a class="link-copy copy-markdown" @click="copyToClipboard(message.content)">复制 Markdown</a>
-                <span v-if="message.role === 'assistant'">{{ getSpeedFromMessage(message) }}</span>
+            :class="['message', message.role === 'assistant' ? 'message-ai' : '']">
+            <div v-if="message.role === 'assistant'">
+                <div style=" margin-bottom: 8px;">
+                    <span>{{ message.model }}</span>
+                </div>
+                <div v-html="formatMessage(message)"></div>
+                <div style="margin-top: 4px; display: flex; align-items: center;">
+                    <a class="link-copy copy-markdown" @click="copyToClipboard(message.content)">复制 Markdown</a>
+                    <MessageInfo v-if="message.role === 'assistant'" :message="message"></MessageInfo>
+                </div>
+            </div>
+            <div v-else>
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 8px;">
+                    <span>You</span>
+                </div>
+                <div style="display: flex; justify-content: flex-end; width: 100%;">
+                    <div class="message-you" v-html="formatMessage(message)"></div>
+                </div>
             </div>
         </div>
         <div v-show="loading" :key="latestMessage.uuid"
             :class="['message', latestMessage.role === 'assistant' ? 'message-ai' : 'message-you']">
+            <div style=" margin-bottom: 8px;">
+                <span>{{ latestMessage.model }}</span>
+            </div>
             <div ref="latestMessageRef"></div>
         </div>
         <div ref="messagesEndRef"></div>
@@ -18,11 +34,12 @@
 
 <script setup lang="ts">
 import { ChatMessage } from '@/models/Model';
-import { copyToClipboard, getTokenCount } from '@/utils';
+import { copyToClipboard } from '@/utils';
 import hljs from 'highlight.js';
 import { Marked } from "marked";
 import { markedHighlight } from "marked-highlight";
 import { onMounted, ref, watch } from 'vue';
+import MessageInfo from './MessageInfo.vue';
 
 const marked = new Marked(
     markedHighlight({
@@ -45,16 +62,7 @@ const latestMessageRef = ref<HTMLDivElement | null>(null)
 
 // 格式化消息内容
 const formatMessage = (message: ChatMessage) => {
-    const prefix = message.role === 'assistant' ? 'AI: ' : 'You: '
-    return marked.parse(`${prefix}${message.content}`)
-}
-
-const getSpeedFromMessage = (message: ChatMessage) => {
-    const duration = message.timestamp - message.startTime || 1000;
-    const second = (duration / 1000).toFixed(2)
-    const tokens = getTokenCount(message.content);
-    const speed = (tokens * 1000 / duration).toFixed(2);
-    return  `${tokens} tokens in ${second} second = ${speed} token/s`;
+    return marked.parse(message.content)
 }
 
 // 滚动到底部

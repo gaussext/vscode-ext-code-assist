@@ -1,3 +1,4 @@
+import type { ChatVendor } from '@/api';
 import * as uuid from 'uuid';
 
 export class ChatConversation {
@@ -9,6 +10,8 @@ type MessageRole = 'system' | 'user' | 'assistant';
 
 export class ChatMessage {
     role: MessageRole = "system";
+    vendor: ChatVendor;
+    model: string;
     content = '';
     uuid = uuid.v4();
     startTime = Date.now();

@@ -1,28 +1,23 @@
 <template>
   <div class="chat-container">
-    <AppHeader
-      :conversations="conversations"
-      :conversationId="conversationId"
-      @update:conversationId="handleConversationChange"
-      @create="getConversations"
-      @delete="getConversations" 
-      @change="onSettingChange"
-      />
+    <AppHeader :messages="messages" :conversations="conversations" :conversationId="conversationId"
+      @update:conversationId="handleConversationChange" @create="getConversations" @delete="getConversations" />
     <AppBody :messages="messages" :latestMessage="latestMessage" :loading="loading" />
-    <AppFooter v-model="prompt" :loading="loading" :models="models" :model="model" @update:model="onModelChange" @click="onButtonClick" />
+    <AppFooter v-model="prompt" :loading="loading" :models="models" :model="model" @update:model="onModelChange"
+      @change="onSettingChange" @click="onButtonClick" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { firstElement, getJsonSafe } from "@/utils";
-import { onMounted, onUnmounted, reactive, ref, unref } from "vue";
+import { onMounted, onUnmounted, ref, unref } from "vue";
 import { chatService, type ChatVendor } from "./api";
 import AppBody from "./components/AppBody.vue";
 import AppFooter from "./components/AppFooter.vue";
 import AppHeader from "./components/AppHeader.vue";
 import { ChatConversation, ChatMessage } from "./models/Model";
-import store from "./store/index";
 import { ChatModel, type IModel } from "./setting";
+import store from "./store/index";
 
 const KEY_MODEL = "code-assist.model";
 const KEY_CONV = "code-assist.conversation";
@@ -43,6 +38,10 @@ const onSettingChange = async () => {
 const getModels = async () => {
   const res = await chatService.getModels();
   models.value = res;
+  // check current model in models
+  if (!res.find(item => item.value === model.value.value)) {
+    model.value = firstElement(res);
+  }
   return res;
 };
 
@@ -92,6 +91,8 @@ const handleChatRequest = async (
   loading.value = true;
   const startTime = Date.now();
   try {
+    latestMessage.value.vendor = vendorId;
+    latestMessage.value.model = modelId;
     latestMessage.value.content = "...";
     await chatService.chat(
       {
@@ -125,6 +126,8 @@ const handleChating = (delta: string) => {
 // AI 结束回答
 const handleChatEnd = (startTime: number) => {
   const message = new ChatMessage("assistant");
+  message.vendor = latestMessage.value.vendor;
+  message.model = latestMessage.value.model;
   message.content = latestMessage.value.content;
   message.startTime = startTime;
   messages.value = [...messages.value, message];
@@ -162,7 +165,7 @@ ${code}
 const onButtonClick = async () => {
   const content = prompt.value;
   if (loading.value) {
-    chatService.stop();
+    await chatService.stop(model.value.vendor);
     loading.value = false;
     return;
   }
@@ -192,7 +195,7 @@ const handleConversationChange = (id: string) => {
 
 onMounted(async () => {
   window.addEventListener("message", handleWindowMessage);
-  getModels()
+  getModels();
   await getConversations();
   loadMessages();
 });

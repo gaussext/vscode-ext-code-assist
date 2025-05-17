@@ -24,6 +24,14 @@ class DeepseekService {
 
     private controller = new AbortController();
 
+    getHeaders(TOKEN) {
+        return {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            Authorization: `Bearer ${TOKEN}`
+        };
+    }
+
     getModels() {
         return Promise.resolve({
             data: {
@@ -53,11 +61,7 @@ class DeepseekService {
         const data = createRequestData({ vendor: 'deepseek', model, content, messages });
         const response = await axios.post(URL, data, {
             method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json',
-                Authorization: `Bearer ${TOKEN}`
-            },
+            headers: this.getHeaders(TOKEN),
             responseType: 'stream',
             signal: this.controller.signal,
             adapter: 'fetch'
@@ -81,6 +85,8 @@ class DeepseekService {
                             callback(item.delta?.content || '');
                         });
                     }
+                } else {
+                    console.log(json);
                 }
             });
 
