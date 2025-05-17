@@ -51,18 +51,17 @@ const info = computed(() => {
   const result = {
     temp: 0,
     user: 0,
-    upload: 0,
-    upload_cost: 0,
     assistant: 0,
+    upload: 0,
     window: 0,
     width: 0
   }
   props.messages.forEach(message => {
     const tokens = getTokenCount(message.content)
     if (message.role === 'user' || message.role === 'system') {
-      result.upload = result.upload + result.user + result.assistant + tokens;
-      result.upload_cost = result.upload_cost + result.upload;
       result.user = result.user + tokens;
+      const upload = result.user + result.assistant;
+      result.upload = result.upload + upload;
     } else {
       result.assistant = result.assistant + tokens
     }
@@ -104,11 +103,6 @@ const onDeleteConversation = async (id: string) => {
   const convs = await store.getConversations();
   emit('delete')
   emit("update:conversationId", firstElement(convs).id);
-};
-
-const onClearConversation = async () => {
-  await store.setMessagesById(props.conversationId, []);
-  emit("update:conversationId", props.conversationId);
 };
 </script>
 

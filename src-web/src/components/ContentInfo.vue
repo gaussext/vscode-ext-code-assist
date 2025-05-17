@@ -7,7 +7,7 @@
             <el-icon>
                 <Top />
             </el-icon>
-            <span>{{ info.upload_cost }}</span>
+            <span>{{ info.upload }}</span>
             <span>/</span>
             <el-icon>
                 <Bottom />
@@ -32,9 +32,8 @@ const props = defineProps({
         default: () => ({
             temp: 0,
             user: 0,
-            upload: 0,
-            upload_cost: 0,
             assistant: 0,
+            upload: 0,
             window: 0,
             width: 0
         })
