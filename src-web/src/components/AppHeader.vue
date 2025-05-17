@@ -111,12 +111,12 @@ const onDeleteConversation = async (id: string) => {
   margin-top: 2px;
   margin-bottom: 2px;
   width: 100%;
-  height: 4px;
+  height: 2px;
   background-color: #777;
 }
 
 .header-area-bar__inner {
-  height: 4px;
+  height: 2px;
   width: var(--width);
   background-color: #409eff;
 }

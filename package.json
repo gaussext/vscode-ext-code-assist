@@ -2,7 +2,7 @@
   "name": "code-assist",
   "displayName": "Gauss Code Assist",
   "description": "",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -15,7 +15,7 @@
     "configuration": {
       "title": "Code Assist",
       "properties": {
-        "code-assist.origin": {
+        "code-assist.ollama": {
           "type": "string",
           "default": "http://127.0.0.1:11434",
           "description": "Ollama Server Address"

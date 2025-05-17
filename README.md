@@ -1,8 +1,8 @@
 # vscode-ext-code-assist
 
-VS Code 简单代码小助手，使用本地 Ollama 作为后端
+VS Code 简单代码小助手，支持 Ollama 和 DeepSeek
 
-![](https://www.gausszhou.top/static/data/github/code-assist/1.webp)
+![](https://www.gausszhou.top/static/data/github/code-assist/2.webp)
 
 ## Configuration
 
@@ -10,8 +10,9 @@ VS Code 简单代码小助手，使用本地 Ollama 作为后端
 
 ```json
 {
-    "code-assist.ollama": "http://127.0.0.1:11434",
-    "code-assist.deepseek_token": "sk-***"
+  "code-assist.ollama": "http://127.0.0.1:11434",
+  "code-assist.deepseek": "https://api.deepseek.com",
+  "code-assist.deepseek_token": "***",
 }
 ```
 
