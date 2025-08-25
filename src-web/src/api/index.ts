@@ -1,8 +1,9 @@
 import setting from "@/setting";
 import { deepseekService } from "./services/deepseepk";
 import { ollamaService } from "./services/ollama";
+import { geminiService } from "./services/gemini";
 
-export type ChatVendor = 'ollama' | 'deepseek';
+export type ChatVendor = 'ollama' | 'deepseek' | 'gemini';
 
 export interface ChatParams {
     vendor: ChatVendor;
@@ -19,6 +20,9 @@ class ChatService {
         } 
         if (vendor === 'deepseek')  {
             return deepseekService;
+        }
+        if (vendor === 'gemini') {
+            return geminiService;
         }
         return ollamaService;
     }
