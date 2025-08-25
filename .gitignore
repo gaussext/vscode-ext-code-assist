@@ -1,9 +1,13 @@
 .vscode/settings.json
+.idea
 out
 dist
 dist-*
 node_modules
-.vscode-test/
 *.vsix
+
+.env
+.vscode-test/
+
 package-lock.json
 pnpm-lock.yaml
