@@ -1,9 +1,11 @@
 .vscode/settings.json
 .idea
+
+node_modules
 out
 dist
 dist-*
-node_modules
+*.*.tsbuildinfo
 *.vsix
 
 .env
