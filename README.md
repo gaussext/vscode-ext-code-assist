@@ -20,6 +20,7 @@ VS Code 简单代码小助手，支持 Ollama/DeepSeek/Gemini
 - [x] 基本功能
   - [x] 基本问答功能完成
   - [x] 渲染 Markdown
+  - [x] 复制 Markdown
   - [x] 计算生成速度
   - [x] 代码高亮
 - [x] 配置
@@ -36,7 +37,7 @@ VS Code 简单代码小助手，支持 Ollama/DeepSeek/Gemini
   - [x] 右键菜单 - 开始对话
   - [x] 右键菜单 - 代码解释
   - [x] 右键菜单 - 代码优化
-  - [x] 复制回答 - Markdown
+  - [x] 右键菜单 - 添加到对话
 - [x] 支持模型
   - [x] 支持 Ollama
   - [x] 支持 Deepseek

@@ -1,5 +1,5 @@
 <template>
-    <div class="messages-area" id="messages">
+    <div class="app-body messages-area" id="messages">
         <div v-for="message in messages" :key="message.uuid"
             :class="['message', message.role === 'assistant' ? 'message-ai' : '']">
             <div v-if="message.role === 'assistant'">
@@ -35,22 +35,11 @@
 <script setup lang="ts">
 import { ChatMessage } from '@/models/Model';
 import { copyToClipboard } from '@/utils';
-import hljs from 'highlight.js';
-import { Marked } from "marked";
-import { markedHighlight } from "marked-highlight";
 import { onMounted, ref, watch } from 'vue';
 import MessageInfo from './MessageInfo.vue';
+import { marked } from '@/utils/marked';
 
-const marked = new Marked(
-    markedHighlight({
-        emptyLangClass: 'hljs',
-        langPrefix: 'hljs language-',
-        highlight(code, lang, info) {
-            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-            return hljs.highlight(code, { language }).value;
-        }
-    })
-)
+
 const props = defineProps<{
     messages: ChatMessage[]
     latestMessage: ChatMessage
