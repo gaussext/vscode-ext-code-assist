@@ -13,11 +13,11 @@ body {
     --app-footer-height: 100px;
 }
 
-.header-area-tool {
+
+.app-header .header-area-tool {
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    gap: 4px;
     height: var(--app-header-height);
 }
 
@@ -29,15 +29,13 @@ body {
     min-width: 400px;
     max-width: 800px;
     margin: 0 auto;
-    padding-top: 2px;
+    max-height: 100vh;
 }
-
-
 
 .messages-area {
     margin-top: 8px;
     margin-bottom: 8px;
-    padding: 4px 8px 0 0;
+    padding: 4px 8px 200px 0;
     border-radius: 4px;
     height: var(--app-body-height);
     overflow-y: auto;
@@ -47,7 +45,6 @@ body {
     height: var(--app-footer-height);
     position: relative;
 }
-
 
 .messages-area .message-you,
 .messages-area .message-ai {
@@ -77,7 +74,6 @@ body {
     cursor: pointer;
 }
 
-
 .footer-area textarea {
     width: 100%;
     height: 100%;
@@ -101,6 +97,21 @@ body {
 
 .footer-area #chat-button {
     width: auto;
+}
+
+.footer-area .prompt-area {
+    height: 100px;
+}
+
+.footer-area .prompt-code {
+    position: absolute;
+    width: calc(100% - 36px);
+    bottom: 108px;
+    height: 200px;
+    overflow-y: auto;
+    padding: 4px;
+    border-radius: 4px;
+    background-color: #1e1f1c;
 }
 
 .el-button+.el-button.vscode-button-small {

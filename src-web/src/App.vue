@@ -3,7 +3,7 @@
     <AppHeader :messages="messages" :conversations="conversations" :conversationId="conversationId"
       @update:conversationId="handleConversationChange" @create="getConversations" @delete="getConversations" />
     <AppBody :messages="messages" :latestMessage="latestMessage" :loading="loading" />
-    <AppFooter v-model="prompt" :loading="loading" :models="models" :model="model" @update:model="onModelChange"
+    <AppFooter v-model="prompt" :promptCode="promptCode" :loading="loading" :models="models" :model="model" @update:model="onModelChange"
       @change="onSettingChange" @click="onButtonClick" />
   </div>
 </template>
@@ -27,19 +27,22 @@ const latestMessage = ref(new ChatMessage("assistant"));
 const messages = ref<ChatMessage[]>([]);
 const loading = ref(false);
 const prompt = ref("");
+const promptCode = ref("");
 const conversations = ref<ChatConversation[]>([]);
 const models = ref<IModel[]>([]);
-const model = ref<IModel>(getJsonSafe(localStorage.getItem(KEY_MODEL), new ChatModel()));
+const model = ref<IModel>(
+  getJsonSafe(localStorage.getItem(KEY_MODEL), new ChatModel())
+);
 
 const onSettingChange = async () => {
-  getModels()
-}
+  getModels();
+};
 
 const getModels = async () => {
   const res = await chatService.getModels();
   models.value = res;
   // check current model in models
-  if (!res.find(item => item.value === model.value.value)) {
+  if (!res.find((item) => item.value === model.value.value)) {
     model.value = firstElement(res);
   }
   return res;
@@ -48,13 +51,13 @@ const getModels = async () => {
 const onModelChange = (value: IModel) => {
   model.value = value;
   localStorage.setItem(KEY_MODEL, JSON.stringify(unref(model)));
-}
+};
 
 const getConversations = async () => {
   const convs = await store.getConversations();
   conversations.value = [...convs];
   if (!conversationId.value && firstElement(convs).id) {
-    conversationId.value = firstElement(convs).id
+    conversationId.value = firstElement(convs).id;
   }
   return convs;
 };
@@ -78,21 +81,24 @@ const handleWindowMessage = (e: MessageEvent) => {
     case "comment":
       handleComment(text);
       break;
+    case "add-to-chat": {
+      handleAddToChat(text);
+    }
   }
 };
 
 const enqueue = async (value: any) => {
   queueAsync(value, (result) => {
     switch (result.type) {
-      case 'delta':
+      case "delta":
         handleChating(result.delta);
         break;
-      case 'end':
+      case "end":
         handleChatEnd(result.startTime, result.endTime);
         break;
     }
-  })
-}
+  });
+};
 
 // 等待 AI 回复
 const handleChatRequest = async (
@@ -115,17 +121,17 @@ const handleChatRequest = async (
         messages: messages,
       },
       (delta: string) => {
-        enqueue({ type: 'delta', delta })
+        enqueue({ type: "delta", delta });
       },
       () => {
         const endTime = Date.now();
-        enqueue({ type: 'end', startTime, endTime });
+        enqueue({ type: "end", startTime, endTime });
       }
     );
   } catch (error: any) {
-    enqueue({ type: 'delta', delta: '请求失败: ' + error.message })
+    enqueue({ type: "delta", delta: "请求失败: " + error.message });
     const endTime = Date.now();
-    enqueue({ type: 'end', startTime, endTime });
+    enqueue({ type: "end", startTime, endTime });
   }
 };
 
@@ -134,7 +140,7 @@ const handleChating = (delta: string) => {
     latestMessage.value.content = "";
   }
   latestMessage.value.content += delta;
-}
+};
 
 // AI 结束回答
 const handleChatEnd = (startTime: number, endTime) => {
@@ -151,7 +157,9 @@ const handleChatEnd = (startTime: number, endTime) => {
 
 const handleOptimization = (code: string) => {
   if (!code) return;
-  prompt.value = `优化一下这段代码
+  prompt.value = `优化一下这段代码`;
+
+  promptCode.value = `
 \`\`\`typescript
 ${code}
 \`\`\``;
@@ -160,7 +168,8 @@ ${code}
 
 const handleExplanation = (code: string) => {
   if (!code) return;
-  prompt.value = `解释一下这段代码
+  prompt.value = `解释一下这段代码`;
+  promptCode.value = `
 \`\`\`typescript
 ${code}
 \`\`\``;
@@ -169,16 +178,26 @@ ${code}
 
 const handleComment = (code: string) => {
   if (!code) return;
-  prompt.value = `给下面这段代码补充注释
+  prompt.value = `给下面这段代码补充注释`;
+  promptCode.value = `
 \`\`\`typescript
 ${code}
 \`\`\``;
   onButtonClick();
 };
 
+const handleAddToChat = (code: string) => {
+  if (!code) return;
+  prompt.value = ``;
+  promptCode.value = `
+\`\`\`typescript
+${code}
+\`\`\``;
+};
+
 // 发送消息
 const onButtonClick = async () => {
-  const content = prompt.value;
+  const content = prompt.value + promptCode.value;
   if (loading.value) {
     await chatService.stop(model.value.vendor);
     loading.value = false;
@@ -191,13 +210,19 @@ const onButtonClick = async () => {
     return;
   }
   prompt.value = "";
+  promptCode.value = ""
   await store.updateConversationTitle(conversationId.value, content);
   await getConversations();
   const message = new ChatMessage("user");
   message.content = content;
   messages.value = [...messages.value, message];
   store.setMessagesById(conversationId.value, unref(messages));
-  handleChatRequest(model.value.vendor, model.value.value, content, messages.value);
+  handleChatRequest(
+    model.value.vendor,
+    model.value.value,
+    content,
+    messages.value
+  );
 };
 
 // 会话变更处理

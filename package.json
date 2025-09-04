@@ -64,6 +64,10 @@
         "title": "开始对话"
       },
       {
+        "command": "codeAssist.add-to-chat",
+        "title": "添加到对话"
+      },
+      {
         "command": "codeAssist.optimization",
         "title": "代码优化"
       },
@@ -110,6 +114,12 @@
         },
         {
           "command": "codeAssist.explanation",
+          "group": "1_modification",
+          "order": 3,
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "codeAssist.add-to-chat",
           "group": "1_modification",
           "order": 3,
           "when": "editorHasSelection"

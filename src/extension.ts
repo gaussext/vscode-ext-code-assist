@@ -61,7 +61,18 @@ function setupChatWebview(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(chat, optimization, explanation, comment);
+  const addToChat = vscode.commands.registerCommand(
+    "codeAssist.add-to-chat",
+    () => {
+      const editor = vscode.window.activeTextEditor;
+      if (editor) {
+        const selection = editor.document.getText(editor.selection);
+        openViewAndSendMessage("add-to-chat", selection);
+      }
+    }
+  );
+
+  context.subscriptions.push(chat, optimization, explanation, comment, addToChat);
 }
 
 export function activate(context: vscode.ExtensionContext) {

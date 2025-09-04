@@ -1,5 +1,5 @@
 <template>
-  <div class="header-area">
+  <div class="app-header header-area">
     <div class="header-area-tool">
       <div class="info-block">
         <ContentInfo :info="info"></ContentInfo>
