@@ -23,9 +23,10 @@ const languages = {
     stylus,
     typescript,
     xml
-}
+};
+
 Object.keys(languages).forEach(key => {
-    hljs.registerLanguage(key, languages[key])
-})
+    hljs.registerLanguage(key, languages[key]);
+});
 
 export default hljs;
