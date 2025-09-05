@@ -25,6 +25,8 @@
 
 <script lang="ts" setup>
 import { MAX_TOKEN_LENGTH } from "@/utils/constants";
+import { Top, Bottom } from '@element-plus/icons-vue';
+
 const props = defineProps({
   info: {
     type: Object,

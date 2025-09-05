@@ -34,7 +34,7 @@
           class="vscode-button-small"
           id="create-button"
           title="配置模型"
-          icon="Setting"
+          :icon="Setting"
           @click="openDialog"
         >
         </el-button>
@@ -58,7 +58,7 @@ import { ChatModel, type IModel } from "@/setting";
 import { ref, watch } from "vue";
 import SettingDialog from "./AppSettingDialog.vue";
 import { marked } from "@/utils/marked";
-import { VideoPause, Promotion } from '@element-plus/icons-vue';
+import { VideoPause, Promotion, Setting } from '@element-plus/icons-vue';
 
 const modelValue = defineModel<string>({ required: true });
 
