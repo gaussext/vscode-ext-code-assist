@@ -28,6 +28,7 @@
 <script lang="ts" setup>
 import { ChatMessage } from '@/models/Model';
 import { getTokenCount } from '@/utils';
+import { QuestionFilled } from '@element-plus/icons-vue';
 
 const props = defineProps({
     message: {
