@@ -1,4 +1,4 @@
-import hljs from 'highlight.js';
+import hljs from './hljs';
 import { Marked } from "marked";
 import { markedHighlight } from "marked-highlight";
 

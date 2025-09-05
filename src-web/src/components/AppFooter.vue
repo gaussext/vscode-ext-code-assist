@@ -58,6 +58,7 @@ import { ChatModel, type IModel } from "@/setting";
 import { ref, watch } from "vue";
 import SettingDialog from "./AppSettingDialog.vue";
 import { marked } from "@/utils/marked";
+import { VideoPause, Promotion } from '@element-plus/icons-vue';
 
 const modelValue = defineModel<string>({ required: true });
 
