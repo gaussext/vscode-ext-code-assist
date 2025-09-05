@@ -1,5 +1,5 @@
 {
-  "name": "webview",
+  "name": "vscode-ext-code-assist-webview",
   "private": true,
   "version": "0.1.0",
   "type": "module",
@@ -12,7 +12,6 @@
     "core-js": "^3.8.3",
     "element-plus": "^2.9.9",
     "highlight.js": "^11.11.1",
-    "js-tiktoken": "^1.0.20",
     "localforage": "^1.10.0",
     "marked": "^15.0.11",
     "marked-highlight": "^2.2.1",
