@@ -1,3 +1,5 @@
+import type { IMessage } from "@/types";
+
 /**
  *  获取 Json 数据
  * @param str 
@@ -71,18 +73,23 @@ function lerp(start: number, end: number, t: number): number {
     return start + (end - start) * t;
 }
 
-// 控制速度为 33 - 60 Token/s
-const calcDelay = (count, min = 1000 / 60, max = 1000 / 30) => {
-    const progress = Math.max(0, (max + min - count) / (max + min));
-    return Math.ceil(lerp(min, max, progress));
+// 控制速度为 30 - 165 Token/s
+// 剩余字符越多，渲染帧数越高
+const calcDelay = (count, min = 30, max = 165) => {
+    const total = max + min;
+    const progress = count / (total + count);
+    const fps = lerp(min, max, progress);
+    const ms = Math.ceil(1000 / fps);
+    return ms;
 };
 
 let isExecuting = false;
-const resultQueue: any[] = [];
+const resultQueue: IMessage[] = [];
+
 // 执行队列中的任务
 const executeNextTask = async (callback) => {
     while (resultQueue.length > 0 && !isExecuting) {
-        isExecuting = true;            
+        isExecuting = true;
         const result = resultQueue.shift();
         callback(result);
         const delay = calcDelay(resultQueue.length);
@@ -91,8 +98,18 @@ const executeNextTask = async (callback) => {
     }
 };
 
-export const queueAsync = (result: any, callback) => {
-    resultQueue.push(result);
+type Callback<T> = (result: T) => void;
+
+export const queueAsync = <T extends IMessage>(result: T, callback: Callback<T>) => {
+    // 拆分 delta 为单个字符
+    if (result.type === 'delta') {
+        Array.from({ length: result.delta.length }).forEach((_, index) => {
+            const char = result.delta[index];
+            resultQueue.push({ type: 'delta', delta: char });
+        });
+    } else {
+        resultQueue.push(result);
+    }
     // 如果没有正在执行的任务，开始执行
     if (!isExecuting) {
         executeNextTask(callback);

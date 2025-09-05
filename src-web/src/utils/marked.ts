@@ -7,8 +7,13 @@ export const marked = new Marked(
         emptyLangClass: 'hljs',
         langPrefix: 'hljs language-',
         highlight(code, lang, info) {
-            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
-            return hljs.highlight(code, { language }).value;
+            try {
+                const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                return hljs.highlight(code, { language }).value;
+            } catch {
+                return code;
+            }
+
         }
     })
 )

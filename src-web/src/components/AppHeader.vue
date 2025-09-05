@@ -34,6 +34,7 @@ import ChatAppsScript from "@/icons/chat-apps-script.vue";
 import ChatAddOn from "@/icons/chat-add-on.vue";
 import ContentInfo from "./ContentInfo.vue";
 import { MAX_TOKEN_LENGTH } from "@/utils/constants";
+import { Delete } from '@element-plus/icons-vue';
 
 const props = defineProps({
   conversationId: {

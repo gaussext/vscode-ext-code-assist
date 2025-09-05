@@ -1,6 +1,6 @@
 import axios from "axios";
 import { type ChatParams } from "@/api";
-import { type StandardItem } from "@/types";
+import { type IStandardItem } from "@/types";
 import { getJsonSafe } from "@/utils";
 import setting from "@/setting";
 
@@ -50,7 +50,7 @@ class GeminiService {
                         "value": "gemini-2.0-flash-lite",
                         "label": "gemini-2.0-flash-lite",
                     }
-                ] as StandardItem<string>[]
+                ] as IStandardItem<string>[]
             }
         });
     }

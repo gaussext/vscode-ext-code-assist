@@ -18,6 +18,7 @@ import AppHeader from "./components/AppHeader.vue";
 import { ChatConversation, ChatMessage } from "./models/Model";
 import { ChatModel, type IModel } from "./setting";
 import store from "./store/index";
+import type { IMessage } from "./types";
 
 const KEY_MODEL = "code-assist.model";
 const KEY_CONV = "code-assist.conversation";
@@ -87,7 +88,7 @@ const handleWindowMessage = (e: MessageEvent) => {
   }
 };
 
-const enqueue = async (value: any) => {
+const enqueue = async (value: IMessage) => {
   queueAsync(value, (result) => {
     switch (result.type) {
       case "delta":

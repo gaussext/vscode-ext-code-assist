@@ -1,6 +1,6 @@
 import axios from "axios";
 import { type ChatParams } from "@/api";
-import { type StandardItem } from "@/types";
+import { type IStandardItem } from "@/types";
 import { getJsonSafe } from "@/utils";
 import setting from "@/setting";
 
@@ -40,7 +40,7 @@ class DeepseekService {
                         "value": "deepseek-chat",
                         "label": "deepseek-chat",
                     }
-                ] as StandardItem<string>[]
+                ] as IStandardItem<string>[]
             }
         });
     }
