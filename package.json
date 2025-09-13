@@ -2,7 +2,7 @@
   "name": "code-assist",
   "displayName": "Gauss Code Assist",
   "description": "",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -29,6 +29,11 @@
           "type": "string",
           "default": "",
           "description": "Deepseek Server Token"
+        },
+        "code-assist.gemini_token": {
+          "type": "string",
+          "default": "",
+          "description": "Google Gemini Token"
         }
       }
     },

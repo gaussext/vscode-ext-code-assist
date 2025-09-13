@@ -73,11 +73,10 @@ function lerp(start: number, end: number, t: number): number {
     return start + (end - start) * t;
 }
 
-// 控制速度为 30 - 165 Token/s
+// 控制速度为 60 - 240 Token/s
 // 剩余字符越多，渲染帧数越高
-const calcDelay = (count, min = 30, max = 165) => {
-    const total = max + min;
-    const progress = count / (total + count);
+const calcDelay = (count, min = 60, max = 240) => {
+    const progress = count / (min + count);
     const fps = lerp(min, max, progress);
     const ms = Math.ceil(1000 / fps);
     return ms;
