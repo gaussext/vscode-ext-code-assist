@@ -91,12 +91,9 @@ body {
     padding: 0 4px;
 }
 
-.footer-area .chat-select {
-    max-width: 320px;
-}
-
+.footer-area #setting-button,
 .footer-area #chat-button {
-    width: auto;
+    width: 32px;
 }
 
 .footer-area .prompt-area {
@@ -106,6 +103,7 @@ body {
 .footer-area .prompt-code {
     position: absolute;
     width: calc(100% - 36px);
+    max-width: 400px;
     bottom: 108px;
     height: 200px;
     overflow-y: auto;
@@ -116,4 +114,16 @@ body {
 
 .el-button+.el-button.vscode-button-small {
     margin-left: 0;
+}
+
+.el-dropdown-link{
+    height: 32px;
+    padding: 0 8px;
+    border-radius: 4px;
+    cursor: pointer;
+    outline: none;
+}
+
+.el-dropdown-link:hover {
+    background-color: #262727;
 }

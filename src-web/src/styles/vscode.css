@@ -85,6 +85,7 @@ code {
 	background-color: var(--vscode-input-background);
 	color: var(--vscode-input-foreground);
 	border-radius: 2px;
+	outline: none;
 }
 
 .vscode-textarea:disabled {

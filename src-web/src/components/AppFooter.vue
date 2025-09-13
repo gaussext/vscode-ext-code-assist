@@ -4,48 +4,33 @@
       <div v-html="formatCode(promptCode)"></div>
     </div>
     <div class="prompt-area">
-      <textarea
-        type="textarea"
-        ref="inputRef"
-        class="vscode-textarea"
-        id="chat-input"
-        placeholder="请输入您的问题，使用 Shift + Enter 换行"
-        v-model="modelValue"
-        @keypress="handleKeyPress"
-        :disabled="loading"
-      >
+      <textarea type="textarea" ref="inputRef" class="vscode-textarea" id="chat-input"
+        placeholder="请输入您的问题，使用 Shift + Enter 换行" v-model="modelValue" @keypress="handleKeyPress" :disabled="loading">
       </textarea>
     </div>
 
     <div id="chat-tool">
-      <div style="display: flex; align-items: center">
-        <el-select
-          style="width: 300px"
-          :model-value="modelId"
-          class="chat-select"
-          placeholder="请选择模型"
-          @change="handleChange"
-          :disabled="loading"
-        >
-          <el-option v-for="item in models" :key="item.value" :label="item.label" :value="item.value"> </el-option>
-        </el-select>
-        <el-button
-          style="margin-left: 4px"
-          class="vscode-button-small"
-          id="create-button"
-          title="配置模型"
-          :icon="Setting"
-          @click="openDialog"
-        >
+      <div style="display: flex; align-items: center;">
+        <el-dropdown @command="handleCommand">
+          <span style="display: flex; align-items: center;" class="el-dropdown-link">
+            <span class="text"> {{ modelLabel }}</span>
+            <el-icon class="el-icon--right">
+              <ArrowDown />
+            </el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item v-for="item in models" :key="item.value" :command="item.value"
+                :class="{ active: item.value === modelId }">{{ item.label }}</el-dropdown-item>
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <el-button style="margin-left: 4px" class="vscode-button-small" id="setting-button" title="配置模型" text type="info"
+          :icon="Setting" @click="openDialog">
         </el-button>
       </div>
-      <el-button id="chat-button" :type="loading ? 'danger' : 'primary'" @click="$emit('click')">
-        <el-icon v-if="loading">
-          <VideoPause />
-        </el-icon>
-        <el-icon v-else>
-          <Promotion />
-        </el-icon>
+      <el-button id="chat-button" :icon="loading ? VideoPause : Promotion" type="info" text
+        @click="$emit('click')">
       </el-button>
     </div>
   </div>
@@ -55,10 +40,10 @@
 
 <script setup lang="ts">
 import { ChatModel, type IModel } from "@/setting";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import SettingDialog from "./AppSettingDialog.vue";
 import { marked } from "@/utils/marked";
-import { VideoPause, Promotion, Setting } from '@element-plus/icons-vue';
+import { VideoPause, Promotion, Setting, ArrowDown } from '@element-plus/icons-vue';
 
 const modelValue = defineModel<string>({ required: true });
 
@@ -79,6 +64,10 @@ const props = defineProps({
 const modelId = ref(props.model?.value || "");
 const emit = defineEmits(["update:model", "change", "click"]);
 
+const modelLabel = computed(() => {
+  return props.models.find(item => item.value === modelId.value)?.label;
+});
+
 watch(
   () => props.model,
   (value) => {
@@ -94,7 +83,10 @@ const formatCode = (content) => {
 
 const inputRef = ref<HTMLTextAreaElement | null>(null);
 
-const handleChange = (value: string) => {
+const handleCommand = (value: string) => {
+  modelId.value = value;
+  console.log(value);
+
   const model = props.models.find((item) => item.value === value);
   emit("update:model", model);
 };
