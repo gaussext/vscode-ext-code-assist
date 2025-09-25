@@ -4,10 +4,7 @@ import { ChatWebViewProvider } from "./ChatWebViewProvider";
 // ====== AI 对话聊天 ======
 function setupChatWebview(context: vscode.ExtensionContext) {
   const provider = new ChatWebViewProvider(context.extensionUri);
-  const view = vscode.window.registerWebviewViewProvider(
-    "code-assist.view",
-    provider
-  );
+  const view = vscode.window.registerWebviewViewProvider("code-assist.view", provider);
   context.subscriptions.push(view);
 
   const openViewAndSendMessage = (type: string, text: string) => {
@@ -21,58 +18,15 @@ function setupChatWebview(context: vscode.ExtensionContext) {
     }, 1000);
   };
 
-  const chat = vscode.commands.registerCommand(
-    "codeAssist.chat",
-    () => {
-      openViewAndSendMessage("chat", '');
-    }
-  );
-
-  const optimization = vscode.commands.registerCommand(
-    "codeAssist.optimization",
-    () => {
+  const addCommand = (command: string) => {
+    const disposable = vscode.commands.registerCommand(`codeAssist.${command}`, () => {
       const editor = vscode.window.activeTextEditor;
-      if (editor) {
-        const selection = editor.document.getText(editor.selection);
-        openViewAndSendMessage("optimization", selection);
-      }
-    }
-  );
-
-  const explanation = vscode.commands.registerCommand(
-    "codeAssist.explanation",
-    () => {
-      const editor = vscode.window.activeTextEditor;
-      if (editor) {
-        const selection = editor.document.getText(editor.selection);
-        openViewAndSendMessage("explanation", selection);
-      }
-    }
-  );
-
-  const comment = vscode.commands.registerCommand(
-    "codeAssist.comment",
-    () => {
-      const editor = vscode.window.activeTextEditor;
-      if (editor) {
-        const selection = editor.document.getText(editor.selection);
-        openViewAndSendMessage("comment", selection);
-      }
-    }
-  );
-
-  const addToChat = vscode.commands.registerCommand(
-    "codeAssist.add-to-chat",
-    () => {
-      const editor = vscode.window.activeTextEditor;
-      if (editor) {
-        const selection = editor.document.getText(editor.selection);
-        openViewAndSendMessage("add-to-chat", selection);
-      }
-    }
-  );
-
-  context.subscriptions.push(chat, optimization, explanation, comment, addToChat);
+      const selection = editor?.document.getText(editor.selection) || "";
+      openViewAndSendMessage(command, selection);
+    });
+    context.subscriptions.push(disposable);
+  };
+  ["chat","optimization","explanation","comment", "upgrade-class", "upgrade-vue", "upgrade-react","add-to-chat"].forEach(addCommand);
 }
 
 export function activate(context: vscode.ExtensionContext) {

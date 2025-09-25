@@ -2,7 +2,7 @@
   "name": "code-assist",
   "displayName": "Gauss Code Assist",
   "description": "",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -69,10 +69,6 @@
         "title": "开始对话"
       },
       {
-        "command": "codeAssist.add-to-chat",
-        "title": "添加到对话"
-      },
-      {
         "command": "codeAssist.optimization",
         "title": "代码优化"
       },
@@ -83,6 +79,22 @@
       {
         "command": "codeAssist.comment",
         "title": "代码注释"
+      },
+      {
+        "command": "codeAssist.upgrade-class",
+        "title": "升级 Class"
+      },
+      {
+        "command": "codeAssist.upgrade-vue",
+        "title": "升级 Vue"
+      },
+      {
+        "command": "codeAssist.upgrade-react",
+        "title": "升级 React"
+      },
+      {
+        "command": "codeAssist.add-to-chat",
+        "title": "添加到对话"
       }
     ],
     "submenus": [
@@ -107,26 +119,44 @@
         },
         {
           "command": "codeAssist.comment",
-          "group": "1_modification",
+          "group": "1_basic",
           "order": 1,
           "when": "editorHasSelection"
         },
         {
           "command": "codeAssist.optimization",
-          "group": "1_modification",
+          "group": "1_basic",
           "order": 2,
           "when": "editorHasSelection"
         },
         {
           "command": "codeAssist.explanation",
-          "group": "1_modification",
+          "group": "1_basic",
+          "order": 3,
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "codeAssist.upgrade-class",
+          "group": "2_upgrade",
+          "order": 1,
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "codeAssist.upgrade-vue",
+          "group": "2_upgrade",
+          "order": 2,
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "codeAssist.upgrade-react",
+          "group": "2_upgrade",
           "order": 3,
           "when": "editorHasSelection"
         },
         {
           "command": "codeAssist.add-to-chat",
-          "group": "1_modification",
-          "order": 3,
+          "group": "3_selection",
+          "order": 1,
           "when": "editorHasSelection"
         }
       ]
