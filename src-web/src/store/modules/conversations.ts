@@ -49,6 +49,14 @@ export function deleteConversation(id: string) {
     return setConversations(conversations);
 }
 
+/**
+ * 清空会话列表
+ * @returns 
+ */
+export function clearConversation() {
+    return setConversations([]);
+}
+
 // 更新会话标题
 export function updateConversationTitle(conversationId: string, message: string) {
     conversations.forEach((item) => {

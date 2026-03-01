@@ -232,7 +232,7 @@ const handleAddToChat = (code: string) => {
   if (!code) return;
   prompt.value = ``;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
 };

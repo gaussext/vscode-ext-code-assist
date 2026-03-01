@@ -6,10 +6,14 @@
       </div>
       <div class="icon-block">
         <ChatAddOn @click="onCreateConversation"> </ChatAddOn>
-        <el-popover class="box-item" title="历史记录" width="360px" trigger="click" placement="left-start" v-model:visible="visible">
+        <el-popover class="box-item"width="360px" trigger="click" placement="left-start" v-model:visible="visible">
+            <div class="conversation-head">
+              <span class="conversation-head-title">历史记录</span>
+              <span class="conversation-head-button" @click="clearConversation">清空所有</span>
+            </div>
             <div class="conversation-list">
               <div class="conversation-item" v-for="option in conversations" :key="option.id" @click="onConversationChange(option.id)">
-                <span>{{ option.title }}</span>
+                <span class="conversation-item-title">{{ option.title }}</span>
                 <el-icon class="icon-delete" @click.stop="onDeleteConversation(option.id)"><Delete /></el-icon>
               </div>
             </div>
@@ -105,6 +109,12 @@ const onDeleteConversation = async (id: string) => {
   emit('delete')
   emit("update:conversationId", firstElement(convs).id);
 };
+
+const clearConversation = async () => {
+  await store.clearConversation();
+  const convs = await store.getConversations();
+  emit("update:conversationId", firstElement(convs).id);
+}
 </script>
 
 <style>
@@ -120,6 +130,25 @@ const onDeleteConversation = async (id: string) => {
   height: 2px;
   width: var(--width);
   background-color: #409eff;
+}
+
+.conversation-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.conversation-head .conversation-head-title {
+  font-size: 16px;
+}
+
+.conversation-head .conversation-head-button {
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.conversation-head .conversation-head-button:hover {
+  color: #f56c6c;
 }
 
 .conversation-list {
@@ -138,8 +167,16 @@ const onDeleteConversation = async (id: string) => {
   justify-content: space-between;
   align-items: center;
 }
+
 .conversation-item:hover {
   background-color: #484c58;
+}
+
+.conversation-item-title {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .conversation-item .icon-delete {
