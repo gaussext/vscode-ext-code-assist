@@ -53,7 +53,7 @@ export function deleteConversation(id: string) {
 export function updateConversationTitle(conversationId: string, message: string) {
     conversations.forEach((item) => {
         if (item.id === conversationId) {
-            item.title = message.slice(0, 10) + "...";
+            item.title = message.slice(0, 50) + "...";
         }
     });
     return setConversations(conversations);
