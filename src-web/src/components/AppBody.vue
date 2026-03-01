@@ -1,5 +1,5 @@
 <template>
-    <div class="app-body messages-area" id="messages">
+    <div class="app-body messages-area" id="messages" :class="{ 'has-code': promptCode }">
         <div v-for="message in messages" :key="message.uuid"
             :class="['message', message.role === 'assistant' ? 'message-ai' : '']">
             <div v-if="message.role === 'assistant'">
@@ -44,6 +44,7 @@ const props = defineProps<{
     messages: ChatMessage[]
     latestMessage: ChatMessage
     loading: boolean
+    promptCode: string
 }>()
 
 const messagesEndRef = ref<HTMLDivElement | null>(null)

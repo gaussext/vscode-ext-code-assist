@@ -2,7 +2,7 @@
   <div class="chat-container">
     <AppHeader :messages="messages" :conversations="conversations" :conversationId="conversationId"
       @update:conversationId="handleConversationChange" @create="getConversations" @delete="getConversations" />
-    <AppBody :messages="messages" :latestMessage="latestMessage" :loading="loading" />
+    <AppBody :messages="messages" :promptCode="promptCode" :latestMessage="latestMessage" :loading="loading" />
     <AppFooter v-model="prompt" :promptCode="promptCode" :loading="loading" :models="models" :model="model" @update:model="onModelChange"
       @change="onSettingChange" @click="onButtonClick" />
   </div>
