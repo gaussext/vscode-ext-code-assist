@@ -258,7 +258,7 @@ const handleAnalysis = (code: string) => {
   setting.temperature = EnumTemperature.DataAnalysis;
   prompt.value = `分析一下这段数据`;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
@@ -266,9 +266,9 @@ ${code}
 
 const handleTranslation = (code: string) => {
   if (!code) return;
-  prompt.value = `将以下代码翻译成中文`;
+  prompt.value = `对以下文本进行翻译，如果是中文则翻译成英文，如果是其他语言则翻译成中文`;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
@@ -278,7 +278,7 @@ const handleAppreciation = (code: string) => {
   if (!code) return;
   prompt.value = `鉴赏或者评价一下这段文字`;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
