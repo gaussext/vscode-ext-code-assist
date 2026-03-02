@@ -84,6 +84,7 @@ const loadMessages = async () => {
 // 处理窗口消息
 const handleWindowMessage = (e: MessageEvent) => {
   const { type, text } = e.data;
+  setting.temperature = EnumTemperature.CodeAndMath;
   switch (type) {
     case 'optimization':
       handleOptimization(text);
@@ -104,13 +105,16 @@ const handleWindowMessage = (e: MessageEvent) => {
       handleUpgradeReact(text);
       break;
     case 'analysis':
+      setting.temperature = EnumTemperature.DataAnalysis;
       handleAnalysis(text);
       break;
     case 'translation':
+      setting.temperature = EnumTemperature.Translation;
       handleTranslation(text);
       break;
-    case 'pppreciation':
-      handlePppreciation(text);
+    case 'appreciation':
+      setting.temperature = EnumTemperature.CreativeWriting;
+      handleAppreciation(text);
       break;
     case 'add-to-chat': {
       handleAddToChat(text);
@@ -244,6 +248,7 @@ ${code}
 
 const handleAnalysis = (code: string) => {
   if (!code) return;
+  setting.temperature = EnumTemperature.DataAnalysis;
   prompt.value = `分析一下这段数据`;
   promptCode.value = `
 \`\`\`typescript
@@ -262,9 +267,8 @@ ${code}
   onButtonClick();
 };
 
-const handlePppreciation = (code: string) => {
+const handleAppreciation = (code: string) => {
   if (!code) return;
-  setting.temperature = EnumTemperature.CreativeWriting;
   prompt.value = `鉴赏或者评价一下这段文字`;
   promptCode.value = `
 \`\`\`typescript
