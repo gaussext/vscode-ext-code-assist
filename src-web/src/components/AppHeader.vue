@@ -9,7 +9,7 @@
         <el-popover class="box-item" width="360px" trigger="click" placement="left-start" v-model:visible="visible">
           <div class="conversation-head">
             <span class="conversation-head-title">历史记录</span>
-            <span class="conversation-head-button" @click="clearConversation">清空所有</span>
+            <el-icon class="conversation-head-button" @click="clearConversation"><DeleteFilled /></el-icon>
           </div>
           <div class="conversation-list">
             <div
@@ -19,6 +19,7 @@
               @click="onConversationChange(option.id)"
             >
               <span class="conversation-item-title">{{ option.title }}</span>
+
               <el-icon class="icon-delete" @click.stop="onDeleteConversation(option.id)"><Delete /></el-icon>
             </div>
           </div>
@@ -43,7 +44,7 @@ import ChatAppsScript from '@/icons/chat-apps-script.vue';
 import ChatAddOn from '@/icons/chat-add-on.vue';
 import ContentInfo from './ContentInfo.vue';
 import { MAX_TOKEN_LENGTH } from '@/utils/constants';
-import { Delete } from '@element-plus/icons-vue';
+import { Delete, DeleteFilled } from '@element-plus/icons-vue';
 
 const props = defineProps({
   conversationId: {
@@ -141,6 +142,7 @@ const clearConversation = async () => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  padding-bottom: 12px;
 }
 
 .conversation-head .conversation-head-title {

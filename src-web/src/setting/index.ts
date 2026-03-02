@@ -17,6 +17,10 @@ const GEMINI_TOKEN = localStorage.getItem('setting.config.gemini_token') || sett
 
 const SELECTED_MODELS = getJsonSafe(localStorage.getItem('setting.config.selectedModels') || '[]', []);
 
+const SELECTED_MODE = localStorage.getItem('setting.config.selectedMode') || setting.get('selectedMode') || 'session';
+
+const TEMPERATURE = parseFloat(localStorage.getItem('setting.config.temperature') || setting.get('temperature') || '0.0');
+
 export interface IModel {
   vendor: ChatVendor;
   label: string;
@@ -24,7 +28,7 @@ export interface IModel {
   checked: boolean;
 }
 export class ChatModel implements IModel {
-  vendor: ChatVendor = 'ollama';
+  vendor: ChatVendor = 'deepseek';
   label: string = '';
   value: string = '';
   checked: boolean = true;
@@ -32,6 +36,8 @@ export class ChatModel implements IModel {
 
 class Setting {
   private state = {
+    mode: SELECTED_MODE,
+    temperature: TEMPERATURE,
     models: {
       ollama: [] as IModel[],
       deepseek: [] as IModel[],
@@ -58,16 +64,6 @@ class Setting {
   }
 
   fetchModels() {
-    ollamaService.getModels().then((res) => {
-      this.state.models.ollama = res.data.models.map((item) => {
-        return {
-          vendor: 'ollama',
-          label: item.label,
-          value: item.value,
-          checked: false,
-        } as IModel;
-      });
-    });
     deepseekService.getModels().then((res) => {
       this.state.models.deepseek = res.data.models.map((item) => {
         return {
@@ -90,21 +86,41 @@ class Setting {
     });
   }
 
-  get models() {
+  // 获取所有会话模式
+  get modes() {
     return [
       {
-        vedor: 'ollama',
-        label: 'Ollama',
-        value: 'ollama',
-        children: this.state.models.ollama.map((item) => {
-          return {
-            vendor: 'ollama',
-            label: item.label,
-            value: item.value,
-            checked: this.state.selectedModels.findIndex((item2) => item2.value === item.value) > -1,
-          } as IModel;
-        }),
+        label: '会话模式',
+        value: 'session',
       },
+      {
+        label: '一问一答',
+        value: 'answer',
+      },
+    ];
+  }
+
+  get mode() {
+    return this.state.mode;
+  }
+
+  set mode(value: string) {
+    this.state.mode = value;
+    localStorage.setItem('setting.config.selectedMode', value);
+  }
+
+  get temperature() {
+    return this.state.temperature;
+  }
+
+  set temperature(value: number) {
+    this.state.temperature = value;
+    localStorage.setItem('setting.config.temperature', value.toFixed(1));
+  }
+
+  // 获取所有模型
+  get models() {
+    return [
       {
         label: 'DeepSeek',
         value: 'deepseek',
@@ -112,19 +128,6 @@ class Setting {
         children: this.state.models.deepseek.map((item) => {
           return {
             vendor: 'deepseek',
-            label: item.label,
-            value: item.value,
-            checked: this.state.selectedModels.findIndex((item2) => item2.value === item.value) > -1,
-          } as IModel;
-        }),
-      },
-      {
-        label: 'Gemini',
-        value: 'gemini',
-        vendor: 'gemini',
-        children: this.state.models.gemini.map((item) => {
-          return {
-            vendor: 'gemini',
             label: item.label,
             value: item.value,
             checked: this.state.selectedModels.findIndex((item2) => item2.value === item.value) > -1,
