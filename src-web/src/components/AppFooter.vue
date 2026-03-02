@@ -19,9 +19,10 @@
 
     <div id="chat-tool">
       <div style="display: flex; align-items: center">
-        <el-dropdown @command="handleCommand">
+        <!-- 会话模式选择下拉菜单 -->
+        <el-dropdown @command="changeMode">
           <span style="display: flex; align-items: center" class="el-dropdown-link">
-            <span class="text"> {{ modelLabel }}</span>
+            <span class="text"> {{ modeLabel }}</span>
             <el-icon class="el-icon--right">
               <ArrowDown />
             </el-icon>
@@ -29,15 +30,36 @@
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item
-                v-for="item in models"
+                v-for="item in modes"
                 :key="item.value"
                 :command="item.value"
-                :class="{ active: item.value === modelId }"
+                :class="{ active: item.value === mode }"
                 >{{ item.label }}</el-dropdown-item
               >
             </el-dropdown-menu>
           </template>
         </el-dropdown>
+        <!-- 温度选择下拉菜单 -->
+        <el-dropdown @command="changeTemperature">
+          <span style="display: flex; align-items: center" class="el-dropdown-link">
+            <span class="text"> {{ temperatureLabel }}</span>
+            <el-icon class="el-icon--right">
+              <ArrowDown />
+            </el-icon>
+          </span>
+          <template #dropdown>
+            <el-dropdown-menu>
+              <el-dropdown-item
+                v-for="item in temperatures"
+                :key="item.value"
+                :command="item.value"
+                :class="{ active: item.value === temperature }"
+                >{{ item.label }}</el-dropdown-item
+              >
+            </el-dropdown-menu>
+          </template>
+        </el-dropdown>
+        <!-- 配置模型按钮 -->
         <el-button
           style="margin-left: 4px"
           class="vscode-button-small"
@@ -54,16 +76,16 @@
       </el-button>
     </div>
   </div>
-
   <SettingDialog v-if="dialogVisible" @cancel="onDialogCancel" @submit="onDialogSubmit"></SettingDialog>
 </template>
 
 <script setup lang="ts">
-import { ChatModel, type IModel } from '@/setting';
+import setting, { ChatModel, type IModel } from '@/setting';
 import { computed, ref, watch } from 'vue';
 import SettingDialog from './AppSettingDialog.vue';
 import { marked } from '@/utils/marked';
 import { VideoPause, Promotion, Setting, ArrowDown } from '@element-plus/icons-vue';
+import { createTemperatures } from '@/models/Temperature';
 
 const modelValue = defineModel<string>({ required: true });
 
@@ -96,21 +118,38 @@ watch(
   { deep: true }
 );
 
-// 格式化消息内容
-const formatCode = (content) => {
-  return marked.parse(content);
-};
-
-const inputRef = ref<HTMLTextAreaElement | null>(null);
-
-const handleCommand = (value: string) => {
+// 模型选择下拉菜单
+const changeModel = (value: string) => {
   modelId.value = value;
-  console.log(value);
-
   const model = props.models.find((item) => item.value === value);
   emit('update:model', model);
 };
 
+// 会话模式选择下拉菜单
+const modes = setting.modes;
+const mode = ref(setting.mode);
+const modeLabel = computed(() => {
+  return modes.find((item) => item.value === mode.value)?.label;
+});
+
+const changeMode = (value: string) => {
+  mode.value = value;
+  setting.mode = value;
+};
+
+// 温度选择下拉菜单
+const temperature = ref(setting.temperature);
+const temperatures = createTemperatures();
+const temperatureLabel = computed(() => {
+  return temperatures.find((item) => item.value === temperature.value)?.label;
+});
+
+const changeTemperature = (value: number) => {
+  temperature.value = value;
+  setting.temperature = value;
+};
+
+// 处理键盘事件
 const handleKeyPress = (e: KeyboardEvent) => {
   if (e.key === 'Enter' && !e.shiftKey) {
     e.preventDefault();
@@ -118,6 +157,12 @@ const handleKeyPress = (e: KeyboardEvent) => {
   }
 };
 
+// 格式化消息内容
+const formatCode = (content) => {
+  return marked.parse(content);
+};
+
+// 打开配置模型对话框
 const dialogVisible = ref(false);
 
 const openDialog = () => {

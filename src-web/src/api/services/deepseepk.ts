@@ -15,13 +15,7 @@ function createRequestData({ content, messages, model }: ChatParams) {
     ],
     model: model,
     stream: true, // stream
-    // temperature 参数默认为 1.0。
-    // 代码生成/数学解题   	0.0
-    // 数据抽取/分析	1.0
-    // 通用对话	1.3
-    // 翻译	1.3
-    // 创意类写作/诗歌创作	1.5
-    temperature: 0.2,
+    temperature: setting.temperature,
   };
 }
 

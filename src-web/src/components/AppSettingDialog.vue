@@ -2,29 +2,12 @@
   <el-dialog v-model="visible" title="配置模型" width="500" @closed="onClosed">
     <div class="dialog-body">
       <el-form :model="form" :label-width="100" label-position="top">
-        <h3>模型</h3>
-        <el-form-item v-for="vendor in form.models" :key="vendor.value" :label="vendor.label">
-          <div class="vendor-block">
-            <div class="model-block" v-for="(model, index) in vendor.children" :key="model.value">
-              <label>{{ model.label }}</label>
-              <el-form-item label-position="left">
-                <el-checkbox v-model="model.checked"></el-checkbox>
-              </el-form-item>
-            </div>
-          </div>
-        </el-form-item>
         <h3>供应商</h3>
-        <el-form-item label="Ollama">
-          <el-input v-model="form.ollama" placeholder="http://127.0.0.1:11434"></el-input>
-        </el-form-item>
         <el-form-item label="DeepSeek URL">
           <el-input v-model="form.deepseek" placeholder="https://api.deepseek.com"></el-input>
         </el-form-item>
         <el-form-item label="DeepSeek Token">
           <el-input v-model="form.deepseekToken" type="password" show-password></el-input>
-        </el-form-item>
-        <el-form-item label="Gemini Token">
-          <el-input v-model="form.geminiToken" type="password" show-password></el-input>
         </el-form-item>
       </el-form>
     </div>
@@ -69,10 +52,8 @@ const onConfirmClick = () => {
       }
     });
   });
-  setting.ollama = form.ollama;
   setting.deepseek = form.deepseek;
   setting.deepseekToken = form.deepseekToken;
-  setting.geminiToken = form.geminiToken;
   setting.selectedModels = selectedModels;
   visible.value = false;
 };

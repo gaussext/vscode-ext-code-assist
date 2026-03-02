@@ -1,6 +1,6 @@
 # vscode-ext-code-assist
 
-VS Code 简单代码小助手，支持 Ollama/DeepSeek/Gemini
+VS Code 简单代码小助手，支持 DeepSeek
 
 ## Configuration
 
@@ -8,10 +8,8 @@ VS Code 简单代码小助手，支持 Ollama/DeepSeek/Gemini
 
 ```json
 {
-  "code-assist.ollama": "http://127.0.0.1:11434",
   "code-assist.deepseek": "https://api.deepseek.com",
   "code-assist.deepseek_token": "***",
-  "code-assist.gemini_token": "***"
 }
 ```
 
@@ -39,13 +37,17 @@ VS Code 简单代码小助手，支持 Ollama/DeepSeek/Gemini
   - [x] 右键菜单 - 代码优化
   - [x] 右键菜单 - 添加到对话
 - [x] 支持模型
-  - [x] 支持 Ollama
+  - [ ] 支持 Ollama
   - [x] 支持 Deepseek
-  - [x] 支持 Gemini
+  - [ ] 支持 Gemini
 - [x] 支持显示会话信息
   - [x] 输入
   - [x] 输出
   - [x] 上下文长度
+- [x] 支持切换聊天模式
+  - [x] 会话模式
+  - [x] 一问一答
+- [x] 支持温度参数调整
 
 ## Build
 

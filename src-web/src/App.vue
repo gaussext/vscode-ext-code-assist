@@ -30,14 +30,14 @@ import AppBody from './components/AppBody.vue';
 import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
 import { ChatConversation, ChatMessage } from './models/Model';
-import { ChatModel, type IModel } from './setting';
+import setting, { ChatModel, type IModel } from './setting';
 import store from './store/index';
 import type { IMessage } from './types';
 
-const KEY_MODEL = 'code-assist.model';
-const KEY_CONV = 'code-assist.conversation';
+const STORE_KEY_MODEL = 'code-assist.model';
+const STORE_KEY_CONV = 'code-assist.conversation';
 
-const conversationId = ref(localStorage.getItem(KEY_CONV) || '');
+const conversationId = ref(localStorage.getItem(STORE_KEY_CONV) || '');
 const latestMessage = ref(new ChatMessage('assistant'));
 const messages = ref<ChatMessage[]>([]);
 const loading = ref(false);
@@ -45,7 +45,7 @@ const prompt = ref('');
 const promptCode = ref('');
 const conversations = ref<ChatConversation[]>([]);
 const models = ref<IModel[]>([]);
-const model = ref<IModel>(getJsonSafe(localStorage.getItem(KEY_MODEL), new ChatModel()));
+const model = ref<IModel>(new ChatModel());
 
 const onSettingChange = async () => {
   getModels();
@@ -63,7 +63,6 @@ const getModels = async () => {
 
 const onModelChange = (value: IModel) => {
   model.value = value;
-  localStorage.setItem(KEY_MODEL, JSON.stringify(unref(model)));
 };
 
 const getConversations = async () => {
@@ -263,13 +262,19 @@ const onButtonClick = async () => {
   const message = new ChatMessage('user');
   message.content = content;
   messages.value = [...messages.value, message];
+  let requestMessages = [] as ChatMessage[];
+  if (setting.mode === 'session') {
+    requestMessages = [...messages.value, message];
+  } else {
+    requestMessages = [message];
+  }
   store.setMessagesById(conversationId.value, unref(messages));
-  handleChatRequest(model.value.vendor, model.value.value, content, messages.value);
+  handleChatRequest(model.value.vendor, model.value.value, content, requestMessages);
 };
 
 // 会话变更处理
 const handleConversationChange = (id: string) => {
-  localStorage.setItem(KEY_CONV, id);
+  localStorage.setItem(STORE_KEY_CONV, id);
   conversationId.value = id;
   messages.value = [];
   loadMessages();
