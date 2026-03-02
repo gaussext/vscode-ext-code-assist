@@ -104,21 +104,26 @@ const handleWindowMessage = (e: MessageEvent) => {
     case 'upgrade-react':
       handleUpgradeReact(text);
       break;
-    case 'analysis':
+    case 'analysis': {
       setting.temperature = EnumTemperature.DataAnalysis;
       handleAnalysis(text);
       break;
-    case 'translation':
+    }
+    case 'translation': {
       setting.temperature = EnumTemperature.Translation;
       handleTranslation(text);
       break;
-    case 'appreciation':
+    }
+    case 'appreciation': {
       setting.temperature = EnumTemperature.CreativeWriting;
       handleAppreciation(text);
       break;
+    }
     case 'add-to-chat': {
       handleAddToChat(text);
     }
+    default:
+      break;
   }
 };
 
@@ -130,6 +135,8 @@ const enqueue = async (value: IMessage) => {
         break;
       case 'end':
         handleChatEnd(result.startTime, result.endTime);
+        break;
+      default:
         break;
     }
   });

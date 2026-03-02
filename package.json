@@ -166,8 +166,26 @@
           "when": "editorHasSelection"
         },
         {
+          "command": "codeAssist.analysis",
+          "group": "3_other",
+          "order": 1,
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "codeAssist.translation",
+          "group": "3_other",
+          "order": 2,
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "codeAssist.appreciation",
+          "group": "3_other",
+          "order": 3,
+          "when": "editorHasSelection"
+        },
+        {
           "command": "codeAssist.add-to-chat",
-          "group": "3_selection",
+          "group": "4_selection",
           "order": 1,
           "when": "editorHasSelection"
         }
