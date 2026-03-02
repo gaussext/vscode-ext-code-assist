@@ -36,7 +36,7 @@ function setupChatWebview(context: vscode.ExtensionContext) {
     'upgrade-react',
     'analysis',
     'translation',
-    'pppreciation',
+    'appreciation',
     'add-to-chat',
   ].forEach(addCommand);
 }
