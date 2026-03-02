@@ -6,19 +6,24 @@
       </div>
       <div class="icon-block">
         <ChatAddOn @click="onCreateConversation"> </ChatAddOn>
-        <el-popover class="box-item"width="360px" trigger="click" placement="left-start" v-model:visible="visible">
-            <div class="conversation-head">
-              <span class="conversation-head-title">历史记录</span>
-              <span class="conversation-head-button" @click="clearConversation">清空所有</span>
+        <el-popover class="box-item" width="360px" trigger="click" placement="left-start" v-model:visible="visible">
+          <div class="conversation-head">
+            <span class="conversation-head-title">历史记录</span>
+            <span class="conversation-head-button" @click="clearConversation">清空所有</span>
+          </div>
+          <div class="conversation-list">
+            <div
+              class="conversation-item"
+              v-for="option in conversations"
+              :key="option.id"
+              @click="onConversationChange(option.id)"
+            >
+              <span class="conversation-item-title">{{ option.title }}</span>
+              <el-icon class="icon-delete" @click.stop="onDeleteConversation(option.id)"><Delete /></el-icon>
             </div>
-            <div class="conversation-list">
-              <div class="conversation-item" v-for="option in conversations" :key="option.id" @click="onConversationChange(option.id)">
-                <span class="conversation-item-title">{{ option.title }}</span>
-                <el-icon class="icon-delete" @click.stop="onDeleteConversation(option.id)"><Delete /></el-icon>
-              </div>
-            </div>
+          </div>
           <template #reference>
-            <ChatAppsScript ></ChatAppsScript>
+            <ChatAppsScript></ChatAppsScript>
           </template>
         </el-popover>
       </div>
@@ -30,26 +35,26 @@
 </template>
 
 <script setup lang="ts">
-import store from "@/store";
-import { firstElement, getTokenCount, lastElement } from "@/utils";
-import { computed, ref } from "vue";
-import type { ChatMessage } from "@/models/Model";
-import ChatAppsScript from "@/icons/chat-apps-script.vue";
-import ChatAddOn from "@/icons/chat-add-on.vue";
-import ContentInfo from "./ContentInfo.vue";
-import { MAX_TOKEN_LENGTH } from "@/utils/constants";
+import store from '@/store';
+import { firstElement, getTokenCount, lastElement } from '@/utils';
+import { computed, ref } from 'vue';
+import type { ChatMessage } from '@/models/Model';
+import ChatAppsScript from '@/icons/chat-apps-script.vue';
+import ChatAddOn from '@/icons/chat-add-on.vue';
+import ContentInfo from './ContentInfo.vue';
+import { MAX_TOKEN_LENGTH } from '@/utils/constants';
 import { Delete } from '@element-plus/icons-vue';
 
 const props = defineProps({
   conversationId: {
-    default: "",
+    default: '',
   },
   conversations: {
-    default: () => []
+    default: () => [],
   },
   messages: {
-    default: () => [] as ChatMessage[]
-  }
+    default: () => [] as ChatMessage[],
+  },
 });
 
 const info = computed(() => {
@@ -59,62 +64,62 @@ const info = computed(() => {
     assistant: 0,
     upload: 0,
     window: 0,
-    width: 0
-  }
-  props.messages.forEach(message => {
-    const tokens = getTokenCount(message.content)
+    width: 0,
+  };
+  props.messages.forEach((message) => {
+    const tokens = getTokenCount(message.content);
     if (message.role === 'user' || message.role === 'system') {
       result.user = result.user + tokens;
       const upload = result.user + result.assistant;
       result.upload = result.upload + upload;
     } else {
-      result.assistant = result.assistant + tokens
+      result.assistant = result.assistant + tokens;
     }
-  })
-  result.window = result.user + result.assistant
-  result.width = result.window * 100 / MAX_TOKEN_LENGTH;
+  });
+  result.window = result.user + result.assistant;
+  result.width = (result.window * 100) / MAX_TOKEN_LENGTH;
   return result;
-})
+});
 
 const barStyle = computed(() => {
   return {
-    '--width': `${info.value.width}%`
-  }
-})
+    '--width': `${info.value.width}%`,
+  };
+});
 
 const emit = defineEmits<{
-  (e: "create"): void;
-  (e: "delete"): void;
-  (e: "update:conversationId", value: string): void;
+  (e: 'create'): void;
+  (e: 'delete'): void;
+  (e: 'update:conversationId', value: string): void;
 }>();
 
 // 按钮操作
 const visible = ref(false);
 const onConversationChange = (id: string) => {
-  emit("update:conversationId", id);
+  emit('update:conversationId', id);
   visible.value = false;
 };
 
 const onCreateConversation = async () => {
   await store.createConversation();
   const convs = await store.getConversations();
-  emit('create')
-  emit("update:conversationId", lastElement(convs).id);
+  emit('create');
+  emit('update:conversationId', lastElement(convs).id);
 };
 
 const onDeleteConversation = async (id: string) => {
   await store.deleteConversation(id);
   await store.removeMessagesById(id);
   const convs = await store.getConversations();
-  emit('delete')
-  emit("update:conversationId", firstElement(convs).id);
+  emit('delete');
+  emit('update:conversationId', firstElement(convs).id);
 };
 
 const clearConversation = async () => {
   await store.clearConversation();
   const convs = await store.getConversations();
-  emit("update:conversationId", firstElement(convs).id);
-}
+  emit('update:conversationId', firstElement(convs).id);
+};
 </script>
 
 <style>

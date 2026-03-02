@@ -1,5 +1,5 @@
 import hljs from 'highlight.js/lib/core';
-import javascript from 'highlight.js/lib/languages/javascript'
+import javascript from 'highlight.js/lib/languages/javascript';
 import java from 'highlight.js/lib/languages/java';
 import css from 'highlight.js/lib/languages/css';
 import less from 'highlight.js/lib/languages/less';
@@ -12,21 +12,21 @@ import typescript from 'highlight.js/lib/languages/typescript';
 import xml from 'highlight.js/lib/languages/xml';
 
 const languages = {
-    javascript,
-    java,
-    css,
-    less,
-    go,
-    php,
-    python,
-    ruby,
-    stylus,
-    typescript,
-    xml
+  javascript,
+  java,
+  css,
+  less,
+  go,
+  php,
+  python,
+  ruby,
+  stylus,
+  typescript,
+  xml,
 };
 
-Object.keys(languages).forEach(key => {
-    hljs.registerLanguage(key, languages[key]);
+Object.keys(languages).forEach((key) => {
+  hljs.registerLanguage(key, languages[key]);
 });
 
 export default hljs;

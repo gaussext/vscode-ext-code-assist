@@ -37,8 +37,8 @@
   </el-dialog>
 </template>
 <script lang="ts" setup>
-import setting, { type IModel } from "@/setting";
-import { reactive, ref } from "vue";
+import setting, { type IModel } from '@/setting';
+import { reactive, ref } from 'vue';
 
 const visible = ref(true);
 const form = reactive({
@@ -49,9 +49,9 @@ const form = reactive({
   models: setting.models,
 });
 
-let operation: "submit" | "cancel" = "submit";
+let operation: 'submit' | 'cancel' = 'submit';
 const onCancelClick = () => {
-  operation = "cancel";
+  operation = 'cancel';
   visible.value = false;
 };
 
@@ -77,7 +77,7 @@ const onConfirmClick = () => {
   visible.value = false;
 };
 
-const emit = defineEmits(["cancel", "submit"]);
+const emit = defineEmits(['cancel', 'submit']);
 
 const onClosed = () => {
   emit(operation);

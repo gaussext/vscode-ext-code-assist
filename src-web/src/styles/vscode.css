@@ -1,111 +1,110 @@
 :root {
-	--container-paddding: 20px;
-	--input-padding-vertical: 6px;
-	--input-padding-horizontal: 4px;
-	--input-margin-vertical: 4px;
-	--input-margin-horizontal: 0;
+  --container-paddding: 20px;
+  --input-padding-vertical: 6px;
+  --input-padding-horizontal: 4px;
+  --input-margin-vertical: 4px;
+  --input-margin-horizontal: 0;
 }
 
 body {
-	color: var(--vscode-foreground);
-	font-size: var(--vscode-font-size);
-	font-weight: var(--vscode-font-weight);
-	font-family: var(--vscode-font-family);
-	background-color: var(--vscode-editor-background);
+  color: var(--vscode-foreground);
+  font-size: var(--vscode-font-size);
+  font-weight: var(--vscode-font-weight);
+  font-family: var(--vscode-font-family);
+  background-color: var(--vscode-editor-background);
 }
 
 ol,
 ul {
-	padding-left: var(--container-paddding);
+  padding-left: var(--container-paddding);
 }
 
-body>*,
-form>* {
-	margin-block-start: var(--input-margin-vertical);
-	margin-block-end: var(--input-margin-vertical);
+body > *,
+form > * {
+  margin-block-start: var(--input-margin-vertical);
+  margin-block-end: var(--input-margin-vertical);
 }
 
 *:focus {
-	outline-color: var(--vscode-focusBorder) !important;
+  outline-color: var(--vscode-focusBorder) !important;
 }
 
 a {
-	color: var(--vscode-textLink-foreground);
+  color: var(--vscode-textLink-foreground);
 }
 
 a:hover,
 a:active {
-	color: var(--vscode-textLink-activeForeground);
+  color: var(--vscode-textLink-activeForeground);
 }
 
 code {
-	font-size: var(--vscode-editor-font-size);
-	font-family: var(--vscode-editor-font-family);
+  font-size: var(--vscode-editor-font-size);
+  font-family: var(--vscode-editor-font-family);
 }
 
 .vscode-button {
-	border: none;
-	padding: var(--input-padding-vertical) var(--input-padding-horizontal);
-	width: 100%;
-	text-align: center;
-	outline: 1px solid transparent;
-	outline-offset: 2px !important;
-	color: var(--vscode-button-foreground);
-	background: var(--vscode-button-background);
+  border: none;
+  padding: var(--input-padding-vertical) var(--input-padding-horizontal);
+  width: 100%;
+  text-align: center;
+  outline: 1px solid transparent;
+  outline-offset: 2px !important;
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background);
 }
 
 .vscode-button:hover {
-	cursor: pointer;
-	background: var(--vscode-button-hoverBackground);
+  cursor: pointer;
+  background: var(--vscode-button-hoverBackground);
 }
 
 .vscode-button:disabled {
-	opacity: 0.7;
-	cursor: not-allowed;
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
 .vscode-button:focus {
-	outline-color: var(--vscode-focusBorder);
+  outline-color: var(--vscode-focusBorder);
 }
 
 .vscode-button.secondary {
-	color: var(--vscode-button-secondaryForeground);
-	background: var(--vscode-button-secondaryBackground);
+  color: var(--vscode-button-secondaryForeground);
+  background: var(--vscode-button-secondaryBackground);
 }
 
 .vscode-button.secondary:hover {
-	background: var(--vscode-button-secondaryHoverBackground);
+  background: var(--vscode-button-secondaryHoverBackground);
 }
 
 .vscode-textarea {
-	height: 100%;
-	padding: 4px;
-	resize: none;
-	border: 1px solid var(--vscode-input-border);
-	background-color: var(--vscode-input-background);
-	color: var(--vscode-input-foreground);
-	border-radius: 2px;
-	outline: none;
+  height: 100%;
+  padding: 4px;
+  resize: none;
+  border: 1px solid var(--vscode-input-border);
+  background-color: var(--vscode-input-background);
+  color: var(--vscode-input-foreground);
+  border-radius: 2px;
+  outline: none;
 }
 
 .vscode-textarea:disabled {
-	opacity: 0.7;
-	cursor: not-allowed;
+  opacity: 0.7;
+  cursor: not-allowed;
 }
 
-
 .vscode-textarea::placeholder {
-	color: var(--vscode-input-placeholderForeground);
+  color: var(--vscode-input-placeholderForeground);
 }
 
 .vscode-button-small {
-	width: auto;
-	padding: 4px 16px;
-	border-radius: 2px;
+  width: auto;
+  padding: 4px 16px;
+  border-radius: 2px;
 }
 
 .vscode-button-full {
-	width: 100%;
-	padding: 4px 0;
-	border-radius: 2px;
+  width: 100%;
+  padding: 4px 0;
+  border-radius: 2px;
 }
