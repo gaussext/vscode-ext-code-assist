@@ -1,129 +1,131 @@
 body {
-    font-family: var(--vscode-font-family);
-    color: var(--vscode-foreground);
-    background-color: #1e1f1c;
-    margin: 0;
-    padding: 0 8px;
+  font-family: var(--vscode-font-family);
+  color: var(--vscode-foreground);
+  background-color: #1e1f1c;
+  margin: 0;
+  padding: 0 8px;
 }
 
 #app {
-    margin: 0;
-    --app-header-height: 28px;
-    --app-body-height: calc(100vh - 156px);
-    --app-footer-height: 100px;
+  margin: 0;
+  --app-header-height: 28px;
+  --app-body-height: calc(100vh - 156px);
+  --app-footer-height: 100px;
 }
 
-
 .app-header .header-area-tool {
-    box-sizing: border-box;
-    display: flex;
-    align-items: center;
-    height: var(--app-header-height);
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: var(--app-header-height);
 }
 
 .chat-container {
-    background-color: #1e1f1c;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    min-width: 400px;
-    max-width: 800px;
-    margin: 0 auto;
-    max-height: 100vh;
+  background-color: #1e1f1c;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 400px;
+  max-width: 800px;
+  margin: 0 auto;
+  max-height: 100vh;
 }
 
 .messages-area {
-    margin-top: 8px;
-    margin-bottom: 8px;
-    padding: 4px 8px 200px 0;
-    border-radius: 4px;
-    height: var(--app-body-height);
-    overflow-y: auto;
+  margin-top: 8px;
+  margin-bottom: 8px;
+  padding: 4px 8px 8px 0;
+  border-radius: 4px;
+  height: var(--app-body-height);
+  overflow-y: auto;
+}
+
+.messages-area.has-code {
+  padding-bottom: 200px;
 }
 
 .footer-area {
-    height: var(--app-footer-height);
-    position: relative;
+  height: var(--app-footer-height);
+  position: relative;
 }
 
 .messages-area .message-you,
 .messages-area .message-ai {
-    margin-bottom: 16px;
-    line-height: 1.35;
-    border: 1px solid var(--vscode-input-border);
-    background-color: #272822;
-    padding: 8px;
-    border-radius: 4px;
+  margin-bottom: 16px;
+  line-height: 1.35;
+  border: 1px solid var(--vscode-input-border);
+  background-color: #272822;
+  padding: 8px;
+  border-radius: 4px;
 }
 
 .messages-area .message-ai {
-    background-color: transparent;
+  background-color: transparent;
 }
 
 .messages-area .message-you {
-    width: auto;
-    max-width: 400px;
+  width: auto;
+  max-width: 400px;
 }
 
 .messages-area .link-copy {
-    display: inline-block;
-    user-select: none;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    padding: 2px 4px;
-    cursor: pointer;
+  display: inline-block;
+  user-select: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
 }
 
 .footer-area textarea {
-    width: 100%;
-    height: 100%;
-    background-color: #414339;
-    border-radius: 4px;
+  width: 100%;
+  height: 100%;
+  background-color: #414339;
+  border-radius: 4px;
 }
 
 .footer-area #chat-tool {
-    position: absolute;
-    width: 100%;
-    bottom: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 4px;
+  position: absolute;
+  width: 100%;
+  bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
 }
 
 .footer-area #setting-button,
 .footer-area #chat-button {
-    width: 32px;
+  width: 32px;
 }
 
 .footer-area .prompt-area {
-    height: 100px;
+  height: 100px;
 }
 
 .footer-area .prompt-code {
-    position: absolute;
-    width: calc(100% - 36px);
-    max-width: 400px;
-    bottom: 108px;
-    height: 200px;
-    overflow-y: auto;
-    padding: 4px;
-    border-radius: 4px;
-    background-color: #1e1f1c;
+  position: absolute;
+  width: calc(100% - 36px);
+  bottom: 108px;
+  height: 200px;
+  overflow-y: auto;
+  padding: 4px;
+  border-radius: 4px;
+  background-color: #1e1f1c;
 }
 
-.el-button+.el-button.vscode-button-small {
-    margin-left: 0;
+.el-button + .el-button.vscode-button-small {
+  margin-left: 0;
 }
 
-.el-dropdown-link{
-    height: 32px;
-    padding: 0 8px;
-    border-radius: 4px;
-    cursor: pointer;
-    outline: none;
+.el-dropdown-link {
+  height: 32px;
+  padding: 0 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  outline: none;
 }
 
 .el-dropdown-link:hover {
-    background-color: #262727;
+  background-color: #262727;
 }

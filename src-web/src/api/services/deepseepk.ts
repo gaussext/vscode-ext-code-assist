@@ -1,103 +1,100 @@
-import axios from "axios";
-import { type ChatParams } from "@/api";
-import { type IStandardItem } from "@/types";
-import { getJsonSafe } from "@/utils";
-import setting from "@/setting";
+import axios from 'axios';
+import { type ChatParams } from '@/api';
+import { type IStandardItem } from '@/types';
+import { getJsonSafe } from '@/utils';
+import setting from '@/setting';
 
 function createRequestData({ content, messages, model }: ChatParams) {
-    return {
-        messages: [
-            ...messages,
-            {
-                content: content,
-                role: "user"
-            }
-        ],
-        model: model,
-        stream: true, // stream
-        // temperature 参数默认为 1.0。
-        // 代码生成/数学解题   	0.0
-        // 数据抽取/分析	1.0
-        // 通用对话	1.3
-        // 翻译	1.3
-        // 创意类写作/诗歌创作	1.5 
-        temperature: 0.2,
-    };
+  return {
+    messages: [
+      ...messages,
+      {
+        content: content,
+        role: 'user',
+      },
+    ],
+    model: model,
+    stream: true, // stream
+    // temperature 参数默认为 1.0。
+    // 代码生成/数学解题   	0.0
+    // 数据抽取/分析	1.0
+    // 通用对话	1.3
+    // 翻译	1.3
+    // 创意类写作/诗歌创作	1.5
+    temperature: 0.2,
+  };
 }
 
 class DeepseekService {
+  private controller = new AbortController();
 
-    private controller = new AbortController();
+  getHeaders(TOKEN) {
+    return {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+      Authorization: `Bearer ${TOKEN}`,
+    };
+  }
 
-    getHeaders(TOKEN) {
-        return {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            Authorization: `Bearer ${TOKEN}`
-        };
+  getModels() {
+    return Promise.resolve({
+      data: {
+        models: [
+          {
+            value: 'deepseek-chat',
+            label: 'deepseek-chat',
+          },
+        ] as IStandardItem<string>[],
+      },
+    });
+  }
+
+  stop() {
+    this.controller.abort();
+  }
+
+  async chat({ content, messages, model }: ChatParams, callback: any, end: any) {
+    const URL = setting.deepseek + '/chat/completions';
+    const TOKEN = setting.deepseekToken;
+    if (!TOKEN) {
+      callback('请配置 code-assist.deepseek_token');
+      end('');
+      return;
     }
-
-    getModels() {
-        return Promise.resolve({
-            data: {
-                models: [
-                    {
-                        "value": "deepseek-chat",
-                        "label": "deepseek-chat",
-                    }
-                ] as IStandardItem<string>[]
-            }
-        });
-    }
-
-    stop() {
-        this.controller.abort();
-    }
-
-    async chat({ content, messages, model }: ChatParams, callback: any, end: any) {
-        const URL = setting.deepseek + "/chat/completions";
-        const TOKEN = setting.deepseekToken;
-        if (!TOKEN) {
-            callback('请配置 code-assist.deepseek_token');
-            end('');
-            return;
-        }
-        this.controller = new AbortController();
-        const data = createRequestData({ vendor: 'deepseek', model, content, messages });
-        const response = await axios.post(URL, data, {
-            method: "POST",
-            headers: this.getHeaders(TOKEN),
-            responseType: 'stream',
-            signal: this.controller.signal,
-            adapter: 'fetch'
-        });
-        const reader = response.data.getReader();
-        const decoder = new TextDecoder();
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) {
-                end && end();
-                break;
-            }
-            const text = decoder.decode(value, { stream: true });
-            const lines = text.split('data: ');
-            lines.forEach(line => {
-                const json = line.trim();
-                if (json.startsWith('{') && json.endsWith('}')) {
-                    const obj = getJsonSafe(json, { choices: [] });
-                    if (obj.choices) {
-                        obj.choices.forEach((item: any) => {
-                            callback(item.delta?.content || '');
-                        });
-                    }
-                } else {
-                    console.log(json);
-                }
+    this.controller = new AbortController();
+    const data = createRequestData({ vendor: 'deepseek', model, content, messages });
+    const response = await axios.post(URL, data, {
+      method: 'POST',
+      headers: this.getHeaders(TOKEN),
+      responseType: 'stream',
+      signal: this.controller.signal,
+      adapter: 'fetch',
+    });
+    const reader = response.data.getReader();
+    const decoder = new TextDecoder();
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        end && end();
+        break;
+      }
+      const text = decoder.decode(value, { stream: true });
+      const lines = text.split('data: ');
+      lines.forEach((line) => {
+        const json = line.trim();
+        if (json.startsWith('{') && json.endsWith('}')) {
+          const obj = getJsonSafe(json, { choices: [] });
+          if (obj.choices) {
+            obj.choices.forEach((item: any) => {
+              callback(item.delta?.content || '');
             });
-
+          }
+        } else {
+          console.log(json);
         }
+      });
     }
-
+  }
 }
 
 export const deepseekService = new DeepseekService();

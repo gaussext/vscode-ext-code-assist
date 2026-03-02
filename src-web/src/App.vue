@@ -1,39 +1,51 @@
 <template>
   <div class="chat-container">
-    <AppHeader :messages="messages" :conversations="conversations" :conversationId="conversationId"
-      @update:conversationId="handleConversationChange" @create="getConversations" @delete="getConversations" />
-    <AppBody :messages="messages" :latestMessage="latestMessage" :loading="loading" />
-    <AppFooter v-model="prompt" :promptCode="promptCode" :loading="loading" :models="models" :model="model" @update:model="onModelChange"
-      @change="onSettingChange" @click="onButtonClick" />
+    <AppHeader
+      :messages="messages"
+      :conversations="conversations"
+      :conversationId="conversationId"
+      @update:conversationId="handleConversationChange"
+      @create="getConversations"
+      @delete="getConversations"
+    />
+    <AppBody :messages="messages" :promptCode="promptCode" :latestMessage="latestMessage" :loading="loading" />
+    <AppFooter
+      v-model="prompt"
+      :promptCode="promptCode"
+      :loading="loading"
+      :models="models"
+      :model="model"
+      @update:model="onModelChange"
+      @change="onSettingChange"
+      @click="onButtonClick"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { firstElement, getJsonSafe, queueAsync } from "@/utils";
-import { onMounted, onUnmounted, ref, unref } from "vue";
-import { chatService, type ChatVendor } from "./api";
-import AppBody from "./components/AppBody.vue";
-import AppFooter from "./components/AppFooter.vue";
-import AppHeader from "./components/AppHeader.vue";
-import { ChatConversation, ChatMessage } from "./models/Model";
-import { ChatModel, type IModel } from "./setting";
-import store from "./store/index";
-import type { IMessage } from "./types";
+import { firstElement, getJsonSafe, queueAsync } from '@/utils';
+import { onMounted, onUnmounted, ref, unref } from 'vue';
+import { chatService, type ChatVendor } from './api';
+import AppBody from './components/AppBody.vue';
+import AppFooter from './components/AppFooter.vue';
+import AppHeader from './components/AppHeader.vue';
+import { ChatConversation, ChatMessage } from './models/Model';
+import { ChatModel, type IModel } from './setting';
+import store from './store/index';
+import type { IMessage } from './types';
 
-const KEY_MODEL = "code-assist.model";
-const KEY_CONV = "code-assist.conversation";
+const KEY_MODEL = 'code-assist.model';
+const KEY_CONV = 'code-assist.conversation';
 
-const conversationId = ref(localStorage.getItem(KEY_CONV) || "");
-const latestMessage = ref(new ChatMessage("assistant"));
+const conversationId = ref(localStorage.getItem(KEY_CONV) || '');
+const latestMessage = ref(new ChatMessage('assistant'));
 const messages = ref<ChatMessage[]>([]);
 const loading = ref(false);
-const prompt = ref("");
-const promptCode = ref("");
+const prompt = ref('');
+const promptCode = ref('');
 const conversations = ref<ChatConversation[]>([]);
 const models = ref<IModel[]>([]);
-const model = ref<IModel>(
-  getJsonSafe(localStorage.getItem(KEY_MODEL), new ChatModel())
-);
+const model = ref<IModel>(getJsonSafe(localStorage.getItem(KEY_MODEL), new ChatModel()));
 
 const onSettingChange = async () => {
   getModels();
@@ -73,25 +85,25 @@ const loadMessages = async () => {
 const handleWindowMessage = (e: MessageEvent) => {
   const { type, text } = e.data;
   switch (type) {
-    case "optimization":
+    case 'optimization':
       handleOptimization(text);
       break;
-    case "explanation":
+    case 'explanation':
       handleExplanation(text);
       break;
-    case "comment":
+    case 'comment':
       handleComment(text);
       break;
-    case "upgrade-class":
+    case 'upgrade-class':
       handleUpgradeClass(text);
       break;
-    case "upgrade-vue":
+    case 'upgrade-vue':
       handleUpgradeVue(text);
       break;
-    case "upgrade-react":
+    case 'upgrade-react':
       handleUpgradeReact(text);
       break;
-    case "add-to-chat": {
+    case 'add-to-chat': {
       handleAddToChat(text);
     }
   }
@@ -100,10 +112,10 @@ const handleWindowMessage = (e: MessageEvent) => {
 const enqueue = async (value: IMessage) => {
   queueAsync(value, (result) => {
     switch (result.type) {
-      case "delta":
+      case 'delta':
         handleChating(result.delta);
         break;
-      case "end":
+      case 'end':
         handleChatEnd(result.startTime, result.endTime);
         break;
     }
@@ -111,18 +123,13 @@ const enqueue = async (value: IMessage) => {
 };
 
 // 等待 AI 回复
-const handleChatRequest = async (
-  vendorId: ChatVendor,
-  modelId: string,
-  content: string,
-  messages: ChatMessage[]
-) => {
+const handleChatRequest = async (vendorId: ChatVendor, modelId: string, content: string, messages: ChatMessage[]) => {
   loading.value = true;
   const startTime = Date.now();
   try {
     latestMessage.value.vendor = vendorId;
     latestMessage.value.model = modelId;
-    latestMessage.value.content = "...";
+    latestMessage.value.content = '...';
     await chatService.chat(
       {
         vendor: vendorId,
@@ -131,23 +138,23 @@ const handleChatRequest = async (
         messages: messages,
       },
       (delta: string) => {
-        enqueue({ type: "delta", delta });
+        enqueue({ type: 'delta', delta });
       },
       () => {
         const endTime = Date.now();
-        enqueue({ type: "end", startTime, endTime });
+        enqueue({ type: 'end', startTime, endTime });
       }
     );
   } catch (error: any) {
-    enqueue({ type: "delta", delta: "请求失败: " + error.message });
+    enqueue({ type: 'delta', delta: '请求失败: ' + error.message });
     const endTime = Date.now();
-    enqueue({ type: "end", startTime, endTime });
+    enqueue({ type: 'end', startTime, endTime });
   }
 };
 
 const handleChating = (delta: string) => {
-  if (latestMessage.value.content === "...") {
-    latestMessage.value.content = "";
+  if (latestMessage.value.content === '...') {
+    latestMessage.value.content = '';
   }
   latestMessage.value.content += delta;
 };
@@ -155,7 +162,7 @@ const handleChating = (delta: string) => {
 // AI 结束回答
 const handleChatEnd = (startTime: number, endTime) => {
   loading.value = false;
-  const message = new ChatMessage("assistant");
+  const message = new ChatMessage('assistant');
   message.vendor = latestMessage.value.vendor;
   message.model = latestMessage.value.model;
   message.content = latestMessage.value.content;
@@ -206,7 +213,6 @@ ${code}
   onButtonClick();
 };
 
-
 const handleUpgradeVue = (code: string) => {
   if (!code) return;
   prompt.value = `将以下代码转换为 Vue 3 的 Composition API 组件，请确保转换后的代码符合 Vue 3 的 Composition API 规范，并且能够正常运行。只要回答js/ts代码部分，不要有多余的文字，代码如下：`;
@@ -227,12 +233,11 @@ ${code}
   onButtonClick();
 };
 
-
 const handleAddToChat = (code: string) => {
   if (!code) return;
   prompt.value = ``;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
 };
@@ -251,20 +256,15 @@ const onButtonClick = async () => {
   if (!prompt.value.trim()) {
     return;
   }
-  prompt.value = "";
-  promptCode.value = ""
+  prompt.value = '';
+  promptCode.value = '';
   await store.updateConversationTitle(conversationId.value, content);
   await getConversations();
-  const message = new ChatMessage("user");
+  const message = new ChatMessage('user');
   message.content = content;
   messages.value = [...messages.value, message];
   store.setMessagesById(conversationId.value, unref(messages));
-  handleChatRequest(
-    model.value.vendor,
-    model.value.value,
-    content,
-    messages.value
-  );
+  handleChatRequest(model.value.vendor, model.value.value, content, messages.value);
 };
 
 // 会话变更处理
@@ -276,13 +276,13 @@ const handleConversationChange = (id: string) => {
 };
 
 onMounted(async () => {
-  window.addEventListener("message", handleWindowMessage);
+  window.addEventListener('message', handleWindowMessage);
   getModels();
   await getConversations();
   loadMessages();
 });
 
 onUnmounted(() => {
-  window.removeEventListener("message", handleWindowMessage);
+  window.removeEventListener('message', handleWindowMessage);
 });
 </script>
