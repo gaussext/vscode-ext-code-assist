@@ -1,6 +1,6 @@
-import * as fs from "fs";
-import * as path from "path";
-import * as vscode from "vscode";
+import * as fs from 'fs';
+import * as path from 'path';
+import * as vscode from 'vscode';
 
 const setting = vscode.workspace.getConfiguration('code-assist');
 
@@ -19,32 +19,20 @@ export class ChatWebViewProvider implements vscode.WebviewViewProvider {
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
-
     const mainStyleUri = webview.asWebviewUri(
-      vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "dist-web/css/style.css")
-      )
+      vscode.Uri.file(path.join(this._extensionUri.fsPath, 'dist-web/css/style.css'))
     );
 
-    const appUri = webview.asWebviewUri(
-      vscode.Uri.file(
-        path.join(this._extensionUri.fsPath, "dist-web/js/app.js")
-      )
-    );
-
+    const appUri = webview.asWebviewUri(vscode.Uri.file(path.join(this._extensionUri.fsPath, 'dist-web/js/app.js')));
 
     // 读取 HTML 模板文件
-    const htmlPath = path.join(
-      this._extensionUri.fsPath,
-      "dist-web",
-      "index.html"
-    );
-    let html = fs.readFileSync(htmlPath, "utf-8");
+    const htmlPath = path.join(this._extensionUri.fsPath, 'dist-web', 'index.html');
+    let html = fs.readFileSync(htmlPath, 'utf-8');
 
     // 替换占位符
-    html = html.replace("Object.entries({})", `Object.entries(${JSON.stringify(setting)})`);
-    html = html.replace("/css/style.css", mainStyleUri.toString());
-    html = html.replace("/js/app.js", appUri.toString());
+    html = html.replace('Object.entries({})', `Object.entries(${JSON.stringify(setting)})`);
+    html = html.replace('/css/style.css', mainStyleUri.toString());
+    html = html.replace('/js/app.js', appUri.toString());
     return html;
   }
 

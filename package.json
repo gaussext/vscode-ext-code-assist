@@ -2,7 +2,7 @@
   "name": "code-assist",
   "displayName": "Gauss Code Assist",
   "description": "",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -91,6 +91,18 @@
       {
         "command": "codeAssist.upgrade-react",
         "title": "升级 React"
+      },
+      {
+        "command": "codeAssist.analysis",
+        "title": "数据分析"
+      },
+      {
+        "command": "codeAssist.translation",
+        "title": "文本翻译"
+      },
+      {
+        "command": "codeAssist.pppreciation",
+        "title": "文学鉴赏"
       },
       {
         "command": "codeAssist.add-to-chat",

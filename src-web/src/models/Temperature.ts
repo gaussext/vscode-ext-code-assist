@@ -1,20 +1,27 @@
+export enum EnumTemperature {
+  CodeAndMath = 0.0,
+  DataAnalysis = 1.0,
+  Translation = 1.3,
+  CreativeWriting = 1.5,
+}
+
 export function createTemperatures() {
   return [
     {
-      value: 0.0,
-      label: '代码生成/数学解题',
+      value: EnumTemperature.CodeAndMath,
+      label: '代码生成',
     },
     {
-      value: 1.0,
-      label: '数据抽取/分析',
+      value: EnumTemperature.DataAnalysis,
+      label: '数据分析',
     },
     {
-      value: 1.3,
-      label: '通用对话/翻译',
+      value: EnumTemperature.Translation,
+      label: '文本翻译',
     },
     {
-      value: 1.5,
-      label: '创意类写作/诗歌创作',
+      value: EnumTemperature.CreativeWriting,
+      label: '文学创作',
     },
   ];
 }

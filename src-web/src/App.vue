@@ -33,6 +33,7 @@ import { ChatConversation, ChatMessage } from './models/Model';
 import setting, { ChatModel, type IModel } from './setting';
 import store from './store/index';
 import type { IMessage } from './types';
+import { EnumTemperature } from './models/Temperature';
 
 const STORE_KEY_MODEL = 'code-assist.model';
 const STORE_KEY_CONV = 'code-assist.conversation';
@@ -101,6 +102,15 @@ const handleWindowMessage = (e: MessageEvent) => {
       break;
     case 'upgrade-react':
       handleUpgradeReact(text);
+      break;
+    case 'analysis':
+      handleAnalysis(text);
+      break;
+    case 'translation':
+      handleTranslation(text);
+      break;
+    case 'pppreciation':
+      handlePppreciation(text);
       break;
     case 'add-to-chat': {
       handleAddToChat(text);
@@ -225,6 +235,37 @@ ${code}
 const handleUpgradeReact = (code: string) => {
   if (!code) return;
   prompt.value = `将以下代码转换为 React.FC 组件，请确保转换后的代码符合 ES6 语法规范，并且能够正常运行。只要回答代码部分，不要有多余的文字，代码如下：`;
+  promptCode.value = `
+\`\`\`typescript
+${code}
+\`\`\``;
+  onButtonClick();
+};
+
+const handleAnalysis = (code: string) => {
+  if (!code) return;
+  prompt.value = `分析一下这段数据`;
+  promptCode.value = `
+\`\`\`typescript
+${code}
+\`\`\``;
+  onButtonClick();
+};
+
+const handleTranslation = (code: string) => {
+  if (!code) return;
+  prompt.value = `将以下代码翻译成中文`;
+  promptCode.value = `
+\`\`\`typescript
+${code}
+\`\`\``;
+  onButtonClick();
+};
+
+const handlePppreciation = (code: string) => {
+  if (!code) return;
+  setting.temperature = EnumTemperature.CreativeWriting;
+  prompt.value = `鉴赏或者评价一下这段文字`;
   promptCode.value = `
 \`\`\`typescript
 ${code}
