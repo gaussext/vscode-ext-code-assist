@@ -43,4 +43,10 @@ function setupChatWebview(context: vscode.ExtensionContext) {
 
 export function activate(context: vscode.ExtensionContext) {
   setupChatWebview(context);
+
+  const openCommand = vscode.commands.registerCommand('codeAssist.open', () => {
+    vscode.commands.executeCommand('workbench.view.extension.chat-container');
+    vscode.commands.executeCommand('code-assist.view.focus');
+  });
+  context.subscriptions.push(openCommand);
 }

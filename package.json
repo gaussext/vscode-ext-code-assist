@@ -66,6 +66,10 @@
     },
     "commands": [
       {
+        "command": "codeAssist.open",
+        "title": "打开代码助手"
+      },
+      {
         "command": "codeAssist.chat",
         "title": "开始对话"
       },
@@ -191,7 +195,14 @@
           "when": "editorHasSelection"
         }
       ]
-    }
+    },
+    "keybindings": [
+      {
+        "command": "codeAssist.open",
+        "key": "ctrl+u",
+        "mac": "cmd+u"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",
