@@ -14,7 +14,6 @@
       v-model="prompt"
       :promptCode="promptCode"
       :loading="loading"
-      :models="models"
       :model="model"
       @click="onButtonClick"
     />
@@ -42,7 +41,6 @@ const loading = ref(false);
 const prompt = ref('');
 const promptCode = ref('');
 const conversations = ref<ChatConversation[]>([]);
-const models = ref<IModel[]>([]);
 const model = ref<IModel>(new ChatModel());
   
 const getConversations = async () => {
@@ -316,7 +314,6 @@ const handleConversationChange = (id: string) => {
 
 onMounted(async () => {
   window.addEventListener('message', handleWindowMessage);
-  getModels();
   await getConversations();
   loadMessages();
 });
