@@ -5,11 +5,11 @@
         <ContentInfo :info="info"></ContentInfo>
       </div>
       <div class="icon-block">
-        <ChatAddOn @click="onCreateConversation"> </ChatAddOn>
+        <ChatAdd class="header-icon" @click="onCreateConversation"> </ChatAdd>
         <el-popover class="box-item" width="360px" trigger="click" placement="left-start" v-model:visible="visible">
           <div class="conversation-head">
             <span class="conversation-head-title">历史记录</span>
-            <el-icon class="conversation-head-button" @click="clearConversation"><DeleteFilled /></el-icon>
+            <ChatClear class="header-icon" @click="clearConversation"></ChatClear>
           </div>
           <div class="conversation-list">
             <div
@@ -19,12 +19,11 @@
               @click="onConversationChange(option.id)"
             >
               <span class="conversation-item-title">{{ option.title }}</span>
-
               <el-icon class="icon-delete" @click.stop="onDeleteConversation(option.id)"><Delete /></el-icon>
             </div>
           </div>
           <template #reference>
-            <ChatAppsScript></ChatAppsScript>
+            <ChatHistory class="header-icon"></ChatHistory>
           </template>
         </el-popover>
       </div>
@@ -40,11 +39,10 @@ import store from '@/store';
 import { firstElement, getTokenCount, lastElement } from '@/utils';
 import { computed, ref } from 'vue';
 import type { ChatMessage } from '@/models/Model';
-import ChatAppsScript from '@/icons/chat-apps-script.vue';
-import ChatAddOn from '@/icons/chat-add-on.vue';
+import { ChatAdd, ChatClear, ChatHistory } from '@/icons';
 import ContentInfo from './ContentInfo.vue';
 import { MAX_TOKEN_LENGTH } from '@/utils/constants';
-import { Delete, DeleteFilled } from '@element-plus/icons-vue';
+import { Delete } from '@element-plus/icons-vue';
 
 const props = defineProps({
   conversationId: {
@@ -124,6 +122,11 @@ const clearConversation = async () => {
 </script>
 
 <style>
+.header-icon {
+  cursor: pointer;
+  font-size: 16px;
+}
+
 .header-area-bar {
   margin-top: 2px;
   margin-bottom: 2px;

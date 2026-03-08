@@ -3,10 +3,10 @@
     <div class="dialog-body">
       <el-form :model="form" :label-width="100" label-position="top">
         <h3>供应商</h3>
-        <el-form-item label="DeepSeek URL">
+        <el-form-item label="DeepSeek Base URL">
           <el-input v-model="form.deepseek" placeholder="https://api.deepseek.com"></el-input>
         </el-form-item>
-        <el-form-item label="DeepSeek Token">
+        <el-form-item label="DeepSeek API Key">
           <el-input v-model="form.deepseekToken" type="password" show-password></el-input>
         </el-form-item>
       </el-form>
