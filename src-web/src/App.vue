@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { firstElement, getJsonSafe, queueAsync } from '@/utils';
+import { firstElement, queueAsync } from '@/utils';
 import { onMounted, onUnmounted, ref, unref } from 'vue';
 import { chatService, type ChatVendor } from './api';
 import AppBody from './components/AppBody.vue';
@@ -36,9 +36,7 @@ import store from './store/index';
 import type { IMessage } from './types';
 import { EnumTemperature } from './models/Temperature';
 
-const STORE_KEY_MODEL = 'code-assist.model';
 const STORE_KEY_CONV = 'code-assist.conversation';
-
 const conversationId = ref(localStorage.getItem(STORE_KEY_CONV) || '');
 const latestMessage = ref(new ChatMessage('assistant'));
 const messages = ref<ChatMessage[]>([]);
@@ -323,12 +321,7 @@ const onButtonClick = async () => {
   const message = new ChatMessage('user');
   message.content = content;
   messages.value = [...messages.value, message];
-  let requestMessages = [] as ChatMessage[];
-  if (setting.mode === 'session') {
-    requestMessages = [...messages.value, message];
-  } else {
-    requestMessages = [message];
-  }
+  const requestMessages = [...messages.value, message];
   store.setMessagesById(conversationId.value, unref(messages));
   handleChatRequest(model.value.vendor, model.value.value, content, requestMessages);
 };

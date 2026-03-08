@@ -1,11 +1,12 @@
 {
   "name": "code-assist",
-  "displayName": "Gauss Code Assist",
+  "displayName": "Code Assist",
   "description": "",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "engines": {
     "vscode": "^1.98.0"
   },
+  "publisher": "gausszhou",
   "categories": [
     "Other"
   ],

@@ -19,8 +19,9 @@
     </template>
   </el-dialog>
 </template>
+
 <script lang="ts" setup>
-import setting, { type IModel } from '@/setting';
+import setting from '@/setting';
 import { reactive, ref } from 'vue';
 
 const visible = ref(true);
@@ -39,22 +40,8 @@ const onCancelClick = () => {
 };
 
 const onConfirmClick = () => {
-  const selectedModels: IModel[] = [];
-  form.models.forEach((vendor) => {
-    vendor.children.forEach((model) => {
-      if (model.checked) {
-        selectedModels.push({
-          vendor: model.vendor,
-          label: model.label,
-          value: model.value,
-          checked: model.checked,
-        });
-      }
-    });
-  });
   setting.deepseek = form.deepseek;
   setting.deepseekToken = form.deepseekToken;
-  setting.selectedModels = selectedModels;
   visible.value = false;
 };
 

@@ -16,29 +16,8 @@
       >
       </textarea>
     </div>
-
     <div id="chat-tool">
       <div style="display: flex; align-items: center">
-        <!-- 会话模式选择下拉菜单 -->
-        <el-dropdown @command="changeMode">
-          <span style="display: flex; align-items: center" class="el-dropdown-link">
-            <span class="text"> {{ modeLabel }}</span>
-            <el-icon class="el-icon--right">
-              <ArrowDown />
-            </el-icon>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item
-                v-for="item in modes"
-                :key="item.value"
-                :command="item.value"
-                :class="{ active: item.value === mode }"
-                >{{ item.label }}</el-dropdown-item
-              >
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
         <!-- 温度选择下拉菜单 -->
         <el-dropdown @command="changeTemperature">
           <span style="display: flex; align-items: center" class="el-dropdown-link">
@@ -106,9 +85,6 @@ const props = defineProps({
 const modelId = ref(props.model?.value || '');
 const emit = defineEmits(['update:model', 'change', 'click']);
 
-const modelLabel = computed(() => {
-  return props.models.find((item) => item.value === modelId.value)?.label;
-});
 
 watch(
   () => props.model,
@@ -117,25 +93,6 @@ watch(
   },
   { deep: true }
 );
-
-// 模型选择下拉菜单
-const changeModel = (value: string) => {
-  modelId.value = value;
-  const model = props.models.find((item) => item.value === value);
-  emit('update:model', model);
-};
-
-// 会话模式选择下拉菜单
-const modes = setting.modes;
-const mode = ref(setting.mode);
-const modeLabel = computed(() => {
-  return modes.find((item) => item.value === mode.value)?.label;
-});
-
-const changeMode = (value: string) => {
-  mode.value = value;
-  setting.mode = value;
-};
 
 // 温度选择下拉菜单
 const temperature = ref(setting.temperature);
