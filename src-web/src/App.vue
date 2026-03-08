@@ -16,8 +16,6 @@
       :loading="loading"
       :models="models"
       :model="model"
-      @update:model="onModelChange"
-      @change="onSettingChange"
       @click="onButtonClick"
     />
   </div>
@@ -46,25 +44,7 @@ const promptCode = ref('');
 const conversations = ref<ChatConversation[]>([]);
 const models = ref<IModel[]>([]);
 const model = ref<IModel>(new ChatModel());
-
-const onSettingChange = async () => {
-  getModels();
-};
-
-const getModels = async () => {
-  const res = await chatService.getModels();
-  models.value = res;
-  // check current model in models
-  if (!res.find((item) => item.value === model.value.value)) {
-    model.value = firstElement(res);
-  }
-  return res;
-};
-
-const onModelChange = (value: IModel) => {
-  model.value = value;
-};
-
+  
 const getConversations = async () => {
   const convs = await store.getConversations();
   conversations.value = [...convs];

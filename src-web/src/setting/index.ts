@@ -27,8 +27,8 @@ export interface IModel {
 }
 export class ChatModel implements IModel {
   vendor: ChatVendor = 'deepseek';
-  label: string = '';
-  value: string = '';
+  label: string = 'deepseek-chat';
+  value: string = 'deepseek-chat';
   checked: boolean = true;
 }
 
