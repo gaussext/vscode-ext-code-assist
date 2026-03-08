@@ -17,8 +17,6 @@ const GEMINI_TOKEN = localStorage.getItem('setting.config.gemini_token') || sett
 
 const SELECTED_MODELS = getJsonSafe(localStorage.getItem('setting.config.selectedModels') || '[]', []);
 
-const SELECTED_MODE = localStorage.getItem('setting.config.selectedMode') || setting.get('selectedMode') || 'session';
-
 const TEMPERATURE = parseFloat(localStorage.getItem('setting.config.temperature') || setting.get('temperature') || '0.0');
 
 export interface IModel {
@@ -29,14 +27,14 @@ export interface IModel {
 }
 export class ChatModel implements IModel {
   vendor: ChatVendor = 'deepseek';
-  label: string = '';
-  value: string = '';
+  label: string = 'deepseek-chat';
+  value: string = 'deepseek-chat';
   checked: boolean = true;
 }
 
 class Setting {
   private state = {
-    mode: SELECTED_MODE,
+    mode: 'session',
     temperature: TEMPERATURE,
     models: {
       ollama: [] as IModel[],
@@ -53,11 +51,8 @@ class Setting {
   };
 
   constructor() {
-    this.state.config.ollama = OLLAMA;
     this.state.config.deepseek = DEEPSEEK;
     this.state.config.deepseek_token = DEEPSEEK_TOKEN;
-    this.state.config.gemini_token = GEMINI_TOKEN;
-    this.state.selectedModels = SELECTED_MODELS;
     setTimeout(() => {
       this.fetchModels();
     });
@@ -84,29 +79,6 @@ class Setting {
         } as IModel;
       });
     });
-  }
-
-  // 获取所有会话模式
-  get modes() {
-    return [
-      {
-        label: '会话模式',
-        value: 'session',
-      },
-      {
-        label: '一问一答',
-        value: 'answer',
-      },
-    ];
-  }
-
-  get mode() {
-    return this.state.mode;
-  }
-
-  set mode(value: string) {
-    this.state.mode = value;
-    localStorage.setItem('setting.config.selectedMode', value);
   }
 
   get temperature() {

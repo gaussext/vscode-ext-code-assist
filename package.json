@@ -1,11 +1,12 @@
 {
   "name": "code-assist",
-  "displayName": "Gauss Code Assist",
+  "displayName": "Code Assist",
   "description": "",
-  "version": "0.3.3",
+  "version": "0.3.4",
   "engines": {
     "vscode": "^1.98.0"
   },
+  "publisher": "gausszhou",
   "categories": [
     "Other"
   ],
@@ -15,11 +16,6 @@
     "configuration": {
       "title": "Code Assist",
       "properties": {
-        "code-assist.ollama": {
-          "type": "string",
-          "default": "http://127.0.0.1:11434",
-          "description": "Ollama Server Address"
-        },
         "code-assist.deepseek": {
           "type": "string",
           "default": "https://api.deepseek.com",
@@ -29,11 +25,6 @@
           "type": "string",
           "default": "",
           "description": "Deepseek Server Token"
-        },
-        "code-assist.gemini_token": {
-          "type": "string",
-          "default": "",
-          "description": "Google Gemini Token"
         }
       }
     },
@@ -64,6 +55,10 @@
       }
     },
     "commands": [
+      {
+        "command": "codeAssist.open",
+        "title": "打开代码助手"
+      },
       {
         "command": "codeAssist.chat",
         "title": "开始对话"
@@ -190,7 +185,14 @@
           "when": "editorHasSelection"
         }
       ]
-    }
+    },
+    "keybindings": [
+      {
+        "command": "codeAssist.open",
+        "key": "ctrl+u",
+        "mac": "cmd+u"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "pnpm run package",

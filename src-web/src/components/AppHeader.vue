@@ -1,7 +1,7 @@
 <template>
   <div class="app-header header-area">
     <div class="header-area-tool">
-      <div class="info-block" style="display: flex; align-items: center;">
+      <div class="info-block" style="display: flex; align-items: center; gap: 4px;">
         <ContentInfo :info="info"></ContentInfo>
         <ChatDownload class="header-icon" @click="downloadConversation"></ChatDownload>
       </div>
