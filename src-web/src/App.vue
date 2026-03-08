@@ -7,6 +7,7 @@
       @update:conversationId="handleConversationChange"
       @create="getConversations"
       @delete="getConversations"
+      @download="downloadConversation"
     />
     <AppBody :messages="messages" :promptCode="promptCode" :latestMessage="latestMessage" :loading="loading" />
     <AppFooter
@@ -73,6 +74,10 @@ const getConversations = async () => {
     conversationId.value = firstElement(convs).id;
   }
   return convs;
+};
+
+const downloadConversation = async () => {
+  await store.downloadConversation(conversationId.value);
 };
 
 // 加载消息

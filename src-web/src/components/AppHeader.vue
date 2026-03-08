@@ -1,8 +1,9 @@
 <template>
   <div class="app-header header-area">
     <div class="header-area-tool">
-      <div class="info-block">
+      <div class="info-block" style="display: flex; align-items: center;">
         <ContentInfo :info="info"></ContentInfo>
+        <ChatDownload class="header-icon" @click="downloadConversation"></ChatDownload>
       </div>
       <div class="icon-block">
         <ChatAdd class="header-icon" @click="onCreateConversation"> </ChatAdd>
@@ -39,7 +40,7 @@ import store from '@/store';
 import { firstElement, getTokenCount, lastElement } from '@/utils';
 import { computed, ref } from 'vue';
 import type { ChatMessage } from '@/models/Model';
-import { ChatAdd, ChatClear, ChatHistory } from '@/icons';
+import { ChatAdd, ChatClear, ChatHistory, ChatDownload } from '@/icons';
 import ContentInfo from './ContentInfo.vue';
 import { MAX_TOKEN_LENGTH } from '@/utils/constants';
 import { Delete } from '@element-plus/icons-vue';
@@ -90,6 +91,7 @@ const emit = defineEmits<{
   (e: 'create'): void;
   (e: 'delete'): void;
   (e: 'update:conversationId', value: string): void;
+  (e: 'download'): void;
 }>();
 
 // 按钮操作
@@ -104,6 +106,10 @@ const onCreateConversation = async () => {
   const convs = await store.getConversations();
   emit('create');
   emit('update:conversationId', lastElement(convs).id);
+};
+
+const downloadConversation = async () => {
+  emit('download');
 };
 
 const onDeleteConversation = async (id: string) => {

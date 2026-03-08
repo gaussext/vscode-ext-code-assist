@@ -5,7 +5,7 @@ import {
   getConversations,
   updateConversationTitle,
 } from './modules/conversations';
-import { getMessagesById, removeMessagesById, setMessagesById } from './modules/messages';
+import { getMessagesById, removeMessagesById, setMessagesById, downloadConversation } from './modules/messages';
 
 const store = {
   getConversations,
@@ -17,6 +17,7 @@ const store = {
   getMessagesById,
   setMessagesById,
   removeMessagesById,
+  downloadConversation,
 };
 
 export default store;
