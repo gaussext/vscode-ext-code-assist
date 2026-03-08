@@ -1,15 +1,16 @@
 <template>
   <div class="app-header header-area">
     <div class="header-area-tool">
-      <div class="info-block">
+      <div class="info-block" style="display: flex; align-items: center;">
         <ContentInfo :info="info"></ContentInfo>
+        <ChatDownload class="header-icon" @click="downloadConversation"></ChatDownload>
       </div>
       <div class="icon-block">
-        <ChatAddOn @click="onCreateConversation"> </ChatAddOn>
+        <ChatAdd class="header-icon" @click="onCreateConversation"> </ChatAdd>
         <el-popover class="box-item" width="360px" trigger="click" placement="left-start" v-model:visible="visible">
           <div class="conversation-head">
             <span class="conversation-head-title">历史记录</span>
-            <el-icon class="conversation-head-button" @click="clearConversation"><DeleteFilled /></el-icon>
+            <ChatClear class="header-icon" @click="clearConversation"></ChatClear>
           </div>
           <div class="conversation-list">
             <div
@@ -19,12 +20,11 @@
               @click="onConversationChange(option.id)"
             >
               <span class="conversation-item-title">{{ option.title }}</span>
-
               <el-icon class="icon-delete" @click.stop="onDeleteConversation(option.id)"><Delete /></el-icon>
             </div>
           </div>
           <template #reference>
-            <ChatAppsScript></ChatAppsScript>
+            <ChatHistory class="header-icon"></ChatHistory>
           </template>
         </el-popover>
       </div>
@@ -40,11 +40,10 @@ import store from '@/store';
 import { firstElement, getTokenCount, lastElement } from '@/utils';
 import { computed, ref } from 'vue';
 import type { ChatMessage } from '@/models/Model';
-import ChatAppsScript from '@/icons/chat-apps-script.vue';
-import ChatAddOn from '@/icons/chat-add-on.vue';
+import { ChatAdd, ChatClear, ChatHistory, ChatDownload } from '@/icons';
 import ContentInfo from './ContentInfo.vue';
 import { MAX_TOKEN_LENGTH } from '@/utils/constants';
-import { Delete, DeleteFilled } from '@element-plus/icons-vue';
+import { Delete } from '@element-plus/icons-vue';
 
 const props = defineProps({
   conversationId: {
@@ -92,6 +91,7 @@ const emit = defineEmits<{
   (e: 'create'): void;
   (e: 'delete'): void;
   (e: 'update:conversationId', value: string): void;
+  (e: 'download'): void;
 }>();
 
 // 按钮操作
@@ -106,6 +106,10 @@ const onCreateConversation = async () => {
   const convs = await store.getConversations();
   emit('create');
   emit('update:conversationId', lastElement(convs).id);
+};
+
+const downloadConversation = async () => {
+  emit('download');
 };
 
 const onDeleteConversation = async (id: string) => {
@@ -124,6 +128,11 @@ const clearConversation = async () => {
 </script>
 
 <style>
+.header-icon {
+  cursor: pointer;
+  font-size: 16px;
+}
+
 .header-area-bar {
   margin-top: 2px;
   margin-bottom: 2px;

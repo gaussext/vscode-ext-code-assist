@@ -7,6 +7,7 @@
       @update:conversationId="handleConversationChange"
       @create="getConversations"
       @delete="getConversations"
+      @download="downloadConversation"
     />
     <AppBody :messages="messages" :promptCode="promptCode" :latestMessage="latestMessage" :loading="loading" />
     <AppFooter
@@ -73,6 +74,10 @@ const getConversations = async () => {
     conversationId.value = firstElement(convs).id;
   }
   return convs;
+};
+
+const downloadConversation = async () => {
+  await store.downloadConversation(conversationId.value);
 };
 
 // 加载消息
@@ -189,12 +194,15 @@ const handleChatEnd = (startTime: number, endTime) => {
   message.startTime = startTime;
   message.timestamp = endTime;
   messages.value = [...messages.value, message];
+  // 保存消息
   store.setMessagesById(conversationId.value, unref(messages));
+  // 使用最新消息更新会话标题
+  store.updateConversationTitle(conversationId.value, message.content);
 };
 
 const handleOptimization = (code: string) => {
   if (!code) return;
-  prompt.value = `优化一下这段代码`;
+  prompt.value = `完善或优化一下这段代码`;
 
   promptCode.value = `
 \`\`\`typescript
@@ -205,7 +213,7 @@ ${code}
 
 const handleExplanation = (code: string) => {
   if (!code) return;
-  prompt.value = `解释一下这段代码`;
+  prompt.value = `解释一下这段代码的作用`;
   promptCode.value = `
 \`\`\`typescript
 ${code}
@@ -309,6 +317,7 @@ const onButtonClick = async () => {
   }
   prompt.value = '';
   promptCode.value = '';
+  // 使用用户输入更新会话标题
   await store.updateConversationTitle(conversationId.value, content);
   await getConversations();
   const message = new ChatMessage('user');

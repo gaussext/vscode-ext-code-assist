@@ -30,10 +30,9 @@ export function createConversation() {
   const ids = conversations.map((item) => Number(item.id));
   const nextId = (Math.max(...ids) || 0) + 1;
   const conversationId = `${nextId}`;
-  conversations.push({
-    id: conversationId,
-    title: '新建对话',
-  });
+  const conversation = new ChatConversation();
+  conversation.id = conversationId;
+  conversations.push(conversation);
   return setConversations(conversations);
 }
 
@@ -47,6 +46,13 @@ export function deleteConversation(id: string) {
   }
   conversations = conversations.filter((item) => `${item.id}` !== `${id}`);
   return setConversations(conversations);
+}
+
+export function getConversationById(id: string) {
+  if (!id) {
+    return null;
+  }
+  return conversations.find((item) => item.id === id);
 }
 
 /**
