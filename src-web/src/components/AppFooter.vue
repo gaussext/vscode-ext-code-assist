@@ -59,12 +59,14 @@
 </template>
 
 <script setup lang="ts">
-import setting, { ChatModel, type IModel } from '@/setting';
+import { useSettingStore } from '@/stores/setting';
 import { computed, ref, watch } from 'vue';
 import SettingDialog from './AppSettingDialog.vue';
 import { marked } from '@/utils/marked';
 import { VideoPause, Promotion, Setting, ArrowDown } from '@element-plus/icons-vue';
 import { createTemperatures } from '@/models/Temperature';
+
+const settingStore = useSettingStore();
 
 const modelValue = defineModel<string>({ required: true });
 
@@ -74,28 +76,13 @@ const props = defineProps({
   },
   promptCode: {
     default: '',
-  },
-  model: {
-    default: () => new ChatModel(),
-  },
-  models: {
-    default: () => [] as IModel[],
-  },
+  }
 });
-const modelId = ref(props.model?.value || '');
 const emit = defineEmits(['update:model', 'change', 'click']);
 
 
-watch(
-  () => props.model,
-  (value) => {
-    modelId.value = value.value;
-  },
-  { deep: true }
-);
-
 // 温度选择下拉菜单
-const temperature = ref(setting.temperature);
+const temperature = ref(settingStore.temperature);
 const temperatures = createTemperatures();
 const temperatureLabel = computed(() => {
   return temperatures.find((item) => item.value === temperature.value)?.label;
@@ -103,7 +90,7 @@ const temperatureLabel = computed(() => {
 
 const changeTemperature = (value: number) => {
   temperature.value = value;
-  setting.temperature = value;
+  settingStore.setTemperature(value);
 };
 
 // 处理键盘事件

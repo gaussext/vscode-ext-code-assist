@@ -14,7 +14,6 @@
       v-model="prompt"
       :promptCode="promptCode"
       :loading="loading"
-      :model="model"
       @click="onButtonClick"
     />
   </div>
@@ -28,10 +27,12 @@ import AppBody from './components/AppBody.vue';
 import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
 import { ChatConversation, ChatMessage } from './models/Model';
-import setting, { ChatModel, type IModel } from './setting';
+import { useSettingStore } from './stores/setting';
 import store from './store/index';
 import type { IMessage } from './types';
 import { EnumTemperature } from './models/Temperature';
+
+const settingStore = useSettingStore();
 
 const STORE_KEY_CONV = 'code-assist.conversation';
 const conversationId = ref(localStorage.getItem(STORE_KEY_CONV) || '');
@@ -41,7 +42,6 @@ const loading = ref(false);
 const prompt = ref('');
 const promptCode = ref('');
 const conversations = ref<ChatConversation[]>([]);
-const model = ref<IModel>(new ChatModel());
   
 const getConversations = async () => {
   const convs = await store.getConversations();
@@ -65,7 +65,7 @@ const loadMessages = async () => {
 // 处理窗口消息
 const handleWindowMessage = (e: MessageEvent) => {
   const { type, text } = e.data;
-  setting.temperature = EnumTemperature.CodeAndMath;
+  settingStore.setTemperature(EnumTemperature.CodeAndMath);
   switch (type) {
     case 'optimization':
       handleOptimization(text);
@@ -86,17 +86,17 @@ const handleWindowMessage = (e: MessageEvent) => {
       handleUpgradeReact(text);
       break;
     case 'analysis': {
-      setting.temperature = EnumTemperature.DataAnalysis;
+      settingStore.setTemperature(EnumTemperature.DataAnalysis);
       handleAnalysis(text);
       break;
     }
     case 'translation': {
-      setting.temperature = EnumTemperature.Translation;
+      settingStore.setTemperature(EnumTemperature.Translation);
       handleTranslation(text);
       break;
     }
     case 'appreciation': {
-      setting.temperature = EnumTemperature.CreativeWriting;
+      settingStore.setTemperature(EnumTemperature.CreativeWriting);
       handleAppreciation(text);
       break;
     }
@@ -124,17 +124,16 @@ const enqueue = async (value: IMessage) => {
 };
 
 // 等待 AI 回复
-const handleChatRequest = async (vendorId: ChatVendor, modelId: string, content: string, messages: ChatMessage[]) => {
+const handleChatRequest = async (content: string, messages: ChatMessage[]) => {
   loading.value = true;
   const startTime = Date.now();
   try {
-    latestMessage.value.vendor = vendorId;
-    latestMessage.value.model = modelId;
+
+    latestMessage.value.model = settingStore.config.openai_model;
     latestMessage.value.content = '...';
     await chatService.chat(
       {
-        vendor: vendorId,
-        model: modelId,
+        model: settingStore.config.openai_model,
         content: content,
         messages: messages,
       },
@@ -239,7 +238,7 @@ ${code}
 
 const handleAnalysis = (code: string) => {
   if (!code) return;
-  setting.temperature = EnumTemperature.DataAnalysis;
+  settingStore.setTemperature(EnumTemperature.DataAnalysis);
   prompt.value = `分析一下这段数据`;
   promptCode.value = `
 \`\`\`
@@ -281,11 +280,8 @@ ${code}
 const onButtonClick = async () => {
   const content = prompt.value + promptCode.value;
   if (loading.value) {
-    await chatService.stop(model.value.vendor);
+    await chatService.stop();
     loading.value = false;
-    return;
-  }
-  if (!model.value) {
     return;
   }
   if (!prompt.value.trim()) {
@@ -301,7 +297,7 @@ const onButtonClick = async () => {
   messages.value = [...messages.value, message];
   const requestMessages = [...messages.value, message];
   store.setMessagesById(conversationId.value, unref(messages));
-  handleChatRequest(model.value.vendor, model.value.value, content, requestMessages);
+  handleChatRequest( content, requestMessages);
 };
 
 // 会话变更处理

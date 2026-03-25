@@ -1,41 +1,25 @@
-import setting from '@/setting';
-import { deepseekService } from './services/deepseepk';
-import { ollamaService } from './services/ollama';
-import { geminiService } from './services/gemini';
+import { openaiService } from './services/openai';
 
-export type ChatVendor = 'ollama' | 'deepseek' | 'gemini';
+export type ChatVendor = 'ollama' | 'deepseek' | 'gemini' | 'openai';
 
 export interface ChatParams {
-  vendor: ChatVendor;
   model: string;
   content: string;
   messages: any[];
 }
 
 class ChatService {
-  private getService(vendor?: ChatVendor) {
-    if (vendor === 'ollama') {
-      return ollamaService;
-    }
-    if (vendor === 'deepseek') {
-      return deepseekService;
-    }
-    if (vendor === 'gemini') {
-      return geminiService;
-    }
-    return ollamaService;
-  }
-
-  getModels() {
-    return Promise.resolve(setting.selectedModels);
+  private getService() {
+    return openaiService;
   }
 
   chat(params: ChatParams, callback: any, end: any) {
-    return this.getService(params.vendor).chat(params, callback, end);
+    return this.getService().chat(params, callback, end);
   }
 
-  stop(vendor: ChatVendor) {
-    return this.getService(vendor).stop();
+  stop() {
+    return this.getService().stop();
   }
 }
+
 export const chatService = new ChatService();

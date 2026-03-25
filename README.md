@@ -2,17 +2,6 @@
 
 VS Code 简单代码小助手，支持 DeepSeek
 
-## Configuration
-
-`settings.json`
-
-```json
-{
-  "code-assist.deepseek": "https://api.deepseek.com",
-  "code-assist.deepseek_token": "***",
-}
-```
-
 ## Features
 
 - [x] 基本功能

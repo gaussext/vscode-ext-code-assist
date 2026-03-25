@@ -2,12 +2,14 @@
   <el-dialog v-model="visible" title="配置模型" width="500" @closed="onClosed">
     <div class="dialog-body">
       <el-form :model="form" :label-width="100" label-position="top">
-        <h3>供应商</h3>
-        <el-form-item label="DeepSeek Base URL">
-          <el-input v-model="form.deepseek" placeholder="https://api.deepseek.com"></el-input>
+        <el-form-item label="OpenAI Base URL">
+          <el-input v-model="form.openai"></el-input>
         </el-form-item>
-        <el-form-item label="DeepSeek API Key">
-          <el-input v-model="form.deepseekToken" type="password" show-password></el-input>
+        <el-form-item label="OpenAI API Key">
+          <el-input v-model="form.openaiToken" type="password" show-password></el-input>
+        </el-form-item>
+        <el-form-item label="OpenAI Model">
+          <el-input v-model="form.openaiModel" ></el-input>
         </el-form-item>
       </el-form>
     </div>
@@ -21,16 +23,15 @@
 </template>
 
 <script lang="ts" setup>
-import setting from '@/setting';
+import { useSettingStore } from '@/stores/setting';
 import { reactive, ref } from 'vue';
 
+const settingStore = useSettingStore();
 const visible = ref(true);
 const form = reactive({
-  ollama: setting.ollama,
-  deepseek: setting.deepseek,
-  deepseekToken: setting.deepseekToken,
-  geminiToken: setting.geminiToken,
-  models: setting.models,
+  openai: settingStore.config.openai,
+  openaiToken: settingStore.config.openai_token,
+  openaiModel: settingStore.config.openai_model,
 });
 
 let operation: 'submit' | 'cancel' = 'submit';
@@ -40,8 +41,9 @@ const onCancelClick = () => {
 };
 
 const onConfirmClick = () => {
-  setting.deepseek = form.deepseek;
-  setting.deepseekToken = form.deepseekToken;
+  settingStore.setOpenai(form.openai);
+  settingStore.setOpenaiToken(form.openaiToken);
+  settingStore.setOpenaiModel(form.openaiModel);
   visible.value = false;
 };
 
