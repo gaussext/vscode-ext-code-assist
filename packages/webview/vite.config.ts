@@ -29,16 +29,16 @@ export default defineConfig({
     }),
   ],
   build: {
-    outDir: path.resolve(__dirname, "../dist-web"),
-    assetsInlineLimit: 0, // 禁用文件名哈希
+    outDir: path.resolve(__dirname, "../../dist-web"),
+    assetsInlineLimit: 0,
     sourcemap: false,
-    cssCodeSplit: false, // 不生成单独的 CSS 文件
+    cssCodeSplit: false,
     rollupOptions: {
       external: ["vscode"],
       output: {
-        inlineDynamicImports: true, // 强制所有代码打包进一个文件
-        entryFileNames: "js/app.js", // 指定输出文件名
-        assetFileNames: "[ext]/[name].[ext]", // 静态资源名称（如果有的话）
+        inlineDynamicImports: true,
+        entryFileNames: "js/app.js",
+        assetFileNames: "[ext]/[name].[ext]",
       },
     },
   },

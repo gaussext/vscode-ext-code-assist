@@ -17,9 +17,9 @@
 		// "noUnusedParameters": true,  /* Report errors on unused parameters. */
 	},
 	"includes": [
-		"src/**/*"
+		"packages/main/src/**/*"
 	],
 	"exclude": [
-		"src-web/**/*"
+		"packages/webview/**/*"
 	]
 }

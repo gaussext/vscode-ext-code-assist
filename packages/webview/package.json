@@ -1,5 +1,5 @@
 {
-  "name": "vscode-ext-code-assist-webview",
+  "name": "code-assist-webview",
   "private": true,
   "version": "0.1.0",
   "type": "module",
