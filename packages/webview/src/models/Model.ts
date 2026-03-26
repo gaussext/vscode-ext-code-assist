@@ -1,4 +1,3 @@
-import type { ChatVendor } from '@/api';
 import * as uuid from 'uuid';
 
 export class ChatConversation {
@@ -11,8 +10,8 @@ type MessageRole = 'system' | 'user' | 'assistant';
 
 export class ChatMessage {
   role: MessageRole = 'system';
-  vendor: ChatVendor;
-  model: string;
+  vendor: string = 'deepseek';
+  model: string = 'deepseek-chat';
   content: string = '';
   uuid: string = uuid.v4();
   startTime: number = Date.now();

@@ -59,9 +59,6 @@ export interface RpcStreamHandler<TParams = unknown, TChunk = unknown> {
   ): Promise<void> | void;
 }
 
-export interface RpcHandlers {
-  [method: string]: RpcHandler | RpcStreamHandler;
-}
 
 export interface RpcClientOptions {
   timeout?: number;

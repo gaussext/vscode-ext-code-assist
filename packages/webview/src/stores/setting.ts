@@ -1,6 +1,5 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
-import type { ChatVendor } from '@/api';
 
 const setting = (window as any).setting;
 const OPENAI = localStorage.getItem('setting.config.openai') || setting.get('openai') || 'https://api.deepseek.com';

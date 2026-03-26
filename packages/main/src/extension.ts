@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
-import { ChatWebViewProvider } from './ChatWebViewProvider';
+import { ChatWebViewProvider } from './views/ChatWebViewProvider';
 
-// ====== AI 对话聊天 ======
 function setupChatWebview(context: vscode.ExtensionContext) {
   const provider = new ChatWebViewProvider(context.extensionUri);
   const view = vscode.window.registerWebviewViewProvider('code-assist.view', provider);

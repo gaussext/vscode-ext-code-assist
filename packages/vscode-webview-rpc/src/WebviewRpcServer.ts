@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { RpcServer } from './RpcServer';
-import type { RpcHandlers, RpcServerOptions } from './types';
+import type { RpcServerOptions, RpcStreamHandler } from './types';
 
 export class WebviewRpcServer {
   private server: RpcServer;
@@ -25,12 +25,12 @@ export class WebviewRpcServer {
     this.disposables.push(disposable);
   }
 
-  registerHandlers(namespace: string, handlers: RpcHandlers): void {
-    this.server.registerHandlers(namespace, handlers);
+  registerHandler(namespace: string, handler: RpcStreamHandler): void {
+    this.server.registerHandler(namespace, handler);
   }
 
-  unregisterHandlers(namespace: string): void {
-    this.server.unregisterHandlers(namespace);
+  unregisterHandler(namespace: string): void {
+    this.server.unregisterHandler(namespace);
   }
 
   dispose(): void {

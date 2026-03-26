@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { firstElement, queueAsync } from '@/utils';
 import { onMounted, onUnmounted, ref, unref } from 'vue';
-import { chatService, type ChatVendor } from './api';
+import { chatService } from './api';
 import AppBody from './components/AppBody.vue';
 import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
@@ -163,7 +163,6 @@ const handleChating = (delta: string) => {
 const handleChatEnd = (startTime: number, endTime) => {
   loading.value = false;
   const message = new ChatMessage('assistant');
-  message.vendor = latestMessage.value.vendor;
   message.model = latestMessage.value.model;
   message.content = latestMessage.value.content;
   message.startTime = startTime;

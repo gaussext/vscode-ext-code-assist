@@ -1,6 +1,4 @@
-import { openaiService } from './services/openai';
-
-export type ChatVendor = 'ollama' | 'deepseek' | 'gemini' | 'openai';
+import { chatRpcService } from './rpc';
 
 export interface ChatParams {
   model: string;
@@ -9,16 +7,19 @@ export interface ChatParams {
 }
 
 class ChatService {
-  private getService() {
-    return openaiService;
-  }
-
   chat(params: ChatParams, callback: any, end: any) {
-    return this.getService().chat(params, callback, end);
+    return chatRpcService.streamMessage(params, {
+      onChunk: callback,
+      onComplete: end,
+      onError: (error: Error) => {
+        callback(`Error: ${error.message}`);
+        end();
+      }
+    });
   }
 
   stop() {
-    return this.getService().stop();
+    return chatRpcService.stopChat();
   }
 }
 

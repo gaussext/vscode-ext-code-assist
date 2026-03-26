@@ -8,12 +8,13 @@ import type {
   StreamCallback,
   CompleteCallback,
   ErrorCallback,
-  RpcHandlers,
   RpcServerOptions,
+  RpcHandler,
+  RpcStreamHandler,
 } from './types';
 
 export class RpcServer {
-  private handlers: Map<string, RpcHandlers> = new Map();
+  private handlers: Map<string, RpcStreamHandler | RpcHandler> = new Map();
   private pendingStreams: Map<string, { write: StreamCallback<unknown>; complete: CompleteCallback; error: ErrorCallback }> = new Map();
   private options: RpcServerOptions;
   private webview: any;
@@ -23,11 +24,11 @@ export class RpcServer {
     this.options = { debug: false, ...options };
   }
 
-  registerHandlers(namespace: string, handlers: RpcHandlers) {
-    this.handlers.set(namespace, handlers);
+  registerHandler(namespace: string, handler: RpcStreamHandler | RpcHandler) {
+    this.handlers.set(namespace, handler);
   }
 
-  unregisterHandlers(namespace: string) {
+  unregisterHandler(namespace: string) {
     this.handlers.delete(namespace);
   }
 
@@ -52,7 +53,7 @@ export class RpcServer {
 
   private handleRequest(request: RpcRequest): Promise<string | null> {
     const { id, method, data } = request;
-    const [namespace, methodName] = method.split('.');
+    const [namespace, methodName] = method.split('/');
 
     if (!namespace || !methodName) {
       return Promise.resolve(this.createErrorResponse(id, -32601, 'Method not found'));
@@ -63,7 +64,7 @@ export class RpcServer {
       return Promise.resolve(this.createErrorResponse(id, -32601, 'Namespace not found'));
     }
 
-    const handler = handlers[methodName];
+    const handler = handlers;
     if (!handler) {
       return Promise.resolve(this.createErrorResponse(id, -32601, 'Method not found'));
     }
