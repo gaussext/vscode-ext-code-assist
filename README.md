@@ -20,13 +20,6 @@ pnpm run vsce
 code --install-extension code-assist-*.vsix
 ```
 
-## 配置
-
-在 VS Code 设置中配置：
-
-- `code-assist.deepseek`: DeepSeek 服务器地址（默认：https://api.deepseek.com）
-- `code-assist.deepseek_token`: DeepSeek API 密钥
-
 ## 使用方法
 
 ### 快捷键
