@@ -1,0 +1,35 @@
+{
+  "name": "code-assist-main",
+  "version": "0.3.4",
+  "type": "commonjs",
+  "main": "./dist/extension.js",
+  "scripts": {
+    "compile": "webpack",
+    "watch": "webpack --watch",
+    "package": "webpack --mode production --devtool hidden-source-map",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "lint": "eslint src"
+  },
+  "dependencies": {
+    "loglevel": "^1.9.2",
+    "openai": "^4.28.0",
+    "vscode-webview-rpc": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.17.16",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@types/vscode": "^1.98.0",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "@typescript-eslint/parser": "^8.28.0",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1",
+    "eslint": "^9.23.0",
+    "raw-loader": "^4.0.2",
+    "ts-loader": "^9.5.2",
+    "typescript": "~5.7.2",
+    "webpack": "^5.98.0",
+    "webpack-cli": "^6.0.1"
+  }
+}

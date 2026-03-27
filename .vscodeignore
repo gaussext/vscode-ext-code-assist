@@ -2,10 +2,11 @@
 .vscode-test/**
 out/**
 node_modules/**
-src/**
-src-web/**
+packages/**
 .gitignore
 .yarnrc
+.env
+pnpm-workspace.yaml
 webpack.config.js
 vsc-extension-quickstart.md
 **/tsconfig.json

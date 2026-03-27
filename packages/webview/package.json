@@ -1,0 +1,35 @@
+{
+  "name": "code-assist-webview",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc -b && vite build",
+    "preview": "vite preview",
+    "format": "prettier --write \"src/**/*.{vue,js,ts,jsx,tsx,css,scss,html,json,md}\""
+  },
+  "dependencies": {
+    "element-plus": "^2.9.9",
+    "highlight.js": "^11.11.1",
+    "localforage": "^1.10.0",
+    "marked": "^15.0.11",
+    "marked-highlight": "^2.2.1",
+    "pinia": "^3.0.4",
+    "uuid": "^11.1.0",
+    "vue": "^3.5.13",
+    "vscode-webview-rpc": "workspace:*"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.2",
+    "@vue/tsconfig": "^0.7.0",
+    "prettier": "^3.8.1",
+    "sass": "^1.87.0",
+    "typescript": "~5.7.2",
+    "unplugin-auto-import": "^19.1.2",
+    "unplugin-icons": "^22.1.0",
+    "unplugin-vue-components": "^28.5.0",
+    "vite": "^6.3.1",
+    "vue-tsc": "^2.2.8"
+  }
+}

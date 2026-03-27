@@ -1,0 +1,27 @@
+{
+  "name": "vscode-webview-rpc",
+  "version": "1.0.0",
+  "description": "RPC communication library for VS Code webview with streaming support",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "vscode",
+    "webview",
+    "rpc",
+    "streaming"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/vscode": "^1.98.0",
+    "typescript": "~5.7.2"
+  },
+  "dependencies": {
+    "loglevel": "^1.9.2"
+  }
+}
