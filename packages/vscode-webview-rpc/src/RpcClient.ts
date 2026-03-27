@@ -9,6 +9,7 @@ import type {
   CompleteCallback,
   ErrorCallback,
 } from './types';
+import log from 'loglevel';
 
 export class RpcClient {
   private pendingRequests: Map<
@@ -48,7 +49,7 @@ export class RpcClient {
       this.processMessage(msg);
     } catch (error) {
       if (this.options.debug) {
-        console.error('RPC Client: Failed to parse message', error);
+        log.error('RPC Client: Failed to parse message', error);
       }
     }
   }

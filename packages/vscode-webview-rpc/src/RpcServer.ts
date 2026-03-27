@@ -1,4 +1,5 @@
 import { Webview } from 'vscode';
+import log from 'loglevel';
 import type {
   RpcMessage,
   RpcRequest,
@@ -26,7 +27,7 @@ export class RpcServer {
   }
 
   registerHandler(path: string, handler: RpcStreamHandler | RpcHandler) {
-    console.log('registerHandler', path)
+    log.info('registerHandler', path)
     this.handlers.set(path, handler);
   }
 
@@ -40,7 +41,7 @@ export class RpcServer {
       return this.processMessage(msg);
     } catch (error) {
       if (this.options.debug) {
-        console.error('RPC Server: Failed to parse message', error);
+        log.error('RPC Server: Failed to parse message', error);
       }
       return Promise.resolve(null);
     }
@@ -55,8 +56,8 @@ export class RpcServer {
 
   private handleRequest(request: RpcRequest): Promise<string | null> {
     const { id, path, data } = request;
-    console.log('handleRequest', request);
-    console.log('handler');
+    log.info('handleRequest', request);
+    log.debug('handler');
 
 
     const handler = this.handlers.get(path);

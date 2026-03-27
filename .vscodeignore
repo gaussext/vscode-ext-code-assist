@@ -5,6 +5,7 @@ node_modules/**
 packages/**
 .gitignore
 .yarnrc
+.env
 pnpm-workspace.yaml
 webpack.config.js
 vsc-extension-quickstart.md

@@ -12,6 +12,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
+    "loglevel": "^1.9.2",
     "openai": "^4.28.0",
     "vscode-webview-rpc": "workspace:*"
   },

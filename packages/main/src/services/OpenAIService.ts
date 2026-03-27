@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import log from 'loglevel';
 import { ChatParams, StreamCallbacks } from '../models';
 
 export class OpenAIService {
@@ -37,7 +38,7 @@ export class OpenAIService {
     }
 
     this.controller = new AbortController();
-    console.log('chat', params);
+    log.info('chat', params);
     try {
       const client = this.getClient(apiKey, baseURL);
       const stream = (await client.chat.completions.create(
@@ -52,7 +53,6 @@ export class OpenAIService {
       )) as any;
 
       for await (const chunk of stream) {
-        console.log(chunk)
         const delta = chunk.choices[0]?.delta?.content || '';
         if (delta) {
           callbacks.onChunk(delta);
@@ -61,9 +61,9 @@ export class OpenAIService {
       callbacks.onComplete();
     } catch (error: any) {
       if (error.name === 'AbortError') {
-        console.log('OpenAI chat aborted');
+        log.info('OpenAI chat aborted');
       } else {
-        console.error('OpenAI chat error:', error);
+        log.error('OpenAI chat error:', error);
         callbacks.onError(new Error(`Error: ${error.message}`));
         callbacks.onComplete();
       }

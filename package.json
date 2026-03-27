@@ -3,6 +3,10 @@
   "displayName": "Code Assist",
   "description": "",
   "version": "0.3.4",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gausstool/vscode-ext-code-assist.git"
+  },
   "engines": {
     "vscode": "^1.98.0"
   },
@@ -201,7 +205,7 @@
     "build:prepare": "pnpm run build:rpc && pnpm run build:webview",
     "compile": "pnpm run build:prepare && pnpm --filter code-assist-main run compile",
     "watch": "pnpm run build:prepare && pnpm --filter code-assist-main run watch",
-    "package": "pnpm --filter code-assist-main run package",
+    "package": "pnpm run build:prepare && pnpm --filter code-assist-main run package",
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",

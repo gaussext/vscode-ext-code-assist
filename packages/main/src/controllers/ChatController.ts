@@ -1,10 +1,11 @@
 import { OpenAIService } from '../services';
 import { ChatParams } from '../models';
+import log from 'loglevel';
 
 const openaiService = new OpenAIService();
 
 export const streamMessageHandler = async (params: ChatParams, stream: any) => {
-  console.log('streamMessageHandler', params)
+  log.info('streamMessageHandler', params)
   await openaiService.chat(params, {
     onChunk: (delta: string) => {
       stream.write({ delta });

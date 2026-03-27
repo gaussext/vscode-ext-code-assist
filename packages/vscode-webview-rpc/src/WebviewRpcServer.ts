@@ -24,12 +24,12 @@ export class WebviewRpcServer {
     this.disposables.push(disposable);
   }
 
-  registerHandler(namespace: string, handler:  RpcHandler | RpcStreamHandler): void {
-    this.server.registerHandler(namespace, handler);
+  registerHandler(path: string, handler:  RpcHandler | RpcStreamHandler): void {
+    this.server.registerHandler(path, handler);
   }
 
-  unregisterHandler(namespace: string): void {
-    this.server.unregisterHandler(namespace);
+  unregisterHandler(path: string): void {
+    this.server.unregisterHandler(path);
   }
 
   dispose(): void {
