@@ -5,15 +5,7 @@ export class OpenAIService {
   private client: OpenAI | null = null;
   private controller: AbortController | null = null;
 
-  constructor(
-    private getApiKey: () => string,
-    private getBaseURL: () => string
-  ) {}
-
-  private getClient() {
-    const apiKey = this.getApiKey();
-    const baseURL = this.getBaseURL();
-    
+  private getClient(apiKey: string, baseURL?: string) {
     if (!apiKey) {
       throw new Error('请配置 code-assist.openai_token');
     }
@@ -36,7 +28,8 @@ export class OpenAIService {
   }
 
   async chat(params: ChatParams, callbacks: StreamCallbacks) {
-    const apiKey = this.getApiKey();
+    const { apiKey, baseURL } = params;
+    
     if (!apiKey) {
       callbacks.onError(new Error('请配置 code-assist.openai_token'));
       callbacks.onComplete();
@@ -45,7 +38,7 @@ export class OpenAIService {
 
     this.controller = new AbortController();
     try {
-      const client = this.getClient();
+      const client = this.getClient(apiKey, baseURL);
       const stream = (await client.chat.completions.create(
         {
           model: params.model,

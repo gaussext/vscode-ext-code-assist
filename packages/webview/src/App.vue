@@ -136,6 +136,8 @@ const handleChatRequest = async (content: string, messages: ChatMessage[]) => {
         model: settingStore.config.openai_model,
         content: content,
         messages: messages,
+        apiKey: settingStore.config.openai_token,
+        baseURL: settingStore.config.openai,
       },
       (delta: string) => {
         enqueue({ type: 'delta', delta });

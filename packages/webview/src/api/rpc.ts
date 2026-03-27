@@ -4,6 +4,8 @@ export interface ChatParams {
   model: string;
   content: string;
   messages: any[];
+  apiKey: string;
+  baseURL?: string;
 }
 
 export interface StreamCallbacks {
