@@ -1,12 +1,6 @@
+import type { ChatParams } from '@/models/Model';
 import { chatRpcService } from './rpc';
 
-export interface ChatParams {
-  model: string;
-  content: string;
-  messages: any[];
-  apiKey: string;
-  baseURL?: string;
-}
 
 class ChatService {
   chat(params: ChatParams, callback: any, end: any) {

@@ -6,17 +6,17 @@ export class OpenAIService {
   private controller: AbortController | null = null;
 
   private getClient(apiKey: string, baseURL?: string) {
+    if (!baseURL) {
+      throw new Error('请配置 baseURL');
+    }
     if (!apiKey) {
-      throw new Error('请配置 code-assist.openai_token');
+      throw new Error('请配置 API Key');
     }
-    
-    if (!this.client) {
-      this.client = new OpenAI({
-        apiKey: apiKey,
-        baseURL: baseURL || undefined,
-        dangerouslyAllowBrowser: true,
-      });
-    }
+    this.client = new OpenAI({
+      apiKey: apiKey,
+      baseURL: baseURL || undefined,
+      dangerouslyAllowBrowser: true,
+    });
     return this.client;
   }
 
@@ -29,7 +29,7 @@ export class OpenAIService {
 
   async chat(params: ChatParams, callbacks: StreamCallbacks) {
     const { apiKey, baseURL } = params;
-    
+
     if (!apiKey) {
       callbacks.onError(new Error('请配置 code-assist.openai_token'));
       callbacks.onComplete();
@@ -37,19 +37,14 @@ export class OpenAIService {
     }
 
     this.controller = new AbortController();
+    console.log('chat', params);
     try {
       const client = this.getClient(apiKey, baseURL);
       const stream = (await client.chat.completions.create(
         {
           model: params.model,
-          messages: [
-            ...params.messages,
-            {
-              content: params.content,
-              role: 'user',
-            },
-          ],
-          stream: true
+          messages: params.messages,
+          stream: true,
         },
         {
           signal: this.controller.signal,
@@ -57,6 +52,7 @@ export class OpenAIService {
       )) as any;
 
       for await (const chunk of stream) {
+        console.log(chunk)
         const delta = chunk.choices[0]?.delta?.content || '';
         if (delta) {
           callbacks.onChunk(delta);

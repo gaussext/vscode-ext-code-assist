@@ -114,7 +114,7 @@ export class RpcClient {
   }
 
   async call<TParams = unknown, TResult = unknown>(
-    method: string,
+    path: string,
     params: TParams
   ): Promise<TResult> {
     const id = this.generateMessageId();
@@ -122,7 +122,7 @@ export class RpcClient {
     return new Promise<TResult>((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.pendingRequests.delete(id);
-        reject(new Error(`Request timeout: ${method}`));
+        reject(new Error(`Request timeout: ${path}`));
       }, this.options.timeout);
 
       this.pendingRequests.set(id, { 
@@ -134,7 +134,7 @@ export class RpcClient {
       const message = JSON.stringify({
         id,
         type: 'request',
-        method,
+        path,
         data: params,
       });
 
@@ -143,7 +143,7 @@ export class RpcClient {
   }
 
   stream<TParams = unknown, TChunk = unknown>(
-    method: string,
+    path: string,
     params: TParams,
     options: {
       onChunk: StreamCallback<TChunk>;
@@ -162,7 +162,7 @@ export class RpcClient {
     const message = JSON.stringify({
       id,
       type: 'request',
-      method,
+      path,
       data: { ...params, __stream__: true },
     });
 

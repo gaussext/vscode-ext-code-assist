@@ -1,3 +1,4 @@
+import { Webview } from 'vscode';
 import type {
   RpcMessage,
   RpcRequest,
@@ -19,17 +20,18 @@ export class RpcServer {
   private options: RpcServerOptions;
   private webview: any;
 
-  constructor(webview: any, options: RpcServerOptions = {}) {
+  constructor(webview: Webview, options: RpcServerOptions = {}) {
     this.webview = webview;
     this.options = { debug: false, ...options };
   }
 
-  registerHandler(namespace: string, handler: RpcStreamHandler | RpcHandler) {
-    this.handlers.set(namespace, handler);
+  registerHandler(path: string, handler: RpcStreamHandler | RpcHandler) {
+    console.log('registerHandler', path)
+    this.handlers.set(path, handler);
   }
 
-  unregisterHandler(namespace: string) {
-    this.handlers.delete(namespace);
+  unregisterHandler(path: string) {
+    this.handlers.delete(path);
   }
 
   handleMessage(message: string): Promise<string | null> {
@@ -52,21 +54,15 @@ export class RpcServer {
   }
 
   private handleRequest(request: RpcRequest): Promise<string | null> {
-    const { id, method, data } = request;
-    const [namespace, methodName] = method.split('/');
+    const { id, path, data } = request;
+    console.log('handleRequest', request);
+    console.log('handler');
 
-    if (!namespace || !methodName) {
-      return Promise.resolve(this.createErrorResponse(id, -32601, 'Method not found'));
-    }
 
-    const handlers = this.handlers.get(namespace);
-    if (!handlers) {
-      return Promise.resolve(this.createErrorResponse(id, -32601, 'Namespace not found'));
-    }
-
-    const handler = handlers;
+    const handler = this.handlers.get(path);
+    
     if (!handler) {
-      return Promise.resolve(this.createErrorResponse(id, -32601, 'Method not found'));
+      return Promise.resolve(this.createErrorResponse(id, -32601, 'handler not found'));
     }
 
     if (this.isStreamRequest(data)) {

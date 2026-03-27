@@ -10,12 +10,7 @@
       @download="downloadConversation"
     />
     <AppBody :messages="messages" :promptCode="promptCode" :latestMessage="latestMessage" :loading="loading" />
-    <AppFooter
-      v-model="prompt"
-      :promptCode="promptCode"
-      :loading="loading"
-      @click="onButtonClick"
-    />
+    <AppFooter v-model="prompt" :promptCode="promptCode" :loading="loading" @click="onButtonClick" />
   </div>
 </template>
 
@@ -42,7 +37,7 @@ const loading = ref(false);
 const prompt = ref('');
 const promptCode = ref('');
 const conversations = ref<ChatConversation[]>([]);
-  
+
 const getConversations = async () => {
   const convs = await store.getConversations();
   conversations.value = [...convs];
@@ -128,16 +123,14 @@ const handleChatRequest = async (content: string, messages: ChatMessage[]) => {
   loading.value = true;
   const startTime = Date.now();
   try {
-
     latestMessage.value.model = settingStore.config.openai_model;
     latestMessage.value.content = '...';
     await chatService.chat(
       {
-        model: settingStore.config.openai_model,
-        content: content,
-        messages: messages,
-        apiKey: settingStore.config.openai_token,
         baseURL: settingStore.config.openai,
+        apiKey: settingStore.config.openai_token,
+        model: settingStore.config.openai_model,
+        messages: messages.map(item => ({ role: item.role, content: item.content})),
       },
       (delta: string) => {
         enqueue({ type: 'delta', delta });
@@ -298,7 +291,7 @@ const onButtonClick = async () => {
   messages.value = [...messages.value, message];
   const requestMessages = [...messages.value, message];
   store.setMessagesById(conversationId.value, unref(messages));
-  handleChatRequest( content, requestMessages);
+  handleChatRequest(content, requestMessages);
 };
 
 // 会话变更处理

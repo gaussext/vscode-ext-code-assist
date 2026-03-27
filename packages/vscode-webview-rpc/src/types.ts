@@ -3,7 +3,7 @@ export type RpcMessageType = 'request' | 'response' | 'stream' | 'error' | 'comp
 export interface RpcMessage<T = unknown> {
   id: string;
   type: RpcMessageType;
-  method?: string;
+  path?: string;
   data?: T;
   error?: {
     code: number;
@@ -14,7 +14,7 @@ export interface RpcMessage<T = unknown> {
 
 export interface RpcRequest<T = unknown> extends RpcMessage<T> {
   type: 'request';
-  method: string;
+  path: string;
 }
 
 export interface RpcResponse<T = unknown> extends RpcMessage<T> {
@@ -41,17 +41,17 @@ export interface RpcComplete extends RpcMessage {
 }
 
 export type StreamCallback<T> = (chunk: T) => void;
-export type CompleteCallback = () => void;
+export type CompleteCallback = () => void;``
 export type ErrorCallback = (error: Error) => void;
 
 export interface RpcHandler<TParams = unknown, TResult = unknown> {
-  (params: TParams): Promise<TResult> | TResult;
+  (params?: TParams): Promise<TResult> | TResult;
 }
 
-export interface RpcStreamHandler<TParams = unknown, TChunk = unknown> {
+export interface RpcStreamHandler<TParams = any, TChunk = any> {
   (
-    params: TParams,
-    stream: {
+    params?: TParams,
+    stream?: {
       write: (chunk: TChunk) => void;
       complete: () => void;
       error: (err: Error) => void;

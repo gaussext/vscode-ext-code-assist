@@ -69,14 +69,14 @@ rpcClient.stream('chat.streamMessage', { message: 'Hello' }, {
 
 ### WebviewRpcServer
 
-- `registerHandlers(namespace: string, handlers: RpcHandlers)` - 注册处理器
-- `unregisterHandlers(namespace: string)` - 注销处理器
+- `registerHandlers(path: string, handlers: RpcHandlers)` - 注册处理器
+- `unregisterHandlers(path: string)` - 注销处理器
 - `dispose()` - 清理资源
 
 ### WebviewRpcClient
 
-- `call<TParams, TResult>(method: string, params: TParams): Promise<TResult>` - 普通调用
-- `stream<TParams, TChunk>(method: string, params: TParams, options): void` - 流式调用
+- `call<TParams, TResult>(path: string, params: TParams): Promise<TResult>` - 普通调用
+- `stream<TParams, TChunk>(path: string, params: TParams, options): void` - 流式调用
 - `dispose()` - 清理资源
 
 ## 许可证

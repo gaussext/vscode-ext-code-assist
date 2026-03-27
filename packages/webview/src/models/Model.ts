@@ -20,3 +20,10 @@ export class ChatMessage {
     this.role = role;
   }
 }
+
+export interface ChatParams {
+  model: string;
+  messages: any[];
+  apiKey: string;
+  baseURL?: string;
+}
