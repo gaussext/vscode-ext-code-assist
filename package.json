@@ -18,7 +18,7 @@
   "main": "./dist/extension.js",
   "contributes": {
     "configuration": {
-      "title": "Code Assist",
+      "title": "Code Assist"
     },
     "viewsContainers": {
       "activitybar": [

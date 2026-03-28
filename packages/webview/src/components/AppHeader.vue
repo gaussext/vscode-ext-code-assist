@@ -1,7 +1,7 @@
 <template>
   <div class="app-header header-area">
     <div class="header-area-tool">
-      <div class="info-block" style="display: flex; align-items: center; gap: 4px;">
+      <div class="info-block" style="display: flex; align-items: center; gap: 4px">
         <ContentInfo :info="info"></ContentInfo>
         <ChatDownload class="header-icon" @click="downloadConversation"></ChatDownload>
       </div>
@@ -36,7 +36,8 @@
 </template>
 
 <script setup lang="ts">
-import store from '@/store';
+import { useConversationStore } from '@/stores/conversation';
+import { useMessageStore } from '@/stores/message';
 import { firstElement, getTokenCount, lastElement } from '@/utils';
 import { computed, ref } from 'vue';
 import type { ChatMessage } from '@/models/Model';
@@ -44,13 +45,15 @@ import { ChatAdd, ChatClear, ChatHistory, ChatDownload } from '@/icons';
 import ContentInfo from './ContentInfo.vue';
 import { MAX_TOKEN_LENGTH } from '@/utils/constants';
 import { Delete } from '@element-plus/icons-vue';
+import { storeToRefs } from 'pinia';
+
+const conversationStore = useConversationStore();
+const { conversations, conversationId } = storeToRefs(useConversationStore());
+const messageStore = useMessageStore();
 
 const props = defineProps({
   conversationId: {
     default: '',
-  },
-  conversations: {
-    default: () => [],
   },
   messages: {
     default: () => [] as ChatMessage[],
@@ -94,6 +97,12 @@ const emit = defineEmits<{
   (e: 'download'): void;
 }>();
 
+const downloadConversation = async () => {
+  const conversation = conversationStore.getConversationById(conversationId.value);
+  if (!conversation) return;
+  await messageStore.downloadConversation(conversationId.value, conversation.title);
+};
+
 // 按钮操作
 const visible = ref(false);
 const onConversationChange = (id: string) => {
@@ -102,27 +111,23 @@ const onConversationChange = (id: string) => {
 };
 
 const onCreateConversation = async () => {
-  await store.createConversation();
-  const convs = await store.getConversations();
+  await conversationStore.createConversation();
+  const convs = await conversationStore.getConversations();
   emit('create');
   emit('update:conversationId', lastElement(convs).id);
 };
 
-const downloadConversation = async () => {
-  emit('download');
-};
-
 const onDeleteConversation = async (id: string) => {
-  await store.deleteConversation(id);
-  await store.removeMessagesById(id);
-  const convs = await store.getConversations();
+  await conversationStore.deleteConversation(id);
+  await messageStore.removeMessagesById(id);
+  const convs = await conversationStore.getConversations();
   emit('delete');
   emit('update:conversationId', firstElement(convs).id);
 };
 
 const clearConversation = async () => {
-  await store.clearConversation();
-  const convs = await store.getConversations();
+  await conversationStore.clearConversation();
+  const convs = await conversationStore.getConversations();
   emit('update:conversationId', firstElement(convs).id);
 };
 </script>

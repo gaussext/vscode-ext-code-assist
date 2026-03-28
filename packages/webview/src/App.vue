@@ -2,12 +2,7 @@
   <div class="chat-container">
     <AppHeader
       :messages="messages"
-      :conversations="conversations"
-      :conversationId="conversationId"
       @update:conversationId="handleConversationChange"
-      @create="getConversations"
-      @delete="getConversations"
-      @download="downloadConversation"
     />
     <AppBody :messages="messages" :promptCode="promptCode" :latestMessage="latestMessage" :loading="loading" />
     <AppFooter v-model="prompt" :promptCode="promptCode" :loading="loading" @click="onButtonClick" />
@@ -23,11 +18,14 @@ import AppFooter from './components/AppFooter.vue';
 import AppHeader from './components/AppHeader.vue';
 import { ChatConversation, ChatMessage } from './models/Model';
 import { useSettingStore } from './stores/setting';
-import store from './store/index';
+import { useConversationStore } from './stores/conversation';
+import { useMessageStore } from './stores/message';
 import type { IMessage } from './types';
 import { EnumTemperature } from './models/Temperature';
 
 const settingStore = useSettingStore();
+const conversationStore = useConversationStore();
+const messageStore = useMessageStore();
 
 const STORE_KEY_CONV = 'code-assist.conversation';
 const conversationId = ref(localStorage.getItem(STORE_KEY_CONV) || '');
@@ -36,24 +34,10 @@ const messages = ref<ChatMessage[]>([]);
 const loading = ref(false);
 const prompt = ref('');
 const promptCode = ref('');
-const conversations = ref<ChatConversation[]>([]);
-
-const getConversations = async () => {
-  const convs = await store.getConversations();
-  conversations.value = [...convs];
-  if (!conversationId.value && firstElement(convs).id) {
-    conversationId.value = firstElement(convs).id;
-  }
-  return convs;
-};
-
-const downloadConversation = async () => {
-  await store.downloadConversation(conversationId.value);
-};
 
 // 加载消息
 const loadMessages = async () => {
-  const loadedMessages = await store.getMessagesById(conversationId.value);
+  const loadedMessages = await messageStore.getMessagesById(conversationId.value);
   messages.value = loadedMessages;
 };
 
@@ -119,7 +103,7 @@ const enqueue = async (value: IMessage) => {
 };
 
 // 等待 AI 回复
-const handleChatRequest = async (content: string, messages: ChatMessage[]) => {
+const handleChatRequest = async ( messages: ChatMessage[]) => {
   loading.value = true;
   const startTime = Date.now();
   try {
@@ -164,9 +148,9 @@ const handleChatEnd = (startTime: number, endTime) => {
   message.timestamp = endTime;
   messages.value = [...messages.value, message];
   // 保存消息
-  store.setMessagesById(conversationId.value, unref(messages));
+  messageStore.setMessagesById(conversationId.value, unref(messages));
   // 使用最新消息更新会话标题
-  store.updateConversationTitle(conversationId.value, message.content);
+  conversationStore.updateConversationTitle(conversationId.value, message.content);
 };
 
 const handleOptimization = (code: string) => {
@@ -284,14 +268,13 @@ const onButtonClick = async () => {
   prompt.value = '';
   promptCode.value = '';
   // 使用用户输入更新会话标题
-  await store.updateConversationTitle(conversationId.value, content);
-  await getConversations();
+  await conversationStore.updateConversationTitle(conversationId.value, content);
   const message = new ChatMessage('user');
   message.content = content;
   messages.value = [...messages.value, message];
   const requestMessages = [...messages.value, message];
-  store.setMessagesById(conversationId.value, unref(messages));
-  handleChatRequest(content, requestMessages);
+  messageStore.setMessagesById(conversationId.value, unref(messages));
+  handleChatRequest(requestMessages);
 };
 
 // 会话变更处理
@@ -304,7 +287,7 @@ const handleConversationChange = (id: string) => {
 
 onMounted(async () => {
   window.addEventListener('message', handleWindowMessage);
-  await getConversations();
+  await conversationStore.getConversations();
   loadMessages();
 });
 
