@@ -69,7 +69,7 @@ const info = computed(() => {
     window: 0,
     width: 0,
   };
-  props.messages.forEach((message) => {
+  props.messages?.forEach((message) => {
     const tokens = getTokenCount(message.content);
     if (message.role === 'user' || message.role === 'system') {
       result.user = result.user + tokens;

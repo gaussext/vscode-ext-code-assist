@@ -24,7 +24,7 @@ export function getJsonSafe(str: string, defValue: any = null) {
  * @param text
  * @returns
  */
-export function getTokenCount(text: string): number {
+export function getTokenCount(text: string = ''): number {
   let tokenCount = 0;
   for (const char of text) {
     const code = char.charCodeAt(0);
