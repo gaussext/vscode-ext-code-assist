@@ -42,7 +42,7 @@ import { firstElement, getTokenCount, lastElement } from '@/utils';
 import { computed, ref } from 'vue';
 import type { ChatMessage } from '@/models/Model';
 import { ChatAdd, ChatClear, ChatHistory, ChatDownload } from '@/icons';
-import ContentInfo from './ContentInfo.vue';
+import ContentInfo from './AppHeaderContentInfo.vue';
 import { MAX_TOKEN_LENGTH } from '@/utils/constants';
 import { Delete } from '@element-plus/icons-vue';
 import { storeToRefs } from 'pinia';
@@ -176,6 +176,8 @@ const clearConversation = async () => {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  max-height: 480px;
+  overflow-y: auto;
 }
 
 .conversation-item {

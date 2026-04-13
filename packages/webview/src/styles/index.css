@@ -10,7 +10,7 @@
 body {
   font-family: var(--vscode-font-family);
   color: var(--vscode-foreground);
-  background-color: var(--vscode-editor-background);
+  background-color: var(--vscode-sideBarTitle-background);
   margin: 0;
   padding: 0 8px;
   height: 100vh;
@@ -39,6 +39,7 @@ body {
   max-width: 800px;
   margin: 0 auto;
   max-height: 100vh;
+  padding: 0 4px;
 }
 
 .messages-area {
