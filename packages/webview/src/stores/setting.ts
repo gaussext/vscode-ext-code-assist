@@ -31,24 +31,12 @@ function loadFromStorage<T>(key: string, defaultValue: T): T {
 
 const DEFAULT_PROVIDERS: Provider[] = [
   {
-    id: 'deepseek',
-    name: 'DeepSeek',
-    baseURL: 'https://api.deepseek.com/v1',
+    id: 'ollama',
+    name: 'Ollama',
+    baseURL: 'https://localhost:11434/v1',
     apiKey: '',
     models: [
-      { id: 'deepseek-chat', name: 'DeepSeek Chat' },
-      { id: 'deepseek-coder', name: 'DeepSeek Coder' },
-    ],
-  },
-  {
-    id: 'openai',
-    name: 'OpenAI',
-    baseURL: 'https://api.openai.com/v1',
-    apiKey: '',
-    models: [
-      { id: 'gpt-4o', name: 'GPT-4o' },
-      { id: 'gpt-4o-mini', name: 'GPT-4o Mini' },
-      { id: 'gpt-4-turbo', name: 'GPT-4 Turbo' },
+      { id: 'qwen3:0.6b', name: 'DeepSeek Chat' },
     ],
   },
 ];

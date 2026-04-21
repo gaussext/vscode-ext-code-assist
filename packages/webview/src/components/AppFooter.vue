@@ -17,56 +17,17 @@
       </textarea>
     </div>
     <div id="chat-tool">
-      <div style="display: flex; align-items: center">
-        <!-- 温度选择下拉菜单 -->
-        <el-dropdown @command="changeTemperature">
-          <span style="display: flex; align-items: center" class="el-dropdown-link">
-            <span class="text"> {{ temperatureLabel }}</span>
-            <el-icon class="el-icon--right">
-              <ArrowDown />
-            </el-icon>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item
-                v-for="item in temperatures"
-                :key="item.value"
-                :command="item.value"
-                :class="{ active: item.value === temperature }"
-                >{{ item.label }}</el-dropdown-item
-              >
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <!-- 配置模型按钮 -->
-        <el-button
-          style="margin-left: 4px"
-          class="vscode-button-small"
-          id="setting-button"
-          title="配置模型"
-          text
-          type="info"
-          :icon="Setting"
-          @click="$router.push('/setting')"
-        >
-        </el-button>
-      </div>
-      <el-button id="chat-button" :icon="loading ? VideoPause : Promotion" type="info" text @click="$emit('click')">
-      </el-button>
+      <div></div>
+      <button id="chat-button" @click="$emit('click')">
+        <component :is="loading ? VideoPause : Promotion" />
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useSettingStore } from '@/stores/setting';
-import { computed, ref } from 'vue';
-import { useRouter } from 'vue-router';
 import { marked } from '@/utils/marked';
-import { VideoPause, Promotion, Setting, ArrowDown } from '@element-plus/icons-vue';
-import { createTemperatures } from '@/models/Temperature';
-
-const router = useRouter();
-const settingStore = useSettingStore();
+import { VideoPause, Promotion, Setting } from '@element-plus/icons-vue';
 
 const modelValue = defineModel<string>({ required: true });
 
@@ -79,19 +40,6 @@ const props = defineProps({
   }
 });
 const emit = defineEmits(['update:model', 'change', 'click']);
-
-
-// 温度选择下拉菜单
-const temperature = ref(settingStore.temperature);
-const temperatures = createTemperatures();
-const temperatureLabel = computed(() => {
-  return temperatures.find((item) => item.value === temperature.value)?.label;
-});
-
-const changeTemperature = (value: number) => {
-  temperature.value = value;
-  settingStore.setTemperature(value);
-};
 
 // 处理键盘事件
 const handleKeyPress = (e: KeyboardEvent) => {

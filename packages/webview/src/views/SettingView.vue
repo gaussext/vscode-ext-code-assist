@@ -1,71 +1,57 @@
 <template>
   <div class="setting-container">
     <div class="setting-header">
-      <h2>配置模型</h2>
-      <el-button type="primary" @click="$router.push('/')">返回</el-button>
+      <div></div>
+      <el-icon class="header-icon" style="transform: rotate(90deg);" @click="$router.push('/')"><Download /></el-icon>
     </div>
     <div class="setting-body">
-      <el-tabs v-model="activeProviderId" type="border-card" @tab-change="handleProviderChange">
-        <el-tab-pane
-          v-for="provider in settingStore.providers"
-          :key="provider.id"
-          :label="provider.name"
-          :name="provider.id"
-        >
-          <div class="provider-content">
-            <el-form :label-width="100" label-position="top">
-              <el-form-item label="Base URL">
-                <el-input v-model="provider.baseURL" placeholder="https://api.example.com"></el-input>
-              </el-form-item>
-              <el-form-item label="API Key">
-                <el-input v-model="provider.apiKey" type="password" show-password placeholder="sk-..."></el-input>
-              </el-form-item>
-            </el-form>
+      <div class="provider-content">
+        <div class="form-section">
+          <label>Base URL</label>
+          <input v-model="currentProvider.baseURL" placeholder="https://api.example.com" />
+        </div>
+        <div class="form-section">
+          <label>API Key</label>
+          <input v-model="currentProvider.apiKey" type="password" placeholder="sk-..." />
+        </div>
 
-            <div class="models-section">
-              <div class="models-header">
-                <span>模型列表</span>
-                <el-button size="small" @click="handleAddModel(provider.id)">添加模型</el-button>
-              </div>
-              <div class="models-list">
-                <div
-                  v-for="(model, index) in provider.models"
-                  :key="model.id"
-                  class="model-item"
-                >
-                  <el-input v-model="model.name" placeholder="模型显示名称" class="model-name-input"></el-input>
-                  <el-input v-model="model.id" placeholder="模型ID" class="model-id-input"></el-input>
-                  <el-button
-                    type="danger"
-                    size="small"
-                    :icon="Delete"
-                    circle
-                    @click="handleRemoveModel(provider.id, model.id)"
-                  ></el-button>
-                </div>
-              </div>
+        <div class="models-section">
+          <div class="models-header">
+            <span>模型列表</span>
+            <button @click="handleAddModel(currentProvider.id)">添加模型</button>
+          </div>
+          <div class="models-list">
+            <div
+              v-for="(model, index) in currentProvider.models"
+              :key="model.id"
+              class="model-item"
+            >
+              <input v-model="model.id" placeholder="模型ID" class="model-id-input" />
+              <button class="delete-btn" @click="handleRemoveModel(currentProvider.id, model.id)">
+                <Delete />
+              </button>
             </div>
           </div>
-        </el-tab-pane>
-      </el-tabs>
+        </div>
+      </div>
     </div>
     <div class="setting-footer">
-      <el-button @click="$router.push('/')">取消</el-button>
-      <el-button type="primary" @click="onConfirmClick">确认</el-button>
+      <button @click="$router.push('/')">取消</button>
+      <button class="primary" @click="onConfirmClick">确认</button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { useSettingStore, type Model } from '@/stores/setting';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
-import { Delete } from '@element-plus/icons-vue';
-import { ElMessage } from 'element-plus';
+import { Delete, Upload, Download } from '@element-plus/icons-vue';
 
 const router = useRouter();
 const settingStore = useSettingStore();
 const activeProviderId = ref(settingStore.currentProviderId);
+const currentProvider = computed(() => settingStore.providers.find(p => p.id === activeProviderId.value)!);
 
 const handleProviderChange = (providerId: string) => {
   settingStore.setCurrentProvider(providerId);
@@ -84,15 +70,17 @@ const handleRemoveModel = (providerId: string, modelId: string) => {
 };
 
 const onConfirmClick = () => {
-  ElMessage.success('配置已保存');
   router.push('/');
 };
 </script>
 
 <style scoped>
 .setting-container {
-  padding: 20px;
-  height: 100%;
+  min-width: 400px;
+  max-width: 800px;
+  margin: 0 auto;
+  max-height: 100vh;
+  padding: 0 4px;
   display: flex;
   flex-direction: column;
 }
@@ -102,12 +90,7 @@ const onConfirmClick = () => {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-}
-
-.setting-header h2 {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 600;
+  height: 28px;
 }
 
 .setting-body {
@@ -118,7 +101,62 @@ const onConfirmClick = () => {
 }
 
 .provider-content {
-  padding: 16px 8px;
+  padding: 16px 0px;
+}
+
+.form-section {
+  margin-bottom: 16px;
+}
+
+.form-section label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+input {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background-color: #272822;
+  color: #fff;
+  font-size: 14px;
+}
+
+input:focus {
+  outline: none;
+  border-color: #409eff;
+}
+
+button {
+  padding: 6px 12px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background-color: #272822;
+  color: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #3a3a32;
+}
+
+button.primary {
+  background-color: #409eff;
+  border-color: #409eff;
+  color: #fff;
+}
+
+button.primary:hover {
+  background-color: #66b1ff;
+}
+
+button.delete-btn {
+  padding: 4px;
+  min-width: 28px;
+  min-height: 28px;
+  border: none;
 }
 
 .models-section {
@@ -143,9 +181,7 @@ const onConfirmClick = () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px;
   border-radius: 4px;
-  background-color: #272822;
 }
 
 .model-name-input {
