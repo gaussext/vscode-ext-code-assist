@@ -42,7 +42,6 @@ code --install-extension code-assist-*.vsix
 
 - Node.js >= 18
 - pnpm >= 8
-- VS Code >= 1.98.0
 
 ### 开发命令
 
