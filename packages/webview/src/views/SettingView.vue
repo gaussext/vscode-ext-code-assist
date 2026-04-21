@@ -1,76 +1,66 @@
 <template>
   <div class="setting-container">
     <div class="setting-header">
-      <div></div>
+      <h2 class="setting-title">供应商配置</h2>
       <el-icon class="header-icon" style="transform: rotate(90deg);" @click="$router.push('/')"><Download /></el-icon>
     </div>
     <div class="setting-body">
-      <div class="provider-content">
+      <div class="provider-content" v-for="provider in providers" :key="provider.id">
+        <el-icon v-if="providers.length > 1" class="delete-icon" @click="handleRemoveProvider(provider.id)"><Delete /></el-icon>
         <div class="form-section">
           <label>Base URL</label>
-          <input v-model="currentProvider.baseURL" placeholder="https://api.example.com" />
+          <input v-model="provider.baseURL" placeholder="https://api.example.com" />
         </div>
         <div class="form-section">
           <label>API Key</label>
-          <input v-model="currentProvider.apiKey" type="password" placeholder="sk-..." />
+          <input v-model="provider.apiKey" type="password" placeholder="sk-..." />
         </div>
-
-        <div class="models-section">
-          <div class="models-header">
-            <span>模型列表</span>
-            <button @click="handleAddModel(currentProvider.id)">添加模型</button>
-          </div>
-          <div class="models-list">
-            <div
-              v-for="(model, index) in currentProvider.models"
-              :key="model.id"
-              class="model-item"
-            >
-              <input v-model="model.id" placeholder="模型ID" class="model-id-input" />
-              <button class="delete-btn" @click="handleRemoveModel(currentProvider.id, model.id)">
-                <Delete />
-              </button>
-            </div>
-          </div>
+          <div class="form-section">
+          <label>Models</label>
+          <input v-model="provider.models" placeholder="model1,model2,model3" />
         </div>
       </div>
     </div>
     <div class="setting-footer">
-      <button @click="$router.push('/')">取消</button>
-      <button class="primary" @click="onConfirmClick">确认</button>
+      <div style="flex: 1">
+        <button @click="handleAddProvider">Add Provider</button>
+      </div>
+      <button @click="handleResetClick">Reset</button>
+      <button class="primary" @click="onConfirmClick">OK</button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { useSettingStore, type Model } from '@/stores/setting';
-import { ref, computed } from 'vue';
+import { Provider, ProviderVo, useSettingStore, type IModel } from '@/stores/setting';
 import { useRouter } from 'vue-router';
 import { Delete, Upload, Download } from '@element-plus/icons-vue';
+import { ref } from 'vue';
 
 const router = useRouter();
 const settingStore = useSettingStore();
-const activeProviderId = ref(settingStore.currentProviderId);
-const currentProvider = computed(() => settingStore.providers.find(p => p.id === activeProviderId.value)!);
+const providers = ref(Provider.toVo(settingStore.providers));
 
-const handleProviderChange = (providerId: string) => {
-  settingStore.setCurrentProvider(providerId);
+const handleAddProvider = () => {
+  providers.value.push(new ProviderVo());
+};
+const handleRemoveProvider = (id: string) => {
+  providers.value = providers.value.filter((p) => p.id !== id);
 };
 
-const handleAddModel = (providerId: string) => {
-  const newModel: Model = {
-    id: `model-${Date.now()}`,
-    name: '新模型',
-  };
-  settingStore.addModelToProvider(providerId, newModel);
-};
-
-const handleRemoveModel = (providerId: string, modelId: string) => {
-  settingStore.removeModelFromProvider(providerId, modelId);
+const handleResetClick = () => {
+  settingStore.resetProviders();
+  providers.value = Provider.toVo(settingStore.providers);
+  console.log(providers.value);
 };
 
 const onConfirmClick = () => {
-  router.push('/');
+  // save
+  // redirect to home page
+  if (providers.value.length > 0) {
+    settingStore.setProviders(Provider.toDto(providers.value));
+    router.push('/');
+  }
 };
 </script>
 
@@ -79,7 +69,6 @@ const onConfirmClick = () => {
   min-width: 400px;
   max-width: 800px;
   margin: 0 auto;
-  max-height: 100vh;
   padding: 0 4px;
   display: flex;
   flex-direction: column;
@@ -89,19 +78,36 @@ const onConfirmClick = () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
   height: 28px;
+  margin-bottom: 8px;
+}
+
+.setting-title {
+  font-size: 14px;
+  font-weight: 500;
+  padding-left: 8px;
 }
 
 .setting-body {
   flex: 1;
-  max-height: 66vh;
+  max-height: calc(100vh - 120px);
   overflow-y: auto;
   padding: 0 8px;
 }
 
 .provider-content {
-  padding: 16px 0px;
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--vscode-pickerGroup-border);
+  margin-bottom: 12px;
+  position: relative;
+}
+
+.delete-icon {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  cursor: pointer;
 }
 
 .form-section {
@@ -156,6 +162,7 @@ button.delete-btn {
   padding: 4px;
   min-width: 28px;
   min-height: 28px;
+  font-size: 16px;
   border: none;
 }
 
@@ -196,6 +203,6 @@ button.delete-btn {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 20px;
+  padding: 0 8px;
 }
 </style>

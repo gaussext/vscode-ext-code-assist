@@ -1,17 +1,60 @@
 import { defineStore } from 'pinia';
 import { ref, computed } from 'vue';
 
-export interface Model {
+export interface IModel {
   id: string;
-  name: string;
 }
 
-export interface Provider {
+class Model {
+  static toVo(models: IModel[]) {
+    return models.map((m) => m.id).join(',');
+  }
+
+  static toDto(models: string) {
+    return models.split(',').map((id) => ({ id }));
+  }
+}
+
+export interface IProvider {
   id: string;
-  name: string;
   baseURL: string;
   apiKey: string;
-  models: Model[];
+  models: IModel[];
+}
+
+export interface IProviderVo {
+  id: string;
+  baseURL: string;
+  apiKey: string;
+  models: string;
+}
+
+export class Provider {
+  id = 'default';
+  baseURL = 'https://localhost:11434/v1';
+  apiKey = '';
+
+  static toVo(providers: IProvider[]) {
+    return providers.map((p) => ({
+      ...p,
+      models: Model.toVo(p.models),
+    }));
+  }
+
+  static toDto(providers: IProviderVo[]) {
+    return providers.map((vo) => ({
+      ...vo,
+      models: Model.toDto(vo.models),
+    }));
+  }
+}
+
+export class ProviderDto extends Provider {
+  models: IModel[] = [{ id: 'qwen3:0.6b' }];
+}
+
+export class ProviderVo extends Provider {
+  models = 'qwen3:0.6b';
 }
 
 const setting = (window as any).setting;
@@ -29,17 +72,6 @@ function loadFromStorage<T>(key: string, defaultValue: T): T {
   return configValue !== undefined ? configValue : defaultValue;
 }
 
-const DEFAULT_PROVIDERS: Provider[] = [
-  {
-    id: 'ollama',
-    name: 'Ollama',
-    baseURL: 'https://localhost:11434/v1',
-    apiKey: '',
-    models: [
-      { id: 'qwen3:0.6b', name: 'DeepSeek Chat' },
-    ],
-  },
-];
 
 const TEMPERATURE = parseFloat(
   localStorage.getItem('setting.config.temperature') || setting.get('temperature') || '0.0'
@@ -48,8 +80,8 @@ const TEMPERATURE = parseFloat(
 export const useSettingStore = defineStore('setting', () => {
   const mode = ref('session');
   const temperature = ref(TEMPERATURE);
-  const providers = ref<Provider[]>(loadFromStorage('setting.config.providers', DEFAULT_PROVIDERS));
-  const currentProviderId = ref<string>(loadFromStorage('setting.config.currentProviderId', 'deepseek'));
+  const providers = ref<ProviderDto[]>(loadFromStorage('setting.config.providers', [new ProviderDto()]));
+  const currentProviderId = ref<string>(loadFromStorage('setting.config.currentProviderId', 'default'));
 
   const currentProvider = computed(() => {
     return providers.value.find((p) => p.id === currentProviderId.value) || providers.value[0];
@@ -68,45 +100,22 @@ export const useSettingStore = defineStore('setting', () => {
     localStorage.setItem('setting.config.temperature', value.toFixed(1));
   };
 
-  const setCurrentProvider = (providerId: string) => {
-    currentProviderId.value = providerId;
-    localStorage.setItem('setting.config.currentProviderId', providerId);
+  const setProviders = (value: IProvider[]) => {
+    providers.value = value;
+    localStorage.setItem('setting.config.providers', JSON.stringify(value));
   };
 
-  const updateProvider = (providerId: string, updates: Partial<Provider>) => {
-    const index = providers.value.findIndex((p) => p.id === providerId);
-    if (index !== -1) {
-      providers.value[index] = { ...providers.value[index], ...updates };
-      localStorage.setItem('setting.config.providers', JSON.stringify(providers.value));
-    }
+  const resetProviders = () => {
+    setProviders([new ProviderDto()]);
   };
 
-  const setProviderApiKey = (providerId: string, apiKey: string) => {
-    updateProvider(providerId, { apiKey });
+  const setCurrentProviderId = (value: string) => {
+    currentProviderId.value = value;
+    localStorage.setItem('setting.config.currentProviderId', value);
   };
 
-  const setProviderBaseURL = (providerId: string, baseURL: string) => {
-    updateProvider(providerId, { baseURL });
-  };
-
-  const setProviderModels = (providerId: string, models: Model[]) => {
-    updateProvider(providerId, { models });
-  };
-
-  const addModelToProvider = (providerId: string, model: Model) => {
-    const provider = providers.value.find((p) => p.id === providerId);
-    if (provider) {
-      provider.models.push(model);
-      localStorage.setItem('setting.config.providers', JSON.stringify(providers.value));
-    }
-  };
-
-  const removeModelFromProvider = (providerId: string, modelId: string) => {
-    const provider = providers.value.find((p) => p.id === providerId);
-    if (provider) {
-      provider.models = provider.models.filter((m) => m.id !== modelId);
-      localStorage.setItem('setting.config.providers', JSON.stringify(providers.value));
-    }
+  const setCurrentModelId = (value: string) => {
+    currentModel.value.id = value;
   };
 
   return {
@@ -117,12 +126,9 @@ export const useSettingStore = defineStore('setting', () => {
     currentProvider,
     currentModel,
     setTemperature,
-    setCurrentProvider,
-    updateProvider,
-    setProviderApiKey,
-    setProviderBaseURL,
-    setProviderModels,
-    addModelToProvider,
-    removeModelFromProvider,
+    setProviders,
+    resetProviders,
+    setCurrentProviderId,
+    setCurrentModelId,
   };
 });

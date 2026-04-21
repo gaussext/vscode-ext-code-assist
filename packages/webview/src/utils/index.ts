@@ -97,7 +97,7 @@ const executeNextTask = async (callback) => {
     const result = resultQueue.shift();
     callback(result);
     const delay = calcDelay(resultQueue.length);
-    if (delay > 16) {
+    if (delay > 8) {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
     isExecuting = false;

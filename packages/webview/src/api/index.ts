@@ -1,7 +1,6 @@
 import type { ChatParams } from '@/models/Model';
 import { chatRpcService } from './rpc';
 
-
 class ChatService {
   chat(params: ChatParams, callback: any, end: any) {
     return chatRpcService.streamMessage(params, {
