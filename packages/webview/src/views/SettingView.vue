@@ -5,42 +5,86 @@
       <el-button type="primary" @click="$router.push('/')">返回</el-button>
     </div>
     <div class="setting-body">
-      <el-form :model="form" :label-width="100" label-position="top">
-        <el-form-item label="OpenAI Base URL">
-          <el-input v-model="form.openai"></el-input>
-        </el-form-item>
-        <el-form-item label="OpenAI API Key">
-          <el-input v-model="form.openaiToken" type="password" show-password></el-input>
-        </el-form-item>
-        <el-form-item label="OpenAI Model">
-          <el-input v-model="form.openaiModel" ></el-input>
-        </el-form-item>
-      </el-form>
+      <el-tabs v-model="activeProviderId" type="border-card" @tab-change="handleProviderChange">
+        <el-tab-pane
+          v-for="provider in settingStore.providers"
+          :key="provider.id"
+          :label="provider.name"
+          :name="provider.id"
+        >
+          <div class="provider-content">
+            <el-form :label-width="100" label-position="top">
+              <el-form-item label="Base URL">
+                <el-input v-model="provider.baseURL" placeholder="https://api.example.com"></el-input>
+              </el-form-item>
+              <el-form-item label="API Key">
+                <el-input v-model="provider.apiKey" type="password" show-password placeholder="sk-..."></el-input>
+              </el-form-item>
+            </el-form>
+
+            <div class="models-section">
+              <div class="models-header">
+                <span>模型列表</span>
+                <el-button size="small" @click="handleAddModel(provider.id)">添加模型</el-button>
+              </div>
+              <div class="models-list">
+                <div
+                  v-for="(model, index) in provider.models"
+                  :key="model.id"
+                  class="model-item"
+                >
+                  <el-input v-model="model.name" placeholder="模型显示名称" class="model-name-input"></el-input>
+                  <el-input v-model="model.id" placeholder="模型ID" class="model-id-input"></el-input>
+                  <el-button
+                    type="danger"
+                    size="small"
+                    :icon="Delete"
+                    circle
+                    @click="handleRemoveModel(provider.id, model.id)"
+                  ></el-button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
     </div>
     <div class="setting-footer">
       <el-button @click="$router.push('/')">取消</el-button>
-      <el-button type="primary" @click="onConfirmClick"> 确认 </el-button>
+      <el-button type="primary" @click="onConfirmClick">确认</el-button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { useSettingStore } from '@/stores/setting';
-import { reactive } from 'vue';
+import { useSettingStore, type Model } from '@/stores/setting';
+import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { Delete } from '@element-plus/icons-vue';
+import { ElMessage } from 'element-plus';
 
 const router = useRouter();
 const settingStore = useSettingStore();
-const form = reactive({
-  openai: settingStore.config.openai,
-  openaiToken: settingStore.config.openai_token,
-  openaiModel: settingStore.config.openai_model,
-});
+const activeProviderId = ref(settingStore.currentProviderId);
+
+const handleProviderChange = (providerId: string) => {
+  settingStore.setCurrentProvider(providerId);
+};
+
+const handleAddModel = (providerId: string) => {
+  const newModel: Model = {
+    id: `model-${Date.now()}`,
+    name: '新模型',
+  };
+  settingStore.addModelToProvider(providerId, newModel);
+};
+
+const handleRemoveModel = (providerId: string, modelId: string) => {
+  settingStore.removeModelFromProvider(providerId, modelId);
+};
 
 const onConfirmClick = () => {
-  settingStore.setOpenai(form.openai);
-  settingStore.setOpenaiToken(form.openaiToken);
-  settingStore.setOpenaiModel(form.openaiModel);
+  ElMessage.success('配置已保存');
   router.push('/');
 };
 </script>
@@ -73,26 +117,49 @@ const onConfirmClick = () => {
   padding: 0 8px;
 }
 
-.setting-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
+.provider-content {
+  padding: 16px 8px;
+}
+
+.models-section {
   margin-top: 20px;
 }
 
-.vendor-block {
-  width: 100%;
+.models-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
+
+.models-list {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-.model-block {
+.model-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 8px;
+  gap: 8px;
+  padding: 8px;
   border-radius: 4px;
   background-color: #272822;
+}
+
+.model-name-input {
+  width: 150px;
+}
+
+.model-id-input {
+  flex: 1;
+}
+
+.setting-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
 }
 </style>

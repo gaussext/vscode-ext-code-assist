@@ -107,13 +107,13 @@ const handleChatRequest = async ( messages: ChatMessage[]) => {
   loading.value = true;
   const startTime = Date.now();
   try {
-    latestMessage.value.model = settingStore.config.openai_model;
+    latestMessage.value.model = settingStore.currentModel.id;
     latestMessage.value.content = '...';
     await chatService.chat(
       {
-        baseURL: settingStore.config.openai,
-        apiKey: settingStore.config.openai_token,
-        model: settingStore.config.openai_model,
+        baseURL: settingStore.currentProvider.baseURL,
+        apiKey: settingStore.currentProvider.apiKey,
+        model: settingStore.currentModel.id,
         messages: messages.map(item => ({ role: item.role, content: item.content})),
       },
       (delta: string) => {
