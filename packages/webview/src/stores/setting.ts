@@ -1,47 +1,134 @@
 import { defineStore } from 'pinia';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+
+export interface IModel {
+  id: string;
+}
+
+class Model {
+  static toVo(models: IModel[]) {
+    return models.map((m) => m.id).join(',');
+  }
+
+  static toDto(models: string) {
+    return models.split(',').map((id) => ({ id }));
+  }
+}
+
+export interface IProvider {
+  id: string;
+  baseURL: string;
+  apiKey: string;
+  models: IModel[];
+}
+
+export interface IProviderVo {
+  id: string;
+  baseURL: string;
+  apiKey: string;
+  models: string;
+}
+
+export class Provider {
+  id = 'default';
+  baseURL = 'https://localhost:11434/v1';
+  apiKey = '';
+
+  static toVo(providers: IProvider[]) {
+    return providers.map((p) => ({
+      ...p,
+      models: Model.toVo(p.models),
+    }));
+  }
+
+  static toDto(providers: IProviderVo[]) {
+    return providers.map((vo) => ({
+      ...vo,
+      models: Model.toDto(vo.models),
+    }));
+  }
+}
+
+export class ProviderDto extends Provider {
+  models: IModel[] = [{ id: 'qwen3:0.6b' }];
+}
+
+export class ProviderVo extends Provider {
+  models = 'qwen3:0.6b';
+}
 
 const setting = (window as any).setting;
-const OPENAI = localStorage.getItem('setting.config.openai') || setting.get('openai') || 'https://api.deepseek.com';
-const OPENAI_TOKEN = localStorage.getItem('setting.config.openai_token') || setting.get('openai_token') || '';
-const OPENAI_MODEL = localStorage.getItem('setting.config.openai_model') || setting.get('openai_model') || 'deepseek-chat';
-const TEMPERATURE = parseFloat(localStorage.getItem('setting.config.temperature') || setting.get('temperature') || '0.0');
+
+function loadFromStorage<T>(key: string, defaultValue: T): T {
+  const stored = localStorage.getItem(key);
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch {
+      return defaultValue;
+    }
+  }
+  const configValue = setting.get(key);
+  return configValue !== undefined ? configValue : defaultValue;
+}
+
+
+const TEMPERATURE = parseFloat(
+  localStorage.getItem('setting.config.temperature') || setting.get('temperature') || '0.0'
+);
 
 export const useSettingStore = defineStore('setting', () => {
   const mode = ref('session');
   const temperature = ref(TEMPERATURE);
-  const config = ref({
-    openai: OPENAI,
-    openai_token: OPENAI_TOKEN,
-    openai_model: OPENAI_MODEL,
+  const providers = ref<ProviderDto[]>(loadFromStorage('setting.config.providers', [new ProviderDto()]));
+  const currentProviderId = ref<string>(loadFromStorage('setting.config.currentProviderId', 'default'));
+
+  const currentProvider = computed(() => {
+    return providers.value.find((p) => p.id === currentProviderId.value) || providers.value[0];
   });
+
+  const currentModel = computed(() => {
+    const provider = currentProvider.value;
+    if (provider && provider.models.length > 0) {
+      return provider.models[0];
+    }
+    return { id: 'deepseek-chat', name: 'DeepSeek Chat' };
+  });
+
   const setTemperature = (value: number) => {
     temperature.value = value;
     localStorage.setItem('setting.config.temperature', value.toFixed(1));
   };
 
-  const setOpenai = (value: string) => {
-    config.value.openai = value;
-    localStorage.setItem('setting.config.openai', value);
+  const setProviders = (value: IProvider[]) => {
+    providers.value = value;
+    localStorage.setItem('setting.config.providers', JSON.stringify(value));
   };
 
-  const setOpenaiToken = (value: string) => {
-    config.value.openai_token = value;
-    localStorage.setItem('setting.config.openai_token', value);
+  const resetProviders = () => {
+    setProviders([new ProviderDto()]);
   };
 
-  const setOpenaiModel = (value: string) => {
-    config.value.openai_model = value;
-    localStorage.setItem('setting.config.openai_model', value);
+  const setCurrentProviderId = (value: string) => {
+    currentProviderId.value = value;
+    localStorage.setItem('setting.config.currentProviderId', value);
+  };
+
+  const setCurrentModelId = (value: string) => {
+    currentModel.value.id = value;
   };
 
   return {
     mode,
     temperature,
-    config,
+    providers,
+    currentProviderId,
+    currentProvider,
+    currentModel,
     setTemperature,
-    setOpenai,
-    setOpenaiToken,
-    setOpenaiModel,
+    setProviders,
+    resetProviders,
+    setCurrentProviderId,
+    setCurrentModelId,
   };
 });

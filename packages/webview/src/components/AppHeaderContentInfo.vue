@@ -48,7 +48,7 @@ const props = defineProps({
   align-items: center;
   line-height: 14px;
   gap: 4px;
-  color: #ccc;
+  color: #fff;
   font-size: 12px;
   font-family: monospace;
 }
@@ -64,11 +64,5 @@ const props = defineProps({
   gap: 8px;
 }
 
-.icon-block svg {
-  cursor: pointer;
-}
 
-.icon-block svg:hover {
-  color: #409eff;
-}
 </style>

@@ -3,30 +3,34 @@
     <div class="header-area-tool">
       <div class="info-block" style="display: flex; align-items: center; gap: 4px">
         <ContentInfo :info="info"></ContentInfo>
-        <ChatDownload class="header-icon" @click="downloadConversation"></ChatDownload>
       </div>
       <div class="icon-block">
-        <ChatAdd class="header-icon" @click="onCreateConversation"> </ChatAdd>
-        <el-popover class="box-item" width="360px" trigger="click" placement="left-start" v-model:visible="visible">
-          <div class="conversation-head">
-            <span class="conversation-head-title">历史记录</span>
-            <ChatClear class="header-icon" @click="clearConversation"></ChatClear>
-          </div>
-          <div class="conversation-list">
-            <div
-              class="conversation-item"
-              v-for="option in conversations"
-              :key="option.id"
-              @click="onConversationChange(option.id)"
-            >
-              <span class="conversation-item-title">{{ option.title }}</span>
-              <el-icon class="icon-delete" @click.stop="onDeleteConversation(option.id)"><Delete /></el-icon>
+        <el-icon class="header-icon" @click="downloadConversation"><Download /></el-icon>
+        <el-icon class="header-icon" @click="onCreateConversation"><FolderAdd /></el-icon>
+        <div class="history-dropdown" v-if="visible">
+          <div class="dropdown-overlay" @click="visible = false"></div>
+          <div class="dropdown-content">
+            <div class="conversation-head">
+              <span class="conversation-head-title">历史记录</span>
+              <el-icon class="header-icon" @click="clearConversation"><DeleteFilled /></el-icon>
+            </div>
+            <div class="conversation-list">
+              <div
+                class="conversation-item"
+                v-for="option in conversations"
+                :key="option.id"
+                @click="onConversationChange(option.id)"
+              >
+                <span class="conversation-item-title">{{ option.title }}</span>
+                <span class="icon-delete" @click.stop="onDeleteConversation(option.id)"><Delete /></span>
+              </div>
             </div>
           </div>
-          <template #reference>
-            <ChatHistory class="header-icon"></ChatHistory>
-          </template>
-        </el-popover>
+        </div>
+        <el-icon class="header-icon" @click="visible = !visible"><FolderOpened /></el-icon>
+        <el-icon class="header-icon" width="1em" height="1em" @click="$router.push('/setting')">
+          <Setting></Setting>
+        </el-icon>
       </div>
     </div>
     <div class="header-area-bar">
@@ -41,10 +45,9 @@ import { useMessageStore } from '@/stores/message';
 import { firstElement, getTokenCount, lastElement } from '@/utils';
 import { computed, ref } from 'vue';
 import type { ChatMessage } from '@/models/Model';
-import { ChatAdd, ChatClear, ChatHistory, ChatDownload } from '@/icons';
 import ContentInfo from './AppHeaderContentInfo.vue';
 import { MAX_TOKEN_LENGTH } from '@/utils/constants';
-import { Delete } from '@element-plus/icons-vue';
+import { Delete, Setting, Download, Reading, FolderAdd, FolderOpened } from '@element-plus/icons-vue';
 import { storeToRefs } from 'pinia';
 
 const conversationStore = useConversationStore();
@@ -133,11 +136,6 @@ const clearConversation = async () => {
 </script>
 
 <style>
-.header-icon {
-  cursor: pointer;
-  font-size: 16px;
-}
-
 .header-area-bar {
   margin-top: 2px;
   margin-bottom: 2px;
@@ -149,7 +147,7 @@ const clearConversation = async () => {
 .header-area-bar__inner {
   height: 2px;
   width: var(--width);
-  background-color: #409eff;
+  background-color: var(--vscode-charts-blue);
 }
 
 .conversation-head {
@@ -209,5 +207,35 @@ const clearConversation = async () => {
 
 .conversation-item:hover .icon-delete {
   visibility: visible;
+}
+
+.history-dropdown {
+  position: relative;
+}
+
+.dropdown-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99;
+}
+
+.dropdown-content {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  width: 360px;
+  background-color: #1d1e1f;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 12px;
+  z-index: 100;
+}
+
+.dropdown-content .icon-delete {
+  cursor: pointer;
+  color: #f56c6c;
 }
 </style>

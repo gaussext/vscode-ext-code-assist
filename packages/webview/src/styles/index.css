@@ -1,16 +1,11 @@
 :root {
-  --vscode-editor-background: #1e1f1c;
-  --vscode-block-background: #272822;
-  --vscode-block-border: #414339;
-  --vscode-foreground: #f8f8f2;
   --vscode-font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
-  --vscode-list-hoverBackground: #262727;
 }
 
 body {
   font-family: var(--vscode-font-family);
-  color: var(--vscode-foreground);
-  background-color: var(--vscode-sideBarTitle-background);
+  color: var(--vscode-editor-foreground);
+  background-color: var(--vscode-sideBar-background);
   margin: 0;
   padding: 0 8px;
   height: 100vh;
@@ -28,10 +23,26 @@ body {
   display: flex;
   align-items: center;
   height: var(--app-header-height);
+  padding-top: 2px;
+}
+
+.app-header .header-icon,
+.setting-header .header-icon {
+  cursor: pointer;
+  font-size: 16px;
+  width: 1em;
+  height: 1em;
+}
+
+.header-icon svg {
+  cursor: pointer;
+}
+
+.header-icon svg:hover {
+  color: #409eff;
 }
 
 .chat-container {
-  background-color: var(--vscode-editor-background);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -65,9 +76,9 @@ body {
   margin-bottom: 16px;
   line-height: 1.35;
   border: 1px solid transparent;
-  background-color: var(--vscode-block-background);
   padding: 8px;
   border-radius: 4px;
+  background-color: var(--vscode-editor-background);
 }
 
 .messages-area .message-ai {
@@ -88,10 +99,9 @@ body {
   cursor: pointer;
 }
 
-.footer-area textarea {
+.footer-area .vscode-textarea {
   width: 100%;
   height: 100%;
-  background-color: var(--vscode-block-border);
   border-radius: 4px;
 }
 
@@ -122,7 +132,6 @@ body {
   overflow-y: auto;
   padding: 4px;
   border-radius: 4px;
-  background-color: var(--vscode-editor-background);
 }
 
 .el-button + .el-button.vscode-button-small {
@@ -135,8 +144,4 @@ body {
   border-radius: 4px;
   cursor: pointer;
   outline: none;
-}
-
-.el-dropdown-link:hover {
-  background-color: var(--vscode-list-hoverBackground);
 }

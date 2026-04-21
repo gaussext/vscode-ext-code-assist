@@ -19,7 +19,7 @@ export class ChatMessage {
   constructor(role: MessageRole) {
     const settingStore = useSettingStore();
     this.role = role;
-    this.model = settingStore.config.openai_model;
+    this.model = settingStore.currentModel.id;
   }
 }
 

@@ -10,6 +10,7 @@
     "format": "prettier --write \"src/**/*.{vue,js,ts,jsx,tsx,css,scss,html,json,md}\""
   },
   "dependencies": {
+    "@element-plus/icons-vue": "^2.3.2",
     "element-plus": "^2.9.9",
     "highlight.js": "^11.11.1",
     "localforage": "^1.10.0",
