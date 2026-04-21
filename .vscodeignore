@@ -14,3 +14,7 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+assets
+AGENTS.md
+LICENSE.txt
+pnpm-lock.yaml
