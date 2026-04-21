@@ -11,10 +11,10 @@ declare module 'vue' {
     AppBody: typeof import('./src/components/AppBody.vue')['default']
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
     AppHeader: typeof import('./src/components/AppHeader.vue')['default']
+    AppHeaderContentInfo: typeof import('./src/components/AppHeaderContentInfo.vue')['default']
     AppSettingDialog: typeof import('./src/components/AppSettingDialog.vue')['default']
     ContentInfo: typeof import('./src/components/ContentInfo.vue')['default']
     ElButton: typeof import('element-plus/es')['ElButton']
-    ElDialog: typeof import('element-plus/es')['ElDialog']
     ElDropdown: typeof import('element-plus/es')['ElDropdown']
     ElDropdownItem: typeof import('element-plus/es')['ElDropdownItem']
     ElDropdownMenu: typeof import('element-plus/es')['ElDropdownMenu']
@@ -25,5 +25,7 @@ declare module 'vue' {
     ElPopover: typeof import('element-plus/es')['ElPopover']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     MessageInfo: typeof import('./src/components/MessageInfo.vue')['default']
+    RouterLink: typeof import('vue-router')['RouterLink']
+    RouterView: typeof import('vue-router')['RouterView']
   }
 }

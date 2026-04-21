@@ -1,7 +1,6 @@
 import type { ChatParams } from '@/models/Model';
 import { WebviewRpcClient } from 'vscode-webview-rpc';
 
-
 export interface StreamCallbacks {
   onChunk: (delta: string) => void;
   onComplete: () => void;
@@ -12,12 +11,17 @@ class ChatRpcService {
   private rpcClient: WebviewRpcClient;
 
   constructor() {
-    const vscode = (globalThis as any).acquireVsCodeApi();
-    this.rpcClient = new WebviewRpcClient(vscode, { debug: true });
-    this.rpcClient.setupMessageListener();
+    if (globalThis.acquireVsCodeApi) {
+      const vscode = (globalThis as any).acquireVsCodeApi();
+      this.rpcClient = new WebviewRpcClient(vscode, { debug: true });
+      this.rpcClient.setupMessageListener();
+    }
   }
 
   streamMessage(params: ChatParams, callbacks: StreamCallbacks): void {
+    if (!this.rpcClient) {
+      throw new Error('RPC client not initialized');
+    }
     this.rpcClient.stream('chat/streamMessage', params, {
       onChunk: (chunk: any) => {
         callbacks.onChunk(chunk.delta);
@@ -32,6 +36,9 @@ class ChatRpcService {
   }
 
   async stopChat(): Promise<any> {
+    if (!this.rpcClient) {
+      throw new Error('RPC client not initialized');
+    }
     return this.rpcClient.call('chat/stopChat', {});
   }
 }

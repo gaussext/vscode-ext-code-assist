@@ -47,7 +47,7 @@
           text
           type="info"
           :icon="Setting"
-          @click="openDialog"
+          @click="$router.push('/setting')"
         >
         </el-button>
       </div>
@@ -55,17 +55,17 @@
       </el-button>
     </div>
   </div>
-  <SettingDialog v-if="dialogVisible" @cancel="onDialogCancel" @submit="onDialogSubmit"></SettingDialog>
 </template>
 
 <script setup lang="ts">
 import { useSettingStore } from '@/stores/setting';
-import { computed, ref, watch } from 'vue';
-import SettingDialog from './AppSettingDialog.vue';
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 import { marked } from '@/utils/marked';
 import { VideoPause, Promotion, Setting, ArrowDown } from '@element-plus/icons-vue';
 import { createTemperatures } from '@/models/Temperature';
 
+const router = useRouter();
 const settingStore = useSettingStore();
 
 const modelValue = defineModel<string>({ required: true });
@@ -104,21 +104,5 @@ const handleKeyPress = (e: KeyboardEvent) => {
 // 格式化消息内容
 const formatCode = (content) => {
   return marked.parse(content);
-};
-
-// 打开配置模型对话框
-const dialogVisible = ref(false);
-
-const openDialog = () => {
-  dialogVisible.value = true;
-};
-
-const onDialogCancel = () => {
-  dialogVisible.value = false;
-};
-
-const onDialogSubmit = () => {
-  emit('change');
-  dialogVisible.value = false;
 };
 </script>

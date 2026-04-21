@@ -1,9 +1,19 @@
+:root {
+  --vscode-editor-background: #1e1f1c;
+  --vscode-block-background: #272822;
+  --vscode-block-border: #414339;
+  --vscode-foreground: #f8f8f2;
+  --vscode-font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  --vscode-list-hoverBackground: #262727;
+}
+
 body {
   font-family: var(--vscode-font-family);
   color: var(--vscode-foreground);
-  background-color: #1e1f1c;
+  background-color: var(--vscode-sideBarTitle-background);
   margin: 0;
   padding: 0 8px;
+  height: 100vh;
 }
 
 #app {
@@ -21,7 +31,7 @@ body {
 }
 
 .chat-container {
-  background-color: #1e1f1c;
+  background-color: var(--vscode-editor-background);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -29,6 +39,7 @@ body {
   max-width: 800px;
   margin: 0 auto;
   max-height: 100vh;
+  padding: 0 4px;
 }
 
 .messages-area {
@@ -53,8 +64,8 @@ body {
 .messages-area .message-ai {
   margin-bottom: 16px;
   line-height: 1.35;
-  border: 1px solid var(--vscode-input-border);
-  background-color: #272822;
+  border: 1px solid transparent;
+  background-color: var(--vscode-block-background);
   padding: 8px;
   border-radius: 4px;
 }
@@ -80,7 +91,7 @@ body {
 .footer-area textarea {
   width: 100%;
   height: 100%;
-  background-color: #414339;
+  background-color: var(--vscode-block-border);
   border-radius: 4px;
 }
 
@@ -111,7 +122,7 @@ body {
   overflow-y: auto;
   padding: 4px;
   border-radius: 4px;
-  background-color: #1e1f1c;
+  background-color: var(--vscode-editor-background);
 }
 
 .el-button + .el-button.vscode-button-small {
@@ -127,5 +138,5 @@ body {
 }
 
 .el-dropdown-link:hover {
-  background-color: #262727;
+  background-color: var(--vscode-list-hoverBackground);
 }

@@ -73,13 +73,13 @@ watch(
     if (latestMessageRef.value) {
       latestMessageRef.value.innerHTML = await formatMessage(props.latestMessage);
     }
-    scrollToBottom();
   }
 );
 
 watch(
   () => props.messages,
   () => {
+    // 每次添加消息，滑动滚动条
     scrollToBottom();
   }
 );

@@ -2,7 +2,7 @@
   "name": "code-assist",
   "displayName": "Code Assist",
   "description": "",
-  "version": "0.3.4",
+  "version": "1.0.0-beta.1",
   "repository": {
     "type": "git",
     "url": "https://github.com/gausstool/vscode-ext-code-assist.git"
@@ -18,19 +18,7 @@
   "main": "./dist/extension.js",
   "contributes": {
     "configuration": {
-      "title": "Code Assist",
-      "properties": {
-        "code-assist.deepseek": {
-          "type": "string",
-          "default": "https://api.deepseek.com",
-          "description": "Deepseek Server Address"
-        },
-        "code-assist.deepseek_token": {
-          "type": "string",
-          "default": "",
-          "description": "Deepseek Server Token"
-        }
-      }
+      "title": "Code Assist"
     },
     "viewsContainers": {
       "activitybar": [
