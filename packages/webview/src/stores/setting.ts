@@ -90,7 +90,7 @@ export const useSettingStore = defineStore('setting', () => {
 
   const currentModel = computed(() => {
     const provider = currentProvider.value;
-    return provider.models.find((m) => m.id === currentModelId.value);
+    return provider.models.find((m) => m.id === currentModelId.value) ?? { id: currentModelId.value } ;
   });
 
   const setTemperature = (value: number) => {
@@ -113,7 +113,8 @@ export const useSettingStore = defineStore('setting', () => {
   };
 
   const setCurrentModelId = (value: string) => {
-    currentModel.value.id = value;
+    currentModelId.value = value;
+    localStorage.setItem('setting.config.currentModelId', value);
   };
 
   return {
