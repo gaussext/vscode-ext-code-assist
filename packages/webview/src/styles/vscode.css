@@ -97,14 +97,25 @@ code {
   color: var(--vscode-input-placeholderForeground);
 }
 
-.vscode-button-small {
-  width: auto;
-  padding: 4px 16px;
-  border-radius: 2px;
+.vscode-button-form {
+  padding: 6px 12px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background-color: #272822;
+  color: #fff;
+  cursor: pointer;
 }
 
-.vscode-button-full {
-  width: 100%;
-  padding: 4px 0;
-  border-radius: 2px;
+.vscode-button-form:hover {
+  background-color: #3a3a32;
+}
+
+.vscode-button-form.primary {
+  background-color: #409eff;
+  border-color: #409eff;
+  color: #fff;
+}
+
+.vscode-button-form.primary:hover {
+  background-color: #66b1ff;
 }

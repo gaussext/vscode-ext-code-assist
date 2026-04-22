@@ -1,12 +1,18 @@
 <template>
-  <div class="setting-container">
-    <div class="setting-header">
-      <h2 class="setting-title">供应商配置</h2>
-      <el-icon class="header-icon" style="transform: rotate(90deg);" @click="$router.push('/')"><Download /></el-icon>
+  <div class="provider-setting-container">
+    <div class="provider-setting-header">
+      <h2 class="provider-setting-title">供应商配置</h2>
+      <div class="header-icon-group right">
+        <el-icon class="header-icon" style="transform: rotate(90deg);" @click="$router.push('/')">
+          <Download />
+        </el-icon>
+      </div>
     </div>
-    <div class="setting-body">
-      <div v-for="provider in providers" :key="provider.id" class="provider-content">
-        <el-icon v-if="providers.length > 1" class="delete-icon" @click="handleRemoveProvider(provider.id)"><Delete /></el-icon>
+    <div class="provider-setting-body">
+      <div v-for="provider in providers" :key="provider.id" class="provider-item">
+        <el-icon v-if="providers.length > 1" class="icon-delete" @click="handleRemoveProvider(provider.id)">
+          <Delete />
+        </el-icon>
         <div class="form-section">
           <label>Base URL</label>
           <input v-model="provider.baseURL" placeholder="https://api.example.com" />
@@ -15,7 +21,7 @@
           <label>API Key</label>
           <input v-model="provider.apiKey" type="password" placeholder="sk-..." />
         </div>
-          <div class="form-section">
+        <div class="form-section">
           <label>Models</label>
           <input v-model="provider.models" placeholder="model1,model2,model3" />
         </div>
@@ -23,10 +29,10 @@
     </div>
     <div class="setting-footer">
       <div style="flex: 1">
-        <button @click="handleAddProvider">Add Provider</button>
+        <button class="vscode-button-form" @click="handleAddProvider">Add Provider</button>
       </div>
-      <button @click="handleResetClick">Reset</button>
-      <button class="primary" @click="onConfirmClick">OK</button>
+      <button class="vscode-button-form" @click="handleResetClick">Reset</button>
+      <button class="vscode-button-form primary" @click="onConfirmClick">OK</button>
     </div>
   </div>
 </template>
@@ -34,7 +40,7 @@
 <script lang="ts" setup>
 import { Provider, ProviderVo, useSettingStore, type IModel } from '@/stores/setting';
 import { useRouter } from 'vue-router';
-import { Delete, Upload, Download } from '@element-plus/icons-vue';
+import { Delete, Download } from '@element-plus/icons-vue';
 import { ref } from 'vue';
 
 const router = useRouter();
@@ -64,8 +70,8 @@ const onConfirmClick = () => {
 };
 </script>
 
-<style scoped>
-.setting-container {
+<style lang="scss" scoped>
+.provider-setting-container {
   min-width: 400px;
   max-width: 800px;
   margin: 0 auto;
@@ -74,28 +80,26 @@ const onConfirmClick = () => {
   flex-direction: column;
 }
 
-.setting-header {
+.provider-setting-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: 28px;
   margin-bottom: 8px;
+
+  .provider-setting-title {
+    font-size: 14px;
+    font-weight: 500;
+  }
 }
 
-.setting-title {
-  font-size: 14px;
-  font-weight: 500;
-  padding-left: 8px;
-}
-
-.setting-body {
+.provider-setting-body {
   flex: 1;
   max-height: calc(100vh - 120px);
   overflow-y: auto;
-  padding: 0 8px;
 }
 
-.provider-content {
+.provider-item {
   padding: 16px;
   border-radius: 8px;
   border: 1px solid var(--vscode-pickerGroup-border);
@@ -103,11 +107,12 @@ const onConfirmClick = () => {
   position: relative;
 }
 
-.delete-icon {
+.icon-delete {
   position: absolute;
   top: 8px;
   right: 8px;
   cursor: pointer;
+  color: #f56c6c;
 }
 
 .form-section {
@@ -133,37 +138,6 @@ input {
 input:focus {
   outline: none;
   border-color: #409eff;
-}
-
-button {
-  padding: 6px 12px;
-  border: 1px solid #444;
-  border-radius: 4px;
-  background-color: #272822;
-  color: #fff;
-  cursor: pointer;
-}
-
-button:hover {
-  background-color: #3a3a32;
-}
-
-button.primary {
-  background-color: #409eff;
-  border-color: #409eff;
-  color: #fff;
-}
-
-button.primary:hover {
-  background-color: #66b1ff;
-}
-
-button.delete-btn {
-  padding: 4px;
-  min-width: 28px;
-  min-height: 28px;
-  font-size: 16px;
-  border: none;
 }
 
 .models-section {

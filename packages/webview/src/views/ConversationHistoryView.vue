@@ -1,0 +1,139 @@
+<template>
+  <div class="conversation-history-container">
+    <div class="conversation-history-header">
+      <h2 class="conversation-history-title">历史记录</h2>
+      <div class="header-icon-group right">
+        <el-icon class="header-icon" style="transform: rotate(90deg);" @click="$router.push('/')">
+          <Download />
+        </el-icon>
+        <el-icon class="header-icon" @click="$router.push('/setting')">
+          <Setting></Setting>
+        </el-icon>
+      </div>
+    </div>
+    <div class="conversation-history-body">
+      <div v-for="option in conversations" :key="option.id" class="conversation-item"
+        @click="onConversationChange(option.id)">
+        <span class="conversation-item-title">{{ option.title }}</span>
+        <el-icon v-if="conversations.length > 1" class="icon-delete" @click.stop="onDeleteConversation(option.id)">
+          <Delete />
+        </el-icon>
+      </div>
+    </div>
+    <div class="conversation-history-footer">
+      <button class="vscode-button-form" @click="onClearConversation">Reset</button>
+      <button class="vscode-button-form primary" @click="$router.push('/')">OK</button>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { useConversationStore } from '@/stores/conversation';
+import { useMessageStore } from '@/stores/message';
+import { firstElement, sleep } from '@/utils';
+import { useRouter } from 'vue-router';
+import { Delete, Download, Setting } from '@element-plus/icons-vue';
+import { storeToRefs } from 'pinia';
+
+const router = useRouter();
+const conversationStore = useConversationStore();
+const { conversations, conversationId } = storeToRefs(useConversationStore());
+const messageStore = useMessageStore();
+
+const onConversationChange = (id: string) => {
+  conversationStore.setCurrentConversationId(id);
+  router.push('/');
+};
+
+const onDeleteConversation = async (id: string) => {
+  await conversationStore.deleteConversation(id);
+  await messageStore.removeMessagesById(id);
+  const convs = await conversationStore.getConversations();
+  if (convs.length > 0) {
+    conversationStore.setCurrentConversationId(firstElement(convs).id);
+  }
+};
+
+const onClearConversation = async () => {
+  router.push('/');
+  await sleep(1000);
+  await conversationStore.clearConversation();
+  const convs = await conversationStore.getConversations();
+  if (convs.length > 0) {
+    conversationStore.setCurrentConversationId(firstElement(convs).id);
+  }
+};
+</script>
+
+<style lang="scss" scoped>
+.conversation-history-container {
+  min-width: 400px;
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 0 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.conversation-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 28px;
+  margin-bottom: 8px;
+
+  .conversation-history-title {
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+.conversation-history-body {
+  flex: 1;
+  max-height: calc(100vh - 120px);
+  display: flex;
+  flex-direction: column;
+}
+
+.conversation-item {
+  cursor: pointer;
+  padding: 12px;
+  border-radius: 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  background-color: transparent;
+  border: 1px solid var(--vscode-pickerGroup-border);
+  color: var(--vscode-list-highlightForeground);
+
+  &:hover {
+    background-color: var(--vscode-pickerGroup-border);
+    color: var(--vscode-list-highlightForeground);
+  }
+
+  .conversation-item-title {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .icon-delete {
+    cursor: pointer;
+    color: var(--vscode-charts-red);
+    visibility: hidden;
+  }
+
+  &:hover .icon-delete {
+    visibility: visible;
+  }
+}
+
+.conversation-history-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0 8px;
+}
+</style>

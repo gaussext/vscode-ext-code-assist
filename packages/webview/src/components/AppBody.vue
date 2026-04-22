@@ -57,7 +57,7 @@ const latestMessageRef = ref<HTMLDivElement | null>(null);
 
 // 格式化消息内容
 const formatMessage = (message: ChatMessage) => {
-  return marked.parse(message.content);
+  return marked.parse(message?.content ?? '');
 };
 
 // 滚动到底部

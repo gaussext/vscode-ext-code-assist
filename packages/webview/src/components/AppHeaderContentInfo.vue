@@ -56,11 +56,4 @@ const props = defineProps({
     vertical-align: middle;
   }
 }
-
-.icon-block {
-  flex: 1;
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
 </style>

@@ -10,18 +10,17 @@
 </template>
 
 <script setup lang="ts">
-import { firstElement, queueAsync } from '@/utils';
+import { queueAsync } from '@/utils';
 import { onMounted, onUnmounted, ref, unref } from 'vue';
 import { chatService } from '../api';
 import AppBody from '../components/AppBody.vue';
 import AppFooter from '../components/AppFooter.vue';
 import AppHeader from '../components/AppHeader.vue';
-import { ChatConversation, ChatMessage } from '../models/Model';
+import { EnumTemperature, ChatMessage } from '../models/Model';
 import { useSettingStore } from '../stores/setting';
 import { useConversationStore } from '../stores/conversation';
 import { useMessageStore } from '../stores/message';
 import type { IMessage } from '../types';
-import { EnumTemperature } from '../models/Temperature';
 
 const settingStore = useSettingStore();
 const conversationStore = useConversationStore();

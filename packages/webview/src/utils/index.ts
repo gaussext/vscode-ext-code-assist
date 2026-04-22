@@ -1,5 +1,8 @@
 import type { IMessage } from '@/types';
 
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 /**
  *  获取 Json 数据
  * @param str

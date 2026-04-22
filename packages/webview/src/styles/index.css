@@ -18,6 +18,7 @@ body {
   --app-footer-height: 100px;
 }
 
+
 .app-header .header-area-tool {
   box-sizing: border-box;
   display: flex;
@@ -26,8 +27,17 @@ body {
   padding-top: 2px;
 }
 
-.app-header .header-icon,
-.setting-header .header-icon {
+.header-icon-group {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+}
+.header-icon-group.right {
+  justify-content: flex-end;
+}
+
+.header-icon-group .header-icon,
+.header-icon-group .header-icon {
   cursor: pointer;
   font-size: 16px;
   width: 1em;
@@ -132,10 +142,6 @@ body {
   overflow-y: auto;
   padding: 4px;
   border-radius: 4px;
-}
-
-.el-button + .el-button.vscode-button-small {
-  margin-left: 0;
 }
 
 .el-dropdown-link {
