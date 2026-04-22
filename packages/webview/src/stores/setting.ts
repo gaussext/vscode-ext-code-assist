@@ -1,5 +1,12 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+
+const EnumStorageKey = {
+  Temperature: 'code-assist.config.temperature',
+  Providers: 'code-assist.config.providers',
+  CurrentProviderId: 'code-assist.config.currentProviderId',
+  CurrentModelId: 'code-assist.config.currentModelId',
+}
 
 export interface IModel {
   id: string;
@@ -54,7 +61,7 @@ export class ProviderDto extends Provider {
 }
 
 export class ProviderVo extends Provider {
-  models = 'qwen3:0.6b';
+  models = 'qwen3:0.6b,qwen3:1.7b,qwen3:4b';
 }
 
 const setting = (window as any).setting;
@@ -74,15 +81,15 @@ function loadFromStorage<T>(key: string, defaultValue: T): T {
 
 
 const TEMPERATURE = parseFloat(
-  localStorage.getItem('setting.config.temperature') || setting.get('temperature') || '0.0'
+  localStorage.getItem(EnumStorageKey.Temperature) || setting.get('temperature') || '0.0'
 );
 
 export const useSettingStore = defineStore('setting', () => {
   const mode = ref('session');
   const temperature = ref(TEMPERATURE);
-  const providers = ref<ProviderDto[]>(loadFromStorage('setting.config.providers', [new ProviderDto()]));
-  const currentProviderId = ref<string>(loadFromStorage('setting.config.currentProviderId', 'default'));
-  const currentModelId = ref<string>(loadFromStorage('setting.config.currentModelId', 'qwen3:0.6b'));
+  const providers = ref<ProviderDto[]>(loadFromStorage(EnumStorageKey.Providers, [new ProviderDto()]));
+  const currentProviderId = ref<string>(loadFromStorage(EnumStorageKey.CurrentProviderId, 'default'));
+  const currentModelId = ref<string>(loadFromStorage(EnumStorageKey.CurrentModelId, 'qwen3:0.6b'));
 
   const currentProvider = computed(() => {
     return providers.value.find((p) => p.id === currentProviderId.value) || providers.value[0];
@@ -95,27 +102,55 @@ export const useSettingStore = defineStore('setting', () => {
 
   const setTemperature = (value: number) => {
     temperature.value = value;
-    localStorage.setItem('setting.config.temperature', value.toFixed(1));
+    localStorage.setItem(EnumStorageKey.Temperature, value.toFixed(1));
   };
 
   const setProviders = (value: IProvider[]) => {
     providers.value = value;
-    localStorage.setItem('setting.config.providers', JSON.stringify(value));
+    localStorage.setItem(EnumStorageKey.Providers, JSON.stringify(value));
+    fix();
   };
 
   const resetProviders = () => {
     setProviders([new ProviderDto()]);
+    fix();
   };
 
   const setCurrentProviderId = (value: string) => {
     currentProviderId.value = value;
-    localStorage.setItem('setting.config.currentProviderId', value);
+    localStorage.setItem(EnumStorageKey.CurrentProviderId, value);
   };
 
   const setCurrentModelId = (value: string) => {
     currentModelId.value = value;
-    localStorage.setItem('setting.config.currentModelId', value);
+    localStorage.setItem(EnumStorageKey.CurrentModelId, value);
   };
+
+  const fix = () => {
+    let validProvider = false;
+    providers.value.forEach((p) => {
+      if (p.id === currentProviderId.value) {
+        validProvider = true;
+      }
+    })
+    if (!validProvider) {
+      setCurrentProviderId(currentProvider.value.id);
+    }
+
+    let validModel = false;
+    currentProvider.value.models.forEach((m) => {
+      if (m.id === currentModelId.value) {
+        validModel = true;
+      }
+    })
+    if (!validModel) {
+      setCurrentModelId(currentProvider.value.models[0].id);
+    }
+  }
+
+  onMounted(() => {
+    fix()
+  })
 
   return {
     mode,
