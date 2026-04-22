@@ -5,7 +5,7 @@
       <el-icon class="header-icon" style="transform: rotate(90deg);" @click="$router.push('/')"><Download /></el-icon>
     </div>
     <div class="setting-body">
-      <div class="provider-content" v-for="provider in providers" :key="provider.id">
+      <div v-for="provider in providers" :key="provider.id" class="provider-content">
         <el-icon v-if="providers.length > 1" class="delete-icon" @click="handleRemoveProvider(provider.id)"><Delete /></el-icon>
         <div class="form-section">
           <label>Base URL</label>

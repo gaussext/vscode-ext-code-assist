@@ -1,5 +1,5 @@
 <template>
-  <div class="app-body messages-area" id="messages" :class="{ 'has-code': promptCode }">
+  <div id="messages" class="app-body messages-area" :class="{ 'has-code': promptCode }">
     <div
       v-for="message in messages"
       :key="message.uuid"

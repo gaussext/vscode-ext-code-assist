@@ -7,7 +7,7 @@
       <div class="icon-block">
         <el-icon class="header-icon" @click="downloadConversation"><Download /></el-icon>
         <el-icon class="header-icon" @click="onCreateConversation"><FolderAdd /></el-icon>
-        <div class="history-dropdown" v-if="visible">
+        <div v-if="visible" class="history-dropdown">
           <div class="dropdown-overlay" @click="visible = false"></div>
           <div class="dropdown-content">
             <div class="conversation-head">
@@ -16,9 +16,9 @@
             </div>
             <div class="conversation-list">
               <div
-                class="conversation-item"
                 v-for="option in conversations"
                 :key="option.id"
+                class="conversation-item"
                 @click="onConversationChange(option.id)"
               >
                 <span class="conversation-item-title">{{ option.title }}</span>
@@ -102,7 +102,7 @@ const emit = defineEmits<{
 
 const downloadConversation = async () => {
   const conversation = conversationStore.getConversationById(conversationId.value);
-  if (!conversation) return;
+  if (!conversation) {return;}
   await messageStore.downloadConversation(conversationId.value, conversation.title);
 };
 
@@ -135,49 +135,49 @@ const clearConversation = async () => {
 };
 </script>
 
-<style>
+<style lang="scss">
 .header-area-bar {
   margin-top: 2px;
   margin-bottom: 2px;
   width: 100%;
   height: 2px;
   background-color: #777;
-}
 
+}
 .header-area-bar__inner {
   height: 2px;
   width: var(--width);
   background-color: var(--vscode-charts-blue);
-}
 
+}
 .conversation-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding-bottom: 12px;
-}
 
-.conversation-head .conversation-head-title {
-  font-size: 16px;
-}
+  .conversation-head-title {
+    font-size: 16px;
 
-.conversation-head .conversation-head-button {
-  font-size: 14px;
-  cursor: pointer;
-}
+  }
+  .conversation-head-button {
+    font-size: 14px;
+    cursor: pointer;
 
-.conversation-head .conversation-head-button:hover {
-  color: #f56c6c;
-}
+  }
+  .conversation-head-button:hover {
+    color: #f56c6c;
 
+  }
+}
 .conversation-list {
   display: flex;
   flex-direction: column;
   gap: 4px;
   max-height: 480px;
   overflow-y: auto;
-}
 
+}
 .conversation-item {
   cursor: pointer;
   padding: 6px;
@@ -187,32 +187,36 @@ const clearConversation = async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
 
+}
 .conversation-item:hover {
   background-color: #484c58;
-}
 
+}
 .conversation-item-title {
   flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
 
-.conversation-item .icon-delete {
-  visibility: hidden;
-  color: #f56c6c;
 }
+.conversation-item {
+  .icon-delete {
+    visibility: hidden;
+    color: #f56c6c;
 
-.conversation-item:hover .icon-delete {
-  visibility: visible;
+  }
 }
+.conversation-item:hover {
+  .icon-delete {
+    visibility: visible;
 
+  }
+}
 .history-dropdown {
   position: relative;
-}
 
+}
 .dropdown-overlay {
   position: fixed;
   top: 0;
@@ -220,8 +224,8 @@ const clearConversation = async () => {
   right: 0;
   bottom: 0;
   z-index: 99;
-}
 
+}
 .dropdown-content {
   position: absolute;
   right: 0;
@@ -232,10 +236,10 @@ const clearConversation = async () => {
   border-radius: 4px;
   padding: 12px;
   z-index: 100;
-}
 
-.dropdown-content .icon-delete {
-  cursor: pointer;
-  color: #f56c6c;
+  .icon-delete {
+    cursor: pointer;
+    color: #f56c6c;
+  }
 }
 </style>

@@ -5,7 +5,7 @@ import log from 'loglevel';
 const openaiService = new OpenAIService();
 
 export const streamMessageHandler = async (params: ChatParams, stream: any) => {
-  log.info('streamMessageHandler', params)
+  log.info('streamMessageHandler', params);
   await openaiService.chat(params, {
     onChunk: (delta: string) => {
       stream.write({ delta });

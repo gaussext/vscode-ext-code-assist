@@ -198,7 +198,8 @@
     "compile-tests": "tsc -p . --outDir out",
     "watch-tests": "tsc -p . -w --outDir out",
     "pretest": "pnpm run compile-tests && pnpm run compile && pnpm run lint",
-    "lint": "pnpm --filter code-assist-main run lint",
+    "lint": "eslint packages/*/src/**/*.{js,ts,jsx,tsx,vue,css,scss,html,json,md}",
+    "lint:fix": "eslint --fix packages/*/src/**/*.{js,ts,jsx,tsx,vue,css,scss,html,json,md}",
     "test": "vscode-test",
     "vsce": "vsce package"
   },
@@ -206,10 +207,15 @@
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
     "@types/vscode": "^1.74.0",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "@typescript-eslint/parser": "^8.28.0",
     "@vscode/test-cli": "^0.0.10",
     "@vscode/test-electron": "^2.4.1",
     "@vscode/vsce": "^3.9.1",
     "concurrently": "^9.1.2",
-    "typescript": "~5.7.2"
+    "eslint": "^9.23.0",
+    "eslint-plugin-vue": "^10.9.0",
+    "typescript": "~5.7.2",
+    "vue-eslint-parser": "^10.4.0"
   }
 }
