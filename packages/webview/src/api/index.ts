@@ -1,8 +1,8 @@
-import type { ChatParams } from '@/models/Model';
+import type { IChatParams } from '@/models/Model';
 import { chatRpcService } from './rpc';
 
 class ChatService {
-  chat(params: ChatParams, callback: any, end: any) {
+  chat(params: IChatParams, callback: any, end: any) {
     return chatRpcService.streamMessage(params, {
       onChunk: callback,
       onComplete: end,

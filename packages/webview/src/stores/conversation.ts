@@ -76,6 +76,10 @@ export const useConversationStore = defineStore('conversation', () => {
 
 
 
+  const setCurrentConversationId = (id: string) => {
+    conversationId.value = id;
+  };
+
   return {
     conversationId,
     conversations,
@@ -85,5 +89,6 @@ export const useConversationStore = defineStore('conversation', () => {
     getConversationById,
     clearConversation,
     updateConversationTitle,
+    setCurrentConversationId,
   };
 });

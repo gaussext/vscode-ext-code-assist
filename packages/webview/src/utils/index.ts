@@ -1,5 +1,8 @@
 import type { IMessage } from '@/types';
 
+export function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 /**
  *  获取 Json 数据
  * @param str
@@ -97,7 +100,7 @@ const executeNextTask = async (callback) => {
     const result = resultQueue.shift();
     callback(result);
     const delay = calcDelay(resultQueue.length);
-    if (delay > 8) {
+    if (delay > 4) {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
     isExecuting = false;

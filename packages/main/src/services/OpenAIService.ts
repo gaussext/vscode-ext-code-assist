@@ -15,7 +15,7 @@ export class OpenAIService {
     }
     this.client = new OpenAI({
       apiKey: apiKey,
-      baseURL: baseURL || undefined,
+      baseURL: baseURL,
       dangerouslyAllowBrowser: true,
     });
     return this.client;
@@ -30,9 +30,13 @@ export class OpenAIService {
 
   async chat(params: ChatParams, callbacks: StreamCallbacks) {
     const { apiKey, baseURL } = params;
-
+    if (!baseURL) {
+      callbacks.onError(new Error('请配置 baseURL'));
+      callbacks.onComplete();
+      return;
+    }
     if (!apiKey) {
-      callbacks.onError(new Error('请配置 code-assist.openai_token'));
+      callbacks.onError(new Error('请配置 API Key'));
       callbacks.onComplete();
       return;
     }

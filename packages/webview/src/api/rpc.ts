@@ -1,4 +1,4 @@
-import type { ChatParams } from '@/models/Model';
+import type { IChatParams } from '@/models/Model';
 import { WebviewRpcClient } from 'vscode-webview-rpc';
 
 export interface StreamCallbacks {
@@ -18,9 +18,19 @@ class ChatRpcService {
     }
   }
 
-  streamMessage(params: ChatParams, callbacks: StreamCallbacks): void {
+  streamMessage(params: IChatParams, callbacks: StreamCallbacks): void {
     if (!this.rpcClient) {
       throw new Error('RPC client not initialized');
+    }
+    const { baseURL, apiKey, model } = params;
+    if (!baseURL) {
+      throw new Error('baseURL required');
+    }
+    if (!apiKey) {
+      throw new Error('apiKey required');
+    }
+    if (!model) {
+      throw new Error('model required');
     }
     this.rpcClient.stream('chat/streamMessage', params, {
       onChunk: (chunk: any) => {

@@ -1,18 +1,18 @@
 <template>
   <div class="app-footer footer-area">
-    <div class="prompt-code" v-if="promptCode">
+    <div v-if="promptCode" class="prompt-code">
       <div v-html="formatCode(promptCode)"></div>
     </div>
     <div class="prompt-area">
       <textarea
-        type="textarea"
-        ref="inputRef"
-        class="vscode-textarea"
         id="chat-input"
-        placeholder="请输入您的问题，使用 Shift + Enter 换行"
+        ref="inputRef"
         v-model="modelValue"
-        @keypress="handleKeyPress"
+        type="textarea"
+        class="vscode-textarea"
+        placeholder="请输入您的问题，使用 Shift + Enter 换行"
         :disabled="loading"
+        @keypress="handleKeyPress"
       >
       </textarea>
     </div>

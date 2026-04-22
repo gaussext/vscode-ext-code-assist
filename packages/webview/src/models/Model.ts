@@ -11,11 +11,11 @@ type MessageRole = 'system' | 'user' | 'assistant';
 
 export class ChatMessage {
   role: MessageRole = 'system';
-  model: string = 'deepseek-chat';
+  model: string = 'qwen3:0.6b';
   content: string = '';
   uuid: string = uuid.v4();
-  startTime: number = Date.now();
-  timestamp: number = Date.now();
+  startTime?: number = Date.now();
+  timestamp?: number = Date.now();
   constructor(role: MessageRole) {
     const settingStore = useSettingStore();
     this.role = role;
@@ -23,9 +23,16 @@ export class ChatMessage {
   }
 }
 
-export interface ChatParams {
+export interface IChatParams {
   model: string;
   messages: any[];
   apiKey: string;
   baseURL?: string;
+}
+
+export enum EnumTemperature {
+  CodeAndMath = 0.0,
+  DataAnalysis = 1.0,
+  Translation = 1.3,
+  CreativeWriting = 1.5,
 }

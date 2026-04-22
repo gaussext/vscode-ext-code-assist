@@ -29,7 +29,7 @@ pnpm run lint
 
 ## 项目结构
 
-```
+```bash
 vscode-ext-code-assist/
 ├── packages/
 │   ├── main/                    # VS Code 扩展主程序
@@ -40,3 +40,12 @@ vscode-ext-code-assist/
 ## 技术栈
 
 - TypeScript, VS Code Extension API, Vue 3, Vite, Webpack, pnpm, DeepSeek API
+
+## 测试
+
+```bash
+使用十种编程语言输出 HTTP 服务示例代码
+使用十种编程语言输出 WebSocket 服务示例代码
+写一篇科幻小说,要求不少于 2000 字
+写一篇玄幻小说,要求不少于 2000 字
+```
