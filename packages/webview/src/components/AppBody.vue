@@ -12,7 +12,7 @@
         <div v-html="formatMessage(message)"></div>
         <div style="margin-top: 4px; display: flex; align-items: center">
           <a class="link-copy copy-markdown" @click="copyToClipboard(message.content)">复制 Markdown</a>
-          <MessageInfo v-if="message.role === 'assistant'" :message="message"></MessageInfo>
+          <AppMessageInfo v-if="message.role === 'assistant'" :message="message"></AppMessageInfo>
         </div>
       </div>
       <div v-else>
@@ -42,7 +42,7 @@
 import { ChatMessage } from '@/models/Model';
 import { copyToClipboard } from '@/utils';
 import { onMounted, ref, watch } from 'vue';
-import MessageInfo from './MessageInfo.vue';
+import AppMessageInfo from './AppMessageInfo.vue';
 import { marked } from '@/utils/marked';
 
 const props = defineProps<{

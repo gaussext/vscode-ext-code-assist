@@ -11,7 +11,7 @@ type MessageRole = 'system' | 'user' | 'assistant';
 
 export class ChatMessage {
   role: MessageRole = 'system';
-  model: string = 'deepseek-chat';
+  model: string = 'qwen3:0.6b';
   content: string = '';
   uuid: string = uuid.v4();
   startTime: number = Date.now();
@@ -23,7 +23,7 @@ export class ChatMessage {
   }
 }
 
-export interface ChatParams {
+export interface IChatParams {
   model: string;
   messages: any[];
   apiKey: string;

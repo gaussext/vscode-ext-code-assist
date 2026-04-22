@@ -12,9 +12,9 @@ declare module 'vue' {
     AppFooter: typeof import('./src/components/AppFooter.vue')['default']
     AppHeader: typeof import('./src/components/AppHeader.vue')['default']
     AppHeaderContentInfo: typeof import('./src/components/AppHeaderContentInfo.vue')['default']
+    AppMessageInfo: typeof import('./src/components/AppMessageInfo.vue')['default']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
-    MessageInfo: typeof import('./src/components/MessageInfo.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

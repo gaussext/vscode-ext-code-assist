@@ -31,8 +31,8 @@ export interface IProviderVo {
 
 export class Provider {
   id = 'default';
-  baseURL = 'https://localhost:11434/v1';
-  apiKey = '';
+  baseURL = 'http://localhost:11434/v1';
+  apiKey = 'ollama';
 
   static toVo(providers: IProvider[]) {
     return providers.map((p) => ({
@@ -82,6 +82,7 @@ export const useSettingStore = defineStore('setting', () => {
   const temperature = ref(TEMPERATURE);
   const providers = ref<ProviderDto[]>(loadFromStorage('setting.config.providers', [new ProviderDto()]));
   const currentProviderId = ref<string>(loadFromStorage('setting.config.currentProviderId', 'default'));
+  const currentModelId = ref<string>(loadFromStorage('setting.config.currentModelId', 'qwen3:0.6b'));
 
   const currentProvider = computed(() => {
     return providers.value.find((p) => p.id === currentProviderId.value) || providers.value[0];
@@ -89,10 +90,7 @@ export const useSettingStore = defineStore('setting', () => {
 
   const currentModel = computed(() => {
     const provider = currentProvider.value;
-    if (provider && provider.models.length > 0) {
-      return provider.models[0];
-    }
-    return { id: 'deepseek-chat', name: 'DeepSeek Chat' };
+    return provider.models.find((m) => m.id === currentModelId.value);
   });
 
   const setTemperature = (value: number) => {
