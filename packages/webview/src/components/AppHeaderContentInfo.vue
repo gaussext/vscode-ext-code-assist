@@ -14,7 +14,7 @@
       </el-icon>
       <span>{{ info.assistant }}</span>
       <span>/</span>
-      <span>Use</span>
+      <span>Ctx</span>
       <span>{{ info.window }}</span>
       <span>/</span>
       <span>Max</span>
@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import { MAX_TOKEN_LENGTH } from '@/models/constants';
+import { MAX_TOKEN_LENGTH } from '@/stores/constants';
 import { Top, Bottom } from '@element-plus/icons-vue';
 
 const props = defineProps({

@@ -1,12 +1,6 @@
 import { defineStore } from 'pinia';
 import { ref, computed, onMounted } from 'vue';
-
-const EnumStorageKey = {
-  Temperature: 'code-assist.config.temperature',
-  Providers: 'code-assist.config.providers',
-  CurrentProviderId: 'code-assist.config.currentProviderId',
-  CurrentModelId: 'code-assist.config.currentModelId',
-}
+import { EnumStorageKey } from './constants';
 
 export interface IModel {
   id: string;

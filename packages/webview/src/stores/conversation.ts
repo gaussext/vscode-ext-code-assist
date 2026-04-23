@@ -3,6 +3,7 @@ import { ref, unref } from 'vue';
 import localforage from 'localforage';
 import { ChatConversation } from '@/models/Model';
 import { firstElement } from '@/utils';
+import { EnumStorageKey } from './constants';
 
 const storeConversations = localforage.createInstance({
   name: 'code-assist',
@@ -12,7 +13,7 @@ const storeConversations = localforage.createInstance({
 
 export const useConversationStore = defineStore('conversation', () => {
   const conversations = ref<ChatConversation[]>([]);
-  const conversationId = ref<string>('');
+  const conversationId = ref<string>(localStorage.getItem(EnumStorageKey.ConversationId) || '');
 
   const getConversations = async (): Promise<ChatConversation[]> => {
     const res = await storeConversations.getItem('data');
@@ -73,8 +74,6 @@ export const useConversationStore = defineStore('conversation', () => {
     });
     return setConversations(conversations.value);
   };
-
-
 
   const setCurrentConversationId = (id: string) => {
     conversationId.value = id;
