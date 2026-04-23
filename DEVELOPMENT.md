@@ -44,6 +44,7 @@ vscode-ext-code-assist/
 ## 测试
 
 ```bash
+验证功能是否正常，请回复 OK 或者 NO
 使用十种编程语言输出 HTTP 服务示例代码
 使用十种编程语言输出 WebSocket 服务示例代码
 写一篇科幻小说,要求不少于 2000 字
