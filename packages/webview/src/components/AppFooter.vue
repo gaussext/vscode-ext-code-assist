@@ -1,7 +1,7 @@
 <template>
   <div class="app-footer footer-area">
     <div v-if="promptCode" class="prompt-code">
-      <div v-html="formatCode(promptCode)"></div>
+      <Markdown :content="promptCode" />
     </div>
     <div class="prompt-area">
       <textarea
@@ -28,6 +28,7 @@
 <script setup lang="ts">
 import { marked } from '@/utils/marked';
 import { VideoPause, Promotion, Setting } from '@element-plus/icons-vue';
+import Markdown from './Markdown.vue';
 
 const modelValue = defineModel<string>({ required: true });
 
@@ -47,10 +48,5 @@ const handleKeyPress = (e: KeyboardEvent) => {
     e.preventDefault();
     emit('click');
   }
-};
-
-// 格式化消息内容
-const formatCode = (content) => {
-  return marked.parse(content);
 };
 </script>

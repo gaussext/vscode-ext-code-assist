@@ -11,23 +11,17 @@ import type {
 } from './types';
 import log from 'loglevel';
 
+interface IPromiseChannel {
+  resolve: (value: unknown) => void;
+  reject: (error: Error) => void;
+  timeout: NodeJS.Timeout;
+  onChunk?: StreamCallback<unknown>;
+  onComplete?: CompleteCallback;
+  onError?: ErrorCallback;
+}
+
 export class RpcClient {
-  private pendingRequests: Map<
-    string,
-    {
-      resolve: (value: unknown) => void;
-      reject: (error: Error) => void;
-      timeout: NodeJS.Timeout;
-    }
-  > = new Map();
-  private pendingStreams: Map<
-    string,
-    {
-      onChunk: StreamCallback<unknown>;
-      onComplete: CompleteCallback;
-      onError: ErrorCallback;
-    }
-  > = new Map();
+  private pendingRequests: Map<string, IPromiseChannel> = new Map();
   private messageId: number = 0;
   private options: RpcClientOptions;
 
@@ -74,17 +68,16 @@ export class RpcClient {
   private handleResponse(response: RpcResponse): void {
     const pending = this.pendingRequests.get(response.id);
     if (!pending) return;
-
     clearTimeout(pending.timeout);
     this.pendingRequests.delete(response.id);
     pending.resolve(response.data);
   }
 
   private handleStreamChunk(chunk: RpcStreamChunk): void {
-    const pending = this.pendingStreams.get(chunk.id);
+    const pending = this.pendingRequests.get(chunk.id);
     if (!pending) return;
 
-    pending.onChunk(chunk.data);
+    pending.onChunk?.(chunk.data);
 
     if (chunk.isLast) {
       this.handleComplete({ id: chunk.id, type: 'complete' });
@@ -99,25 +92,28 @@ export class RpcClient {
       pendingRequest.reject(new Error(error.error.message));
     }
 
-    const pendingStream = this.pendingStreams.get(error.id);
+    const pendingStream = this.pendingRequests.get(error.id);
     if (pendingStream) {
-      this.pendingStreams.delete(error.id);
-      pendingStream.onError(new Error(error.error.message));
+      this.pendingRequests.delete(error.id);
+      pendingStream.onError?.(new Error(error.error.message));
     }
   }
 
   private handleComplete(complete: RpcComplete): void {
-    const pending = this.pendingStreams.get(complete.id);
+    const pending = this.pendingRequests.get(complete.id);
     if (!pending) return;
 
-    this.pendingStreams.delete(complete.id);
-    pending.onComplete();
+    this.pendingRequests.delete(complete.id);
+    pending.onComplete?.();
   }
 
-  async call<TParams = unknown, TResult = unknown>(
-    path: string,
-    params: TParams
-  ): Promise<TResult> {
+  /**
+   * Call a method on the server.
+   * @param path
+   * @param params
+   * @returns
+   */
+  async call<TParams = unknown, TResult = unknown>(path: string, params: TParams): Promise<TResult> {
     const id = this.generateMessageId();
 
     return new Promise<TResult>((resolve, reject) => {
@@ -126,10 +122,10 @@ export class RpcClient {
         reject(new Error(`Request timeout: ${path}`));
       }, this.options.timeout);
 
-      this.pendingRequests.set(id, { 
-        resolve: resolve as (value: unknown) => void, 
-        reject, 
-        timeout 
+      this.pendingRequests.set(id, {
+        resolve: resolve as (value: unknown) => void,
+        reject,
+        timeout,
       });
 
       const message = JSON.stringify({
@@ -143,7 +139,13 @@ export class RpcClient {
     });
   }
 
-  stream<TParams = unknown, TChunk = unknown>(
+  /**
+   * Call a method on the server that returns a stream of data.
+   * @param path
+   * @param params
+   * @param options
+   */
+  streamCall<TParams = unknown, TChunk = unknown>(
     path: string,
     params: TParams,
     options: {
@@ -151,23 +153,35 @@ export class RpcClient {
       onComplete: CompleteCallback;
       onError: ErrorCallback;
     }
-  ): void {
+  ) {
     const id = this.generateMessageId();
+    return new Promise((resolve, reject) => {
+      const timeout = setTimeout(
+        () => {
+          this.pendingRequests.delete(id);
+          reject(new Error(`Request timeout: ${path}`));
+        },
+        this.options.timeout ? this.options.timeout * 999 : Infinity
+      );
 
-    this.pendingStreams.set(id, {
-      onChunk: options.onChunk as StreamCallback<unknown>,
-      onComplete: options.onComplete,
-      onError: options.onError,
+      this.pendingRequests.set(id, {
+        resolve,
+        reject,
+        timeout,
+        onChunk: options.onChunk as StreamCallback<unknown>,
+        onComplete: options.onComplete,
+        onError: options.onError,
+      });
+
+      const message = JSON.stringify({
+        id,
+        type: 'request',
+        path,
+        data: { ...params, __stream__: true },
+      });
+
+      this.sendMessage(message);
     });
-
-    const message = JSON.stringify({
-      id,
-      type: 'request',
-      path,
-      data: { ...params, __stream__: true },
-    });
-
-    this.sendMessage(message);
   }
 
   dispose(): void {
@@ -176,10 +190,5 @@ export class RpcClient {
       pending.reject(new Error('Client disposed'));
     });
     this.pendingRequests.clear();
-
-    this.pendingStreams.forEach((pending) => {
-      pending.onError(new Error('Client disposed'));
-    });
-    this.pendingStreams.clear();
   }
 }

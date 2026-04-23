@@ -27,7 +27,7 @@ const conversationStore = useConversationStore();
 const messageStore = useMessageStore();
 
 const STORE_KEY_CONV = 'code-assist.conversation';
-const conversationId = ref(localStorage.getItem(STORE_KEY_CONV) || '');
+const conversationId = ref(conversationStore.conversationId || '');
 const latestMessage = ref(new ChatMessage('assistant'));
 const messages = ref<ChatMessage[]>([]);
 const loading = ref(false);

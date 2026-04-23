@@ -1,38 +1,37 @@
 import * as vscode from 'vscode';
 import { RpcServer } from './RpcServer';
-import type { RpcHandler, RpcServerOptions, RpcStreamHandler } from './types';
+import type { IReceiver, ISender, RpcServerOptions } from './types';
 
-export class WebviewRpcServer {
-  private server: RpcServer;
-  private webview: vscode.Webview;
+export class WebviewRpcServer extends RpcServer {
+  private sender: ISender;
+  private receiver: IReceiver;
   private disposables: vscode.Disposable[] = [];
 
-  constructor(webview: vscode.Webview, options: RpcServerOptions = {}) {
-    this.webview = webview;
-    this.server = new RpcServer(webview, options);
+  constructor(sender: ISender, receiver: IReceiver, options: RpcServerOptions = {}) {
+    super(options)
+    this.sender = sender;
+    this.receiver = receiver;
     this.setupMessageListener();
   }
 
   private setupMessageListener(): void {
-    const disposable = this.webview.onDidReceiveMessage((message) => {
-      const response = this.server.handleMessage(message);
+    const disposable = this.receiver.onDidReceiveMessage?.( async (message:any) => {
+      const response = await this.handleMessage(message);
       if (response) {
-        this.webview.postMessage(response);
+        this.sender.postMessage(response);
       }
     });
-
-    this.disposables.push(disposable);
+    if (disposable) {
+      this.disposables.push(disposable);
+    }
   }
 
-  registerHandler(path: string, handler:  RpcHandler | RpcStreamHandler): void {
-    this.server.registerHandler(path, handler);
-  }
-
-  unregisterHandler(path: string): void {
-    this.server.unregisterHandler(path);
+  sendMessage(message: string): void {
+    this.sender.postMessage(message);
   }
 
   dispose(): void {
+    super.dispose();
     this.disposables.forEach((d) => d.dispose());
     this.disposables = [];
   }

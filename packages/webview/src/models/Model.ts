@@ -27,7 +27,12 @@ export interface IChatParams {
   model: string;
   messages: any[];
   apiKey: string;
-  baseURL?: string;
+  baseURL: string;
+}
+
+export interface IModelParams {
+  apiKey: string;
+  baseURL: string;
 }
 
 export enum EnumTemperature {

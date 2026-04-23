@@ -12,6 +12,7 @@
     "@element-plus/icons-vue": "^2.3.2",
     "element-plus": "^2.9.9",
     "highlight.js": "^11.11.1",
+    "katex": "^0.16.45",
     "localforage": "^1.10.0",
     "marked": "^15.0.11",
     "marked-highlight": "^2.2.1",

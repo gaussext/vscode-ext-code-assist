@@ -3,7 +3,7 @@
     <div class="provider-setting-header">
       <h2 class="provider-setting-title">供应商配置</h2>
       <div class="header-icon-group right">
-        <el-icon class="header-icon" style="transform: rotate(90deg);" @click="$router.push('/')">
+        <el-icon class="header-icon" style="transform: rotate(90deg)" @click="$router.push('/')">
           <Download />
         </el-icon>
       </div>
@@ -22,7 +22,12 @@
           <input v-model="provider.apiKey" type="password" placeholder="sk-..." />
         </div>
         <div class="form-section">
-          <label>Models</label>
+          <label style="display: flex; align-items: center; gap: 8px;">
+            <span>Models</span>
+            <el-icon style="cursor: pointer;" @click="getModels(provider)" >
+              <Refresh></Refresh>
+            </el-icon>
+          </label>
           <input v-model="provider.models" placeholder="model1,model2,model3" />
         </div>
       </div>
@@ -40,12 +45,27 @@
 <script lang="ts" setup>
 import { Provider, ProviderVo, useSettingStore, type IModel } from '@/stores/setting';
 import { useRouter } from 'vue-router';
-import { Delete, Download } from '@element-plus/icons-vue';
+import { Delete, Download, Refresh } from '@element-plus/icons-vue';
 import { ref } from 'vue';
+import { chatService } from '@/api';
 
 const router = useRouter();
 const settingStore = useSettingStore();
 const providers = ref(Provider.toVo(settingStore.providers));
+
+const getModels = async (provider: ProviderVo) => {
+  const json = await chatService.models({
+    baseURL: provider.baseURL,
+    apiKey: provider.apiKey,
+  });
+  try {
+    const res = JSON.parse(json);
+    const models = res.body.data || [];
+    provider.models = models.map((m) => m.id).join(',');
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const handleAddProvider = () => {
   providers.value.push(new ProviderVo());

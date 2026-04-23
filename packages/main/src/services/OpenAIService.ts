@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import log from 'loglevel';
-import { ChatParams, StreamCallbacks } from '../models';
+import { IChatParams, StreamCallbacks } from '../models';
 
 export class OpenAIService {
   private client: OpenAI | null = null;
@@ -28,20 +28,9 @@ export class OpenAIService {
     }
   }
 
-  async chat(params: ChatParams, callbacks: StreamCallbacks) {
-    const { apiKey, baseURL } = params;
-    if (!baseURL) {
-      callbacks.onError(new Error('请配置 baseURL'));
-      callbacks.onComplete();
-      return;
-    }
-    if (!apiKey) {
-      callbacks.onError(new Error('请配置 API Key'));
-      callbacks.onComplete();
-      return;
-    }
-
+  async chat(params: IChatParams, callbacks: StreamCallbacks) {
     this.controller = new AbortController();
+    const { apiKey, baseURL } = params;
     log.info('chat', params);
     try {
       const client = this.getClient(apiKey, baseURL);
@@ -71,6 +60,34 @@ export class OpenAIService {
         callbacks.onError(new Error(`Error: ${error.message}`));
         callbacks.onComplete();
       }
+    }
+  }
+
+  async compact(params: IChatParams) {
+    log.info('compact', params);
+    const { apiKey, baseURL } = params;
+    try {
+      const client = this.getClient(apiKey, baseURL);
+      const response = (await client.chat.completions.create({
+        model: params.model,
+        messages: params.messages,
+        stream: false,
+      })) as any;
+      return response;
+    } catch (error: any) {
+      return 'OpenAI compact error: ' + error.message;
+    }
+  }
+
+  async models(params: IChatParams) {
+    log.info('models', params);
+    const { apiKey, baseURL } = params;
+    try {
+      const client = this.getClient(apiKey, baseURL);
+      const list =  await client.models.list();
+      return JSON.stringify(list);
+    } catch (error: any) {
+      return 'OpenAI models error: ' + error.message;
     }
   }
 }

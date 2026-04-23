@@ -1,6 +1,6 @@
 # Code Assist
 
-基于 DeepSeek API 的 VS Code 代码助手扩展，提供智能代码辅助功能。
+基于 OpenAI API 的 VS Code 代码助手扩展，提供智能代码辅助功能。
 
 ## 功能特性
 
@@ -29,6 +29,7 @@ code --install-extension code-assist-*.vsix
 ### 右键菜单
 
 选中代码后，可通过右键菜单访问：
+
 - 开始对话、代码解释、代码优化、代码注释
 - 升级 Class/Vue/React、数据分析、文本翻译、文学鉴赏
 

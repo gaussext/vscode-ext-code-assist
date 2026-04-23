@@ -14,7 +14,11 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+**/*.ttf
+**/*.woff
+**/*.woff2
 assets
 AGENTS.md
+DEVELOPMENT.md
 LICENSE.txt
 pnpm-lock.yaml

@@ -32,7 +32,7 @@ import { getTokenCount, lastElement } from '@/utils';
 import { computed } from 'vue';
 import type { ChatMessage } from '@/models/Model';
 import ContentInfo from './AppHeaderContentInfo.vue';
-import { MAX_TOKEN_LENGTH } from '@/utils/constants';
+import { MAX_TOKEN_LENGTH } from '@/stores/constants';
 import { Setting, Download, FolderAdd, FolderOpened } from '@element-plus/icons-vue';
 import { storeToRefs } from 'pinia';
 

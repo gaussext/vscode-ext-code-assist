@@ -41,3 +41,31 @@
 .markdown-body ul {
   padding-inline-start: 16px;
 }
+
+code.hljs {
+  position: relative;
+}
+
+code.hljs .copy-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  padding: 4px 8px;
+  font-size: 12px;
+  background-color: var(--vscode-button-background);
+  color: var(--vscode-button-foreground);
+  border: 1px solid var(--vscode-button-border, transparent);
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, background-color 0.2s;
+  z-index: 10;
+}
+
+code.hljs:hover .copy-button {
+  opacity: 1;
+}
+
+code.hljs .copy-button:hover {
+  background-color: var(--vscode-button-hoverBackground);
+}

@@ -1,4 +1,4 @@
-export interface ChatParams {
+export interface IChatParams {
   model: string;
   content: string;
   messages: any[];

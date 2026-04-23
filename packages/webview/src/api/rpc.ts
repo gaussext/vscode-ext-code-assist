@@ -1,5 +1,5 @@
-import type { IChatParams } from '@/models/Model';
-import { WebviewRpcClient } from 'vscode-webview-rpc';
+import type { IChatParams, IModelParams } from '@/models/Model';
+import { EnumRpcMessage, WebviewRpcClient } from 'vscode-webview-rpc';
 
 export interface StreamCallbacks {
   onChunk: (delta: string) => void;
@@ -13,8 +13,7 @@ class ChatRpcService {
   constructor() {
     if (globalThis.acquireVsCodeApi) {
       const vscode = (globalThis as any).acquireVsCodeApi();
-      this.rpcClient = new WebviewRpcClient(vscode, { debug: true });
-      this.rpcClient.setupMessageListener();
+      this.rpcClient = new WebviewRpcClient(vscode, globalThis, { debug: true });
     }
   }
 
@@ -32,7 +31,7 @@ class ChatRpcService {
     if (!model) {
       throw new Error('model required');
     }
-    this.rpcClient.stream('chat/streamMessage', params, {
+    this.rpcClient.streamCall(EnumRpcMessage.Stream, params, {
       onChunk: (chunk: any) => {
         callbacks.onChunk(chunk.delta);
       },
@@ -49,7 +48,14 @@ class ChatRpcService {
     if (!this.rpcClient) {
       throw new Error('RPC client not initialized');
     }
-    return this.rpcClient.call('chat/stopChat', {});
+    return this.rpcClient.call(EnumRpcMessage.Stop, {});
+  }
+
+  async models(params: IModelParams): Promise<any> {
+    if (!this.rpcClient) {
+      throw new Error('RPC client not initialized');
+    }
+    return this.rpcClient.call(EnumRpcMessage.Models, params);
   }
 }
 

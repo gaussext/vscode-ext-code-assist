@@ -15,6 +15,7 @@ declare module 'vue' {
     AppMessageInfo: typeof import('./src/components/AppMessageInfo.vue')['default']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
+    Markdown: typeof import('./src/components/Markdown.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }
