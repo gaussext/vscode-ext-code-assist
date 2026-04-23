@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-import { MAX_TOKEN_LENGTH } from '@/utils/constants';
+import { MAX_TOKEN_LENGTH } from '@/models/constants';
 import { Top, Bottom } from '@element-plus/icons-vue';
 
 const props = defineProps({
