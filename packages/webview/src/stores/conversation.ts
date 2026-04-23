@@ -66,10 +66,11 @@ export const useConversationStore = defineStore('conversation', () => {
     return setConversations([]);
   };
 
-  const updateConversationTitle = async (conversationId: string, message: string) => {
+  const updateConversationTitle = async (conversationId: string, title: string) => {
     conversations.value.forEach((item) => {
       if (item.id === conversationId) {
-        item.title = message.slice(0, 50) + '...';
+        item.title = title;
+        item.isSummary = true;
       }
     });
     return setConversations(conversations.value);

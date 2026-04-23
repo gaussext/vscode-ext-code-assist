@@ -5,6 +5,7 @@ export class ChatConversation {
   id: string = '0';
   title: string = '新建对话';
   uuid: string = uuid.v4();
+  isSummary: boolean = false;
 }
 
 type MessageRole = 'system' | 'user' | 'assistant';
@@ -16,10 +17,12 @@ export class ChatMessage {
   uuid: string = uuid.v4();
   startTime?: number = Date.now();
   timestamp?: number = Date.now();
-  constructor(role: MessageRole) {
+  conversationId: string = '0';
+  constructor(role: MessageRole, conversationId: string) {
     const settingStore = useSettingStore();
     this.role = role;
     this.model = settingStore.currentModel.id;
+    this.conversationId = conversationId;
   }
 }
 

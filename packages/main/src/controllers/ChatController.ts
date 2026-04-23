@@ -28,3 +28,7 @@ export const stopChatHandler = async () => {
 export const modelsHandler: RpcHandler<any> = async (params: IChatParams) => {
   return await openaiService.models(params);
 };
+
+export const summaryHandler: RpcHandler<any> = async (params: IChatParams) => {
+  return await openaiService.summary(params);
+};

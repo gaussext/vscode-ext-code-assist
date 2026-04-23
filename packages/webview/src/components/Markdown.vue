@@ -1,5 +1,5 @@
 <template>
-  <div class="markdown-content" v-if="renderedContent">
+  <div v-if="renderedContent" class="markdown-content">
     <div v-html="renderedContent"></div>
   </div>
   <div v-else-if="loading" class="loading">

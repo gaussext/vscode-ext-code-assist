@@ -4,6 +4,7 @@ export interface IStandardItem<T> {
 }
 
 export interface IMessage {
+  conversationId: string;
   type: 'delta' | 'end';
   delta?: string;
   startTime?: number;

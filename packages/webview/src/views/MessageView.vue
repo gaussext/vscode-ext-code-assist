@@ -1,9 +1,6 @@
 <template>
   <div class="chat-container">
-    <AppHeader
-      :messages="messages"
-      @update:conversationId="handleConversationChange"
-    />
+    <AppHeader :messages="messages" @update:conversationId="handleConversationChange" />
     <AppBody :messages="messages" :promptCode="promptCode" :latestMessage="latestMessage" :loading="loading" />
     <AppFooter v-model="prompt" :promptCode="promptCode" :loading="loading" @click="onButtonClick" />
   </div>
@@ -28,7 +25,7 @@ const messageStore = useMessageStore();
 
 const STORE_KEY_CONV = 'code-assist.conversation';
 const conversationId = ref(conversationStore.conversationId || '');
-const latestMessage = ref(new ChatMessage('assistant'));
+const latestMessage = ref(new ChatMessage('assistant', conversationId.value));
 const messages = ref<ChatMessage[]>([]);
 const loading = ref(false);
 const prompt = ref('');
@@ -90,10 +87,10 @@ const enqueue = async (value: IMessage) => {
   queueAsync(value, (result) => {
     switch (result.type) {
       case 'delta':
-        handleChating(result.delta);
+        handleChating(result);
         break;
       case 'end':
-        handleChatEnd(result.startTime, result.endTime);
+        handleChatEnd(result);
         break;
       default:
         break;
@@ -102,10 +99,13 @@ const enqueue = async (value: IMessage) => {
 };
 
 // 等待 AI 回复
-const handleChatRequest = async ( messages: ChatMessage[]) => {
+const handleChatRequest = async (messages: ChatMessage[]) => {
   loading.value = true;
+  // 记录当前对话ID
+  const currentConversationId = conversationId.value;
   const startTime = Date.now();
   try {
+    latestMessage.value = new ChatMessage('assistant', currentConversationId);
     latestMessage.value.model = settingStore.currentModel.id;
     latestMessage.value.content = '...';
     await chatService.chat(
@@ -113,47 +113,65 @@ const handleChatRequest = async ( messages: ChatMessage[]) => {
         baseURL: settingStore.currentProvider.baseURL,
         apiKey: settingStore.currentProvider.apiKey,
         model: settingStore.currentModel.id,
-        messages: messages.map(item => ({ role: item.role, content: item.content})),
+        messages: messages.map(item => ({ role: item.role, content: item.content })),
       },
       (delta: string) => {
-        enqueue({ type: 'delta', delta });
+        enqueue({ conversationId: currentConversationId, type: 'delta', delta });
       },
       () => {
         const endTime = Date.now();
-        enqueue({ type: 'end', startTime, endTime });
+        enqueue({ conversationId: currentConversationId, type: 'end', startTime, endTime });
       }
     );
   } catch (error: any) {
-    enqueue({ type: 'delta', delta: '请求失败: ' + error.message });
+    enqueue({ conversationId: currentConversationId, type: 'delta', delta: '请求失败: ' + error.message });
     const endTime = Date.now();
-    enqueue({ type: 'end', startTime, endTime });
+    enqueue({ conversationId: currentConversationId, type: 'end', startTime, endTime });
   }
 };
 
-const handleChating = (delta: string) => {
+const handleChating = (result: IMessage) => {
   if (latestMessage.value.content === '...') {
     latestMessage.value.content = '';
   }
-  latestMessage.value.content += delta;
+  if (result.conversationId === latestMessage.value.conversationId) {
+    latestMessage.value.content += result.delta;
+  }
 };
 
 // AI 结束回答
-const handleChatEnd = (startTime: number, endTime) => {
+const handleChatEnd = (result: IMessage) => {
   loading.value = false;
-  const message = new ChatMessage('assistant');
+  const message = new ChatMessage('assistant', conversationId.value);
   message.model = latestMessage.value.model;
   message.content = latestMessage.value.content;
-  message.startTime = startTime;
-  message.timestamp = endTime;
+  message.startTime = result.startTime;
+  message.timestamp = result.endTime;
   messages.value = [...messages.value, message];
   // 保存消息
-  messageStore.setMessagesById(conversationId.value, unref(messages));
-  // 使用最新消息更新会话标题
-  conversationStore.updateConversationTitle(conversationId.value, message.content);
+  messageStore.setMessagesById(result.conversationId, unref(messages));
+  const conversation = conversationStore.getConversationById(result.conversationId);
+  if (conversation && !conversation.isSummary) {
+    handleSummary(result.conversationId, messages.value);
+  }
+};
+
+const handleSummary = (conversationId: string, messages: ChatMessage[]) => {
+  chatService.summary({
+    baseURL: settingStore.currentProvider.baseURL,
+    apiKey: settingStore.currentProvider.apiKey,
+    model: settingStore.currentModel.id,
+    messages: messages.map(item => ({ role: item.role, content: item.content })),
+  }).then((result) => {
+    const summary = result?.choices?.[0]?.message?.content || '';
+    if (summary) {
+      conversationStore.updateConversationTitle(conversationId, summary);
+    }
+  });
 };
 
 const handleOptimization = (code: string) => {
-  if (!code) {return;}
+  if (!code) { return; }
   prompt.value = `完善或优化一下这段代码`;
 
   promptCode.value = `
@@ -164,7 +182,7 @@ ${code}
 };
 
 const handleExplanation = (code: string) => {
-  if (!code) {return;}
+  if (!code) { return; }
   prompt.value = `解释一下这段代码的作用`;
   promptCode.value = `
 \`\`\`typescript
@@ -174,7 +192,7 @@ ${code}
 };
 
 const handleComment = (code: string) => {
-  if (!code) {return;}
+  if (!code) { return; }
   prompt.value = `给下面这段代码补充注释`;
   promptCode.value = `
 \`\`\`typescript
@@ -184,7 +202,7 @@ ${code}
 };
 
 const handleUpgradeClass = (code: string) => {
-  if (!code) {return;}
+  if (!code) { return; }
   prompt.value = `将以下代码转换为 ES6 Class 语法，请确保转换后的代码符合 ES6 语法规范，并且能够正常运行。只要回答代码部分，不要有多余的文字，代码如下：`;
   promptCode.value = `
 \`\`\`typescript
@@ -194,7 +212,7 @@ ${code}
 };
 
 const handleUpgradeVue = (code: string) => {
-  if (!code) {return;}
+  if (!code) { return; }
   prompt.value = `将以下代码转换为 Vue 3 的 Composition API 组件，请确保转换后的代码符合 Vue 3 的 Composition API 规范，并且能够正常运行。只要回答js/ts代码部分，不要有多余的文字，代码如下：`;
   promptCode.value = `
 \`\`\`typescript
@@ -204,7 +222,7 @@ ${code}
 };
 
 const handleUpgradeReact = (code: string) => {
-  if (!code) {return;}
+  if (!code) { return; }
   prompt.value = `将以下代码转换为 React.FC 组件，请确保转换后的代码符合 ES6 语法规范，并且能够正常运行。只要回答代码部分，不要有多余的文字，代码如下：`;
   promptCode.value = `
 \`\`\`typescript
@@ -214,7 +232,7 @@ ${code}
 };
 
 const handleAnalysis = (code: string) => {
-  if (!code) {return;}
+  if (!code) { return; }
   settingStore.setTemperature(EnumTemperature.DataAnalysis);
   prompt.value = `分析一下这段数据`;
   promptCode.value = `
@@ -225,7 +243,7 @@ ${code}
 };
 
 const handleTranslation = (code: string) => {
-  if (!code) {return;}
+  if (!code) { return; }
   prompt.value = `对以下文本进行翻译，如果是中文则翻译成英文，如果是其他语言则翻译成中文`;
   promptCode.value = `
 \`\`\`
@@ -235,7 +253,7 @@ ${code}
 };
 
 const handleAppreciation = (code: string) => {
-  if (!code) {return;}
+  if (!code) { return; }
   prompt.value = `鉴赏或者评价一下这段文字`;
   promptCode.value = `
 \`\`\`
@@ -245,7 +263,7 @@ ${code}
 };
 
 const handleAddToChat = (code: string) => {
-  if (!code) {return;}
+  if (!code) { return; }
   prompt.value = ``;
   promptCode.value = `
 \`\`\`
@@ -266,9 +284,7 @@ const onButtonClick = async () => {
   }
   prompt.value = '';
   promptCode.value = '';
-  // 使用用户输入更新会话标题
-  await conversationStore.updateConversationTitle(conversationId.value, content);
-  const message = new ChatMessage('user');
+  const message = new ChatMessage('user', conversationId.value);
   message.content = content;
   messages.value = [...messages.value, message];
   const requestMessages = [...messages.value, message];

@@ -63,17 +63,19 @@ export class OpenAIService {
     }
   }
 
-  async compact(params: IChatParams) {
-    log.info('compact', params);
+  async summary(params: IChatParams) {
+    log.info('summary', params);
     const { apiKey, baseURL } = params;
     try {
       const client = this.getClient(apiKey, baseURL);
-      const response = (await client.chat.completions.create({
+      return client.chat.completions.create({
         model: params.model,
-        messages: params.messages,
+        messages: [
+          ...params.messages,
+          { role: 'user', content: '请用20字以内总结以上对话主题，作为对话标题直接返回，不需要任何标点和修饰' },
+        ],
         stream: false,
-      })) as any;
-      return response;
+      });
     } catch (error: any) {
       return 'OpenAI compact error: ' + error.message;
     }
@@ -84,7 +86,7 @@ export class OpenAIService {
     const { apiKey, baseURL } = params;
     try {
       const client = this.getClient(apiKey, baseURL);
-      const list =  await client.models.list();
+      const list = await client.models.list();
       return JSON.stringify(list);
     } catch (error: any) {
       return 'OpenAI models error: ' + error.message;

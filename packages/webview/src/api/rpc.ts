@@ -57,6 +57,13 @@ class ChatRpcService {
     }
     return this.rpcClient.call(EnumRpcMessage.Models, params);
   }
+
+  async summary(params: { messages: any[] }): Promise<any> {
+    if (!this.rpcClient) {
+      throw new Error('RPC client not initialized');
+    }
+    return this.rpcClient.call(EnumRpcMessage.Summary, params);
+  }
 }
 
 export const chatRpcService = new ChatRpcService();
