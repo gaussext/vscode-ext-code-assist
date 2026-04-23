@@ -9,7 +9,7 @@
         <div style="margin-bottom: 8px">
           <span>{{ message.model }}</span>
         </div>
-        <div v-html="formatMessage(message)"></div>
+        <Markdown :content="message.content" />
         <div style="margin-top: 4px; display: flex; align-items: center">
           <a class="link-copy copy-markdown" @click="copyToClipboard(message.content)">复制 Markdown</a>
           <AppMessageInfo v-if="message.role === 'assistant'" :message="message"></AppMessageInfo>
@@ -20,7 +20,9 @@
           <span>You</span>
         </div>
         <div style="display: flex; justify-content: flex-end; width: 100%">
-          <div class="message-you" v-html="formatMessage(message)"></div>
+          <div class="message-you">
+            <Markdown :content="message.content" />
+          </div>
         </div>
       </div>
     </div>
@@ -44,6 +46,7 @@ import { copyToClipboard } from '@/utils';
 import { onMounted, ref, watch } from 'vue';
 import AppMessageInfo from './AppMessageInfo.vue';
 import { marked } from '@/utils/marked';
+import Markdown from './Markdown.vue';
 
 const props = defineProps<{
   messages: ChatMessage[];
@@ -54,11 +57,6 @@ const props = defineProps<{
 
 const messagesEndRef = ref<HTMLDivElement | null>(null);
 const latestMessageRef = ref<HTMLDivElement | null>(null);
-
-// 格式化消息内容
-const formatMessage = (message: ChatMessage) => {
-  return marked.parse(message?.content ?? '');
-};
 
 // 滚动到底部
 const scrollToBottom = () => {
@@ -71,7 +69,8 @@ watch(
   () => props.latestMessage.content,
   async () => {
     if (latestMessageRef.value) {
-      latestMessageRef.value.innerHTML = await formatMessage(props.latestMessage);
+      const result = await marked.parse(props.latestMessage.content);
+      latestMessageRef.value.innerHTML = result;
     }
   }
 );
