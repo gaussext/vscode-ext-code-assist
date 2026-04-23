@@ -1,14 +1,12 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { WebviewRpcServer } from 'vscode-webview-rpc';
-import { streamMessageHandler, stopChatHandler, modelsHandler } from '../controllers/ChatController';
+import { createRpc } from '../rpc';
 
 const setting = vscode.workspace.getConfiguration('code-assist');
 
 export class ChatWebViewProvider implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
-  private rpcServer?: WebviewRpcServer;
   
   constructor(private readonly _extensionUri: vscode.Uri) {}
 
@@ -20,11 +18,7 @@ export class ChatWebViewProvider implements vscode.WebviewViewProvider {
     };
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-
-    this.rpcServer = new WebviewRpcServer(webviewView.webview, webviewView.webview, { debug: true });
-    this.rpcServer.registerHandler('chat/streamMessage', streamMessageHandler);
-    this.rpcServer.registerHandler('chat/stopChat', stopChatHandler);
-    this.rpcServer.registerHandler('chat/models', modelsHandler);
+    createRpc(webviewView.webview);
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {

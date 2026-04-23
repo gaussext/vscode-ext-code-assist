@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, computed, onMounted } from 'vue';
 import { EnumStorageKey } from './constants';
+import * as uuid from 'uuid';
 
 export interface IModel {
   id: string;
@@ -31,7 +32,7 @@ export interface IProviderVo {
 }
 
 export class Provider {
-  id = 'default';
+  id = uuid.v4();
   baseURL = 'http://localhost:11434/v1';
   apiKey = 'ollama';
 
