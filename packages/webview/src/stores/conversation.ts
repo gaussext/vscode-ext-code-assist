@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { ref, unref } from 'vue';
+import { ref } from 'vue';
 import localforage from 'localforage';
 import { ChatConversation } from '@/models/Model';
 import { firstElement } from '@/utils';
@@ -77,6 +77,7 @@ export const useConversationStore = defineStore('conversation', () => {
 
   const setCurrentConversationId = (id: string) => {
     conversationId.value = id;
+    localStorage.setItem(EnumStorageKey.ConversationId, id);
   };
 
   return {
