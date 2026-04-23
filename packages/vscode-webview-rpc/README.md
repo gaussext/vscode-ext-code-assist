@@ -1,5 +1,8 @@
 # vscode-webview-rpc
 
+[![npm version](https://img.shields.io/npm/v/vscode-webview-rpc.svg)](https://www.npmjs.com/package/vscode-webview-rpc)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 VS Code Webview RPC 通讯库，支持流式数据传输。
 
 ## 特性
