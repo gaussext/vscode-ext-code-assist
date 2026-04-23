@@ -1,6 +1,7 @@
 import hljs from './hljs';
 import { Marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
+import { markedKatexExtension, markedBlockKatexExtension } from './katex';
 
 export const marked = new Marked(
   markedHighlight({
@@ -19,6 +20,8 @@ export const marked = new Marked(
     },
   })
 );
+
+marked.use({ extensions: [markedKatexExtension, markedBlockKatexExtension] });
 
 (window as any).copyCode = function (button: HTMLButtonElement) {
   const code = decodeURIComponent(button.dataset.code || '');

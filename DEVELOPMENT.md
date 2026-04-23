@@ -63,3 +63,10 @@ vscode-ext-code-assist/
 ```bash
 使用 Mermaid 绘制 WebRTC 的流程图和时序图
 ```
+
+> 测试 Katex
+
+```bash
+使用 Latex 语法编写麦克斯韦方程组
+使用 Latex 语法编写欧拉公式
+```
