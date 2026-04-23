@@ -1,10 +1,11 @@
 import { OpenAIService } from '../services';
-import { ChatParams } from '../models';
+import { IChatParams } from '../models';
 import log from 'loglevel';
+import { RpcHandler } from 'vscode-webview-rpc';
 
 const openaiService = new OpenAIService();
 
-export const streamMessageHandler = async (params: ChatParams, stream: any) => {
+export const streamMessageHandler = async (params: IChatParams, stream: any) => {
   log.info('streamMessageHandler', params);
   await openaiService.chat(params, {
     onChunk: (delta: string) => {
@@ -22,4 +23,8 @@ export const streamMessageHandler = async (params: ChatParams, stream: any) => {
 export const stopChatHandler = async () => {
   openaiService.stop();
   return { success: true };
+};
+
+export const modelsHandler: RpcHandler<any> = async (params: IChatParams) => {
+  return await openaiService.models(params);
 };

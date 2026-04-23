@@ -15,19 +15,27 @@ import type {
   RpcStreamHandler,
 } from './types';
 
+interface IChannel {
+  write: StreamCallback<unknown>;
+  complete: CompleteCallback;
+  error: ErrorCallback;
+}
+
 export class RpcServer {
   private handlers: Map<string, RpcStreamHandler | RpcHandler> = new Map();
-  private pendingStreams: Map<string, { write: StreamCallback<unknown>; complete: CompleteCallback; error: ErrorCallback }> = new Map();
+  private pendingRequests: Map<string, IChannel> = new Map();
   private options: RpcServerOptions;
-  private webview: any;
 
-  constructor(webview: Webview, options: RpcServerOptions = {}) {
-    this.webview = webview;
+  constructor(options: RpcServerOptions = {}) {
     this.options = { debug: false, ...options };
   }
 
+  sendMessage(message: string): void {
+    throw new Error('sendMessage must be implemented by subclass');
+  }
+
   registerHandler(path: string, handler: RpcStreamHandler | RpcHandler) {
-    log.info('registerHandler', path)
+    log.info('registerHandler', path);
     this.handlers.set(path, handler);
   }
 
@@ -58,10 +66,8 @@ export class RpcServer {
     const { id, path, data } = request;
     log.info('handleRequest', request);
     log.debug('handler');
-
-
     const handler = this.handlers.get(path);
-    
+
     if (!handler) {
       return Promise.resolve(this.createErrorResponse(id, -32601, 'handler not found'));
     }
@@ -71,38 +77,36 @@ export class RpcServer {
       const streamContext = {
         write: (chunk: unknown) => {
           const message = this.writeStreamChunk(id, chunk, 0, false);
-          this.webview?.postMessage(message);
+          this.sendMessage(message);
         },
         complete: () => {
           const message = this.completeStream(id);
-          this.webview?.postMessage(message);
+          this.sendMessage(message);
         },
         error: (err: Error) => {
           const message = this.errorStream(id, err);
-          this.webview?.postMessage(message);
-        }
+          this.sendMessage(message);
+        },
       };
-      
+
       try {
         const result = streamHandler(data, streamContext);
         if (result instanceof Promise) {
           result.catch((err: Error) => {
             const message = this.errorStream(id, err);
-            this.webview?.postMessage(message);
+            this.sendMessage(message);
           });
         }
       } catch (err) {
         const message = this.errorStream(id, err as Error);
-        this.webview?.postMessage(message);
+        this.sendMessage(message);
       }
-      
       return Promise.resolve(null);
     }
 
     return (async () => {
       try {
         const result = await (handler as any)(data);
-
         const response: RpcResponse = {
           id,
           type: 'response',
@@ -117,11 +121,13 @@ export class RpcServer {
   }
 
   private isStreamRequest(params: unknown): boolean {
-    return params !== null && typeof params === 'object' && '__stream__' in params && (params as any).__stream__ === true;
+    return (
+      params !== null && typeof params === 'object' && '__stream__' in params && (params as any).__stream__ === true
+    );
   }
 
   createStream(id: string, write: StreamCallback<unknown>, complete: CompleteCallback, error: ErrorCallback) {
-    this.pendingStreams.set(id, { write, complete, error });
+    this.pendingRequests.set(id, { write, complete, error });
   }
 
   writeStreamChunk(id: string, chunk: unknown, chunkIndex: number, isLast: boolean): string {
@@ -140,7 +146,7 @@ export class RpcServer {
       id,
       type: 'complete',
     };
-    this.pendingStreams.delete(id);
+    this.pendingRequests.delete(id);
     return JSON.stringify(complete);
   }
 
@@ -153,7 +159,7 @@ export class RpcServer {
         message: error.message,
       },
     };
-    this.pendingStreams.delete(id);
+    this.pendingRequests.delete(id);
     return JSON.stringify(errorResponse);
   }
 
@@ -164,5 +170,9 @@ export class RpcServer {
       error: { code, message },
     };
     return JSON.stringify(errorResponse);
+  }
+
+  dispose(): void {
+    this.pendingRequests.clear();
   }
 }

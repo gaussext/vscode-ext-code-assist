@@ -1,24 +1,27 @@
 import { RpcClient } from './RpcClient';
-import type { RpcClientOptions } from './types';
+import type { IReceiver, ISender, RpcClientOptions } from './types';
 
 export class WebviewRpcClient extends RpcClient {
-  private vscode: any;
+  private sender: ISender;
+  private receiver: IReceiver;
 
-  constructor(vscode: any, options: RpcClientOptions = {}) {
+  constructor(vscode: ISender, receiver: IReceiver, options: RpcClientOptions = {}) {
     super(options);
-    this.vscode = vscode;
+    this.sender = vscode;
+    this.receiver = receiver;
+    this.setupMessageListener()
   }
 
-  sendMessage(message: string): void {
-    this.vscode.postMessage(message);
-  }
-
-  setupMessageListener(): void {
-    (globalThis as any).addEventListener('message', (event: MessageEvent) => {
+  private setupMessageListener(): void {
+    this.receiver.addEventListener?.('message', (event: MessageEvent) => {
       if (event.data) {
         this.handleMessage(event.data);
       }
     });
+  }
+
+  sendMessage(message: string): void {
+    this.sender.postMessage(message);
   }
 
   dispose(): void {

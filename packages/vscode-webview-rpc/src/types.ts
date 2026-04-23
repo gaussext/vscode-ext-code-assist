@@ -68,3 +68,12 @@ export interface RpcClientOptions {
 export interface RpcServerOptions {
   debug?: boolean;
 }
+
+export interface ISender {
+  postMessage: (message: string) => void;
+}
+
+export interface IReceiver {
+  onDidReceiveMessage?: (message: any) => void;
+  addEventListener?: (event: string, callback: (message: any) => void) => void;
+}

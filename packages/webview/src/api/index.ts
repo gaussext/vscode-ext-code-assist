@@ -1,7 +1,11 @@
-import type { IChatParams } from '@/models/Model';
+import type { IChatParams, IModelParams } from '@/models/Model';
 import { chatRpcService } from './rpc';
 
 class ChatService {
+  models(params: IModelParams) {
+    return chatRpcService.models(params);
+  }
+
   chat(params: IChatParams, callback: any, end: any) {
     return chatRpcService.streamMessage(params, {
       onChunk: callback,
