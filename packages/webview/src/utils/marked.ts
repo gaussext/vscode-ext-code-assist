@@ -2,6 +2,7 @@ import hljs from './hljs';
 import { Marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
 import { markedKatexExtension, markedBlockKatexExtension } from './katex';
+import { copyToClipboard } from '.';
 
 export const marked = new Marked(
   markedHighlight({
@@ -12,7 +13,8 @@ export const marked = new Marked(
       try {
         const validLang = language && hljs.getLanguage(language) ? language : 'plaintext';
         const highlighted = hljs.highlight(code, { language: validLang }).value;
-        const buttonHtml = `<button class="copy-button" data-code="${code}" onclick="copyCode(this)"><span class="copy-text">复制</span></button>`;
+        const encoded = encodeURIComponent(code)
+        const buttonHtml = `<button class="copy-button" data-code="${encoded}" onclick="copyCode(this)"><span class="copy-text">复制</span></button>`;
         return `${buttonHtml}${highlighted}`;
       } catch {
         return code;
@@ -23,25 +25,10 @@ export const marked = new Marked(
 
 marked.use({ extensions: [markedKatexExtension, markedBlockKatexExtension] });
 
-(window as any).copyCode = function (button: HTMLButtonElement) {
+(window as any).copyCode =  async (button: HTMLButtonElement) => {
   const code = decodeURIComponent(button.dataset.code || '');
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(code).then(() => {
-      showCopySuccess(button);
-    });
-  } else {
-    const textarea = document.createElement('textarea');
-    textarea.value = code;
-    textarea.style.position = 'fixed';
-    document.body.appendChild(textarea);
-    textarea.select();
-    try {
-      document.execCommand('copy');
-      showCopySuccess(button);
-    } finally {
-      document.body.removeChild(textarea);
-    }
-  }
+  await copyToClipboard(code)
+  showCopySuccess(button)
 };
 
 function showCopySuccess(button: HTMLButtonElement) {

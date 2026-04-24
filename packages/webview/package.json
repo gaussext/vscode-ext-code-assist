@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
+    "dompurify": "^3.4.1",
     "element-plus": "^2.9.9",
     "highlight.js": "^11.11.1",
     "katex": "^0.16.45",

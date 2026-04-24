@@ -34,13 +34,14 @@ import { firstElement, sleep } from '@/utils';
 import { useRouter } from 'vue-router';
 import { Delete, Download, Setting } from '@element-plus/icons-vue';
 import { storeToRefs } from 'pinia';
+import { onMounted } from 'vue';
 
 const router = useRouter();
 const conversationStore = useConversationStore();
 const { conversations } = storeToRefs(useConversationStore());
 const messageStore = useMessageStore();
 
-const onConversationChange = (id: string) => {
+const onConversationChange = async (id: string) => {
   conversationStore.setConversationId(id);
   router.push('/');
 };
@@ -63,6 +64,10 @@ const onClearConversation = async () => {
     conversationStore.setConversationId(firstElement(convs).id);
   }
 };
+
+onMounted(async () => {
+  await conversationStore.getConversations();
+});
 </script>
 
 <style lang="scss" scoped>
@@ -93,6 +98,8 @@ const onClearConversation = async () => {
   max-height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
+  overflow-y: auto;
+  gap: 8px;
 }
 
 .conversation-item {
@@ -102,7 +109,6 @@ const onClearConversation = async () => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
   background-color: transparent;
   border: 1px solid var(--vscode-pickerGroup-border);
   color: var(--vscode-list-highlightForeground);
@@ -135,5 +141,6 @@ const onClearConversation = async () => {
   justify-content: flex-end;
   gap: 10px;
   padding: 0 8px;
+  margin-top: 8px;
 }
 </style>

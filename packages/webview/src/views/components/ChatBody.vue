@@ -66,12 +66,16 @@ const scrollToBottom = () => {
 };
 
 watch(
-  () => props.currentMessage.content,
+  () => props.currentMessage,
   async () => {
-    if (currentMessageRef.value) {
+    if (currentMessageRef.value && props.currentMessage.content) {
       const result = await marked.parse(props.currentMessage.content);
       currentMessageRef.value.innerHTML = result;
     }
+  },
+  {
+    deep: true,
+    immediate: true,
   }
 );
 

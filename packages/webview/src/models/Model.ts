@@ -17,7 +17,7 @@ export class ChatMessage {
   content: string = '';
   startTime?: number = Date.now();
   loadTime?: number = Date.now();
-  timestamp?: number = Date.now();
+  endTime?: number = Date.now();
   constructor(role: MessageRole, conversationId: string) {
     const settingStore = useSettingStore();
     this.role = role;

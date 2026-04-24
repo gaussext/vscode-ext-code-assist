@@ -4,17 +4,20 @@
       <div class="header-icon-group" style="display: flex; align-items: center; gap: 4px">
         <UsageInfo :info="info" />
       </div>
+      <div class="header-title">
+        {{ title }}
+      </div>
       <div class="header-icon-group right">
-        <el-icon class="header-icon" :class="{'disabled': loading}" @click="downloadConversation">
+        <el-icon class="header-icon" :class="{ disabled: loading }" @click="downloadConversation">
           <Download />
         </el-icon>
-        <el-icon class="header-icon" :class="{'disabled': loading}" @click="onCreateConversation">
+        <el-icon class="header-icon" :class="{ disabled: loading }" @click="onCreateConversation">
           <FolderAdd />
         </el-icon>
-        <el-icon class="header-icon" :class="{'disabled': loading}" @click="gotoHistory">
+        <el-icon class="header-icon" :class="{ disabled: loading }" @click="gotoHistory">
           <FolderOpened />
         </el-icon>
-        <el-icon class="header-icon" :class="{'disabled': loading}" @click="gotoSetting">
+        <el-icon class="header-icon" :class="{ disabled: loading }" @click="gotoSetting">
           <Setting></Setting>
         </el-icon>
       </div>
@@ -29,7 +32,7 @@
 import { useConversationStore } from '@/stores/conversation';
 import { useMessageStore } from '@/stores/message';
 import { getTokenCount } from '@/utils';
-import { computed } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import type { ChatMessage } from '@/models/Model';
 import UsageInfo from '@/components/UsageInfo.vue';
 import { MAX_TOKEN_LENGTH } from '@/stores/constants';
@@ -39,6 +42,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 const conversationStore = useConversationStore();
 const messageStore = useMessageStore();
+const title = ref('');
 
 const props = defineProps({
   messages: {
@@ -47,6 +51,25 @@ const props = defineProps({
   loading: {
     default: false,
   },
+});
+
+const loadTitle = () => {
+  const conversation = conversationStore.getConversationById(conversationStore.conversationId);
+  if (conversation && conversation.title) {
+    title.value = conversation.title?.slice?.(0, 10) ?? '';
+  }
+};
+
+watch(
+  () => conversationStore.conversationId,
+  () => {
+    loadTitle();
+  },
+  { immediate: true }
+);
+
+onMounted(() => {
+  loadTitle();
 });
 
 const info = computed(() => {
@@ -87,14 +110,20 @@ const emit = defineEmits<{
 }>();
 
 const downloadConversation = async () => {
-  if (props.loading) { return; }
+  if (props.loading) {
+    return;
+  }
   const conversation = conversationStore.getConversationById(conversationStore.conversationId);
-  if (!conversation) { return; }
+  if (!conversation) {
+    return;
+  }
   await messageStore.downloadConversation(conversationStore.conversationId, conversation.title);
 };
 
 const onCreateConversation = async () => {
-  if (props.loading) { return; }
+  if (props.loading) {
+    return;
+  }
   if (props.messages.length === 0) {
     return;
   }
@@ -105,15 +134,18 @@ const onCreateConversation = async () => {
 };
 
 const gotoHistory = () => {
-  if (props.loading) { return; }
+  if (props.loading) {
+    return;
+  }
   router.push('/history');
 };
 
 const gotoSetting = () => {
-  if (props.loading) { return; }
+  if (props.loading) {
+    return;
+  }
   router.push('/setting');
 };
-
 </script>
 
 <style lang="scss">

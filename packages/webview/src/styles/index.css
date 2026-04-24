@@ -129,8 +129,8 @@ body {
   padding: 0 4px;
 }
 
-.footer-area #setting-button,
 .footer-area #chat-button {
+  cursor: pointer;
   width: 32px;
 }
 

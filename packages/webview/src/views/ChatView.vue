@@ -1,6 +1,7 @@
 <template>
   <div class="chat-container">
-    <ChatHeader :messages="currentMessageList" :loading="loading" @update:conversationId="handleConversationChange" />
+    <!-- :loading="loading" -->
+    <ChatHeader :messages="currentMessageList"  @update:conversationId="handleConversationChange" />
     <ChatBody :messages="currentMessageList" :promptCode="promptCode" :currentMessage="currentMessage"
       :loading="loading" />
     <ChatFooter v-model="prompt" :promptCode="promptCode" :loading="loading" @click="onButtonClick" />
@@ -110,7 +111,7 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
   currentMessage.value = messageLatestStore.getLatestMessageByConvId(currentConversationId);
   currentMessage.value.model = settingStore.currentModel.id;
   currentMessage.value.content = '...';
-  let startTime = Date.now();
+  const startTime = Date.now();
   let loadTime = 0;
   try {
     await chatService.chat(
@@ -128,6 +129,9 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
         enqueue({ conversationId: currentConversationId, type: 'delta', delta, startTime, loadTime, endTime });
       },
       () => {
+        if (!loadTime) {
+          loadTime = Date.now();
+        }
         const endTime = Date.now();
         enqueue({ conversationId: currentConversationId, type: 'end', startTime, loadTime, endTime });
       }
@@ -160,6 +164,7 @@ const handleChating = (result: IMessage) => {
   currentMessage.value = messageLatestStore.getLatestMessageByConvId(conversationStore.conversationId);
   if (currentMessage.value.conversationId === result.conversationId) {
     currentMessage.value.content = botMessage.content;
+    currentMessage.value.endTime  = Date.now();
   }
   console.log(
     'streaming chunk',
@@ -176,7 +181,8 @@ const handleChatEnd = async (result: IMessage) => {
   // 跨页面更新最新消息
   const botMessage = messageLatestStore.getLatestMessageByConvId(result.conversationId);
   botMessage.startTime = result.startTime;
-  botMessage.timestamp = result.endTime;
+  botMessage.loadTime = result.loadTime;
+  botMessage.endTime = result.endTime;
   console.log(
     'streaming end',
     currentMessage.value.conversationId,
@@ -192,6 +198,11 @@ const handleChatEnd = async (result: IMessage) => {
   // 更新当前页面消息列表
   if (conversationStore.conversationId === result.conversationId) {
     currentMessageList.value = messages;
+  }
+  currentMessage.value = messageLatestStore.getLatestMessageByConvId(conversationStore.conversationId);
+  if (currentMessage.value.conversationId === result.conversationId) {
+    currentMessage.value.content = botMessage.content;
+    currentMessage.value.endTime  = Date.now();
   }
   // 生成摘要
   const conversation = conversationStore.getConversationById(result.conversationId);

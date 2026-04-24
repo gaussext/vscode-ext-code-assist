@@ -7,16 +7,32 @@
           <span>{{ message.model }}</span>
         </div>
         <div class="tooltip__item">
+          <span>Load Duration :</span>
+          <span>{{ info.loadDuration }} Second</span>
+        </div>
+        <div class="tooltip__item">
+          <span>Eval Duration :</span>
+          <span>{{ info.evalDuration }} Second</span>
+        </div>
+        <div class="tooltip__item">
+          <span>Total Duration :</span>
+          <span>{{ info.totalDuration }} Second</span>
+        </div>
+        <div class="tooltip__item">
           <span>Token :</span>
-          <span>{{ info.tokens }} Token</span>
+          <span>{{ info.tokens }} Tokens</span>
         </div>
         <div class="tooltip__item">
-          <span>Duration :</span>
-          <span>{{ info.second }} Sec</span>
+          <span>Token Speed: </span>
+          <span>{{ info.tokensSpeed }} Tokens/s</span>
         </div>
         <div class="tooltip__item">
-          <span>Speed: </span>
-          <span>{{ info.speed }} Token/s</span>
+          <span>Char :</span>
+          <span>{{ info.chars }} Chars</span>
+        </div>
+        <div class="tooltip__item">
+          <span>Char Speed: </span>
+          <span>{{ info.charsSpeed }} Chars/s</span>
         </div>
       </div>
     </template>
@@ -37,14 +53,21 @@ const props = defineProps({
 });
 
 const getInfoFromMessage = (message: ChatMessage) => {
-  const duration = message.timestamp - message.startTime || 1000;
-  const second = (duration / 1000).toFixed(2);
+  const loadDuration = ((message.loadTime - message.startTime || 1000) / 1000).toFixed(2);
+  const evalDuration = ((message.endTime - message.loadTime || 1000) / 1000).toFixed(2);
+  const totalDuration = ((message.endTime - message.startTime || 1000) / 1000).toFixed(2);
   const tokens = getTokenCount(message.content);
-  const speed = ((tokens * 1000) / duration).toFixed(2);
+  const tokensSpeed = (tokens / parseFloat(evalDuration)).toFixed(2);
+  const chars = message.content.length;
+  const charsSpeed = (chars / parseFloat(evalDuration)).toFixed(2);
   return {
-    second,
-    speed,
+    loadDuration,
+    evalDuration,
+    totalDuration,
     tokens,
+    tokensSpeed,
+    chars,
+    charsSpeed,
   };
 };
 
@@ -55,6 +78,6 @@ const info = getInfoFromMessage(props.message);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 4px;
+  gap: 16px;
 }
 </style>

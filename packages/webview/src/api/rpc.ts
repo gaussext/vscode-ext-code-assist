@@ -1,5 +1,6 @@
 import type { IChatParams, IModelParams } from '@/models/Model';
 import { EnumRpcMessage, WebviewRpcClient } from 'vscode-webview-rpc';
+import { RpcMock } from './rpc-mock';
 
 export interface StreamCallbacks {
   onChunk: (delta: string) => void;
@@ -19,7 +20,8 @@ class ChatRpcService {
 
   streamMessage(params: IChatParams, callbacks: StreamCallbacks): void {
     if (!this.rpcClient) {
-      throw new Error('RPC client not initialized');
+      RpcMock.mockStream(callbacks);
+      return;
     }
     const { baseURL, apiKey, model } = params;
     if (!baseURL) {
@@ -46,7 +48,8 @@ class ChatRpcService {
 
   async stopChat(): Promise<any> {
     if (!this.rpcClient) {
-      throw new Error('RPC client not initialized');
+      RpcMock.abort();
+      return;
     }
     return this.rpcClient.call(EnumRpcMessage.Stop, {});
   }
