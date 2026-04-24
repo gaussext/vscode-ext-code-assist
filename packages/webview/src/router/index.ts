@@ -4,8 +4,8 @@ import type { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    name: 'Message',
-    component: () => import('../views/MessageView.vue')
+    name: 'Chat',
+    component: () => import('../views/ChatView.vue')
   },
   {
     path: '/setting',

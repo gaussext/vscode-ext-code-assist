@@ -39,7 +39,7 @@ vscode-ext-code-assist/
 
 ## 技术栈
 
-- TypeScript, VS Code Extension API, Vue 3, Vite, Webpack, pnpm, DeepSeek API
+- TypeScript, VS Code Extension API, Vue 3, Vite, Webpack, pnpm, OpenAI API
 
 ## 测试
 

@@ -2,7 +2,7 @@
   <div class="app-header header-area">
     <div class="header-area-tool">
       <div class="header-icon-group" style="display: flex; align-items: center; gap: 4px">
-        <ContentInfo :info="info"></ContentInfo>
+        <UsageInfo :info="info" />
       </div>
       <div class="header-icon-group right">
         <el-icon class="header-icon" @click="downloadConversation">
@@ -31,19 +31,14 @@ import { useMessageStore } from '@/stores/message';
 import { getTokenCount, lastElement } from '@/utils';
 import { computed } from 'vue';
 import type { ChatMessage } from '@/models/Model';
-import ContentInfo from './AppHeaderContentInfo.vue';
+import UsageInfo from '@/components/UsageInfo.vue';
 import { MAX_TOKEN_LENGTH } from '@/stores/constants';
 import { Setting, Download, FolderAdd, FolderOpened } from '@element-plus/icons-vue';
-import { storeToRefs } from 'pinia';
 
 const conversationStore = useConversationStore();
-const { conversationId } = storeToRefs(useConversationStore());
 const messageStore = useMessageStore();
 
 const props = defineProps({
-  conversationId: {
-    default: '',
-  },
   messages: {
     default: () => [] as ChatMessage[],
   },
@@ -87,19 +82,19 @@ const emit = defineEmits<{
 }>();
 
 const downloadConversation = async () => {
-  const conversation = conversationStore.getConversationById(conversationId.value);
+  const conversation = conversationStore.getConversationById(conversationStore.conversationId);
   if (!conversation) { return; }
-  await messageStore.downloadConversation(conversationId.value, conversation.title);
+  await messageStore.downloadConversation(conversationStore.conversationId, conversation.title);
 };
 
 const onCreateConversation = async () => {
-  if (props.messages.length === 0) { 
+  if (props.messages.length === 0) {
     return;
   }
-  await conversationStore.createConversation();
-  const convs = await conversationStore.getConversations();
+  const conv = await conversationStore.createConversation();
+  conversationStore.setConversationId(conv.id);
   emit('create');
-  emit('update:conversationId', lastElement(convs).id);
+  emit('update:conversationId', conv.id);
 };
 </script>
 

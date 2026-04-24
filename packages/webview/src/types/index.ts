@@ -8,5 +8,6 @@ export interface IMessage {
   type: 'delta' | 'end';
   delta?: string;
   startTime?: number;
+  loadTime?: number;
   endTime?: number;
 }

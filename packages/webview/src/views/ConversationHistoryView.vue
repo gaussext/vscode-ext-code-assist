@@ -12,10 +12,10 @@
       </div>
     </div>
     <div class="conversation-history-body">
-      <div v-for="option in conversations" :key="option.id" class="conversation-item"
-        @click="onConversationChange(option.id)">
-        <span class="conversation-item-title">{{ option.title }}</span>
-        <el-icon v-if="conversations.length > 1" class="icon-delete" @click.stop="onDeleteConversation(option.id)">
+      <div v-for="conv in conversations" :key="conv.id" class="conversation-item"
+        @click="onConversationChange(conv.id)">
+        <span class="conversation-item-title">{{ conv.title }}</span>
+        <el-icon v-if="conversations.length > 1" class="icon-delete" @click.stop="onDeleteConversation(conv.id)">
           <Delete />
         </el-icon>
       </div>
@@ -37,11 +37,11 @@ import { storeToRefs } from 'pinia';
 
 const router = useRouter();
 const conversationStore = useConversationStore();
-const { conversations, conversationId } = storeToRefs(useConversationStore());
+const { conversations } = storeToRefs(useConversationStore());
 const messageStore = useMessageStore();
 
 const onConversationChange = (id: string) => {
-  conversationStore.setCurrentConversationId(id);
+  conversationStore.setConversationId(id);
   router.push('/');
 };
 
@@ -50,17 +50,17 @@ const onDeleteConversation = async (id: string) => {
   await messageStore.removeMessagesById(id);
   const convs = await conversationStore.getConversations();
   if (convs.length > 0) {
-    conversationStore.setCurrentConversationId(firstElement(convs).id);
+    conversationStore.setConversationId(firstElement(convs).id);
   }
 };
 
 const onClearConversation = async () => {
   router.push('/');
   await sleep(1000);
-  await conversationStore.clearConversation();
+  await conversationStore.clearConversations();
   const convs = await conversationStore.getConversations();
   if (convs.length > 0) {
-    conversationStore.setCurrentConversationId(firstElement(convs).id);
+    conversationStore.setConversationId(firstElement(convs).id);
   }
 };
 </script>

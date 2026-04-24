@@ -32,7 +32,7 @@ import { QuestionFilled } from '@element-plus/icons-vue';
 
 const props = defineProps({
   message: {
-    default: () => new ChatMessage('system'),
+    default: () => new ChatMessage('system', ''),
   },
 });
 

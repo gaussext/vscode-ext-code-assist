@@ -77,7 +77,6 @@ const handleRemoveProvider = (id: string) => {
 const handleResetClick = () => {
   settingStore.resetProviders();
   providers.value = Provider.toVo(settingStore.providers);
-  console.log(providers.value);
 };
 
 const onConfirmClick = () => {

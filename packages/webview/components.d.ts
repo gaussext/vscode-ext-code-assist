@@ -8,15 +8,12 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AppBody: typeof import('./src/components/AppBody.vue')['default']
-    AppFooter: typeof import('./src/components/AppFooter.vue')['default']
-    AppHeader: typeof import('./src/components/AppHeader.vue')['default']
-    AppHeaderContentInfo: typeof import('./src/components/AppHeaderContentInfo.vue')['default']
-    AppMessageInfo: typeof import('./src/components/AppMessageInfo.vue')['default']
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     Markdown: typeof import('./src/components/Markdown.vue')['default']
+    MessageInfo: typeof import('./src/components/MessageInfo.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    UsageInfo: typeof import('./src/components/UsageInfo.vue')['default']
   }
 }

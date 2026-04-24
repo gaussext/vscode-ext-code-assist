@@ -26,9 +26,8 @@
 </template>
 
 <script setup lang="ts">
-import { marked } from '@/utils/marked';
-import { VideoPause, Promotion, Setting } from '@element-plus/icons-vue';
-import Markdown from './Markdown.vue';
+import { VideoPause, Promotion } from '@element-plus/icons-vue';
+import Markdown from '@/components/Markdown.vue';
 
 const modelValue = defineModel<string>({ required: true });
 

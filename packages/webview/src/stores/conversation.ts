@@ -2,7 +2,6 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import localforage from 'localforage';
 import { ChatConversation } from '@/models/Model';
-import { firstElement } from '@/utils';
 import { EnumStorageKey } from './constants';
 
 const storeConversations = localforage.createInstance({
@@ -21,10 +20,10 @@ export const useConversationStore = defineStore('conversation', () => {
       conversations.value = res as ChatConversation[];
     }
     if (conversations.value.length === 0) {
-      conversations.value.push(new ChatConversation());
-    }
-    if (!conversationId.value && firstElement(conversations.value).id) {
-      conversationId.value = firstElement(conversations.value).id;
+      const conv = new ChatConversation()
+      setConversationId(conv.id)
+      conversations.value.push(conv);
+      setConversations(conversations.value)
     }
     return [...conversations.value];
   };
@@ -34,21 +33,18 @@ export const useConversationStore = defineStore('conversation', () => {
   };
 
   const createConversation = async () => {
-    const ids = conversations.value.map((item) => Number(item.id));
-    const nextId = (Math.max(...ids) || 0) + 1;
-    const conversationId = `${nextId}`;
     const conversation = new ChatConversation();
-    conversation.id = conversationId;
     conversations.value.push(conversation);
-    return setConversations(conversations.value);
+    await setConversations(conversations.value);
+    return conversation;
   };
 
   const deleteConversation = async (id: string) => {
     if (!id) {
-      return [...conversations.value];
+      return false
     }
     if (conversations.value.length <= 1) {
-      return [...conversations.value];
+      return false
     }
     conversations.value = conversations.value.filter((item) => `${item.id}` !== `${id}`);
     return setConversations(conversations.value);
@@ -61,12 +57,12 @@ export const useConversationStore = defineStore('conversation', () => {
     return conversations.value.find((item) => item.id === id);
   };
 
-  const clearConversation = async () => {
+  const clearConversations = () => {
     conversations.value = [];
     return setConversations([]);
   };
 
-  const updateConversationTitle = async (conversationId: string, title: string) => {
+  const updateConversationTitle = (conversationId: string, title: string) => {
     conversations.value.forEach((item) => {
       if (item.id === conversationId) {
         item.title = title;
@@ -76,7 +72,7 @@ export const useConversationStore = defineStore('conversation', () => {
     return setConversations(conversations.value);
   };
 
-  const setCurrentConversationId = (id: string) => {
+  const setConversationId = (id: string) => {
     conversationId.value = id;
     localStorage.setItem(EnumStorageKey.ConversationId, id);
   };
@@ -84,12 +80,15 @@ export const useConversationStore = defineStore('conversation', () => {
   return {
     conversationId,
     conversations,
+    // 
+    setConversationId,
+    // 
     getConversations,
+    clearConversations,
+    // 
     createConversation,
     deleteConversation,
     getConversationById,
-    clearConversation,
     updateConversationTitle,
-    setCurrentConversationId,
   };
 });
