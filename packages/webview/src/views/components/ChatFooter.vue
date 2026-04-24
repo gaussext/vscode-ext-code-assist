@@ -18,8 +18,10 @@
     </div>
     <div id="chat-tool">
       <div></div>
-      <button id="chat-button" @click="$emit('click')">
-        <component :is="loading ? VideoPause : Promotion" />
+      <button class="vscode-button-form" @click="$emit('click')">
+        <el-icon>
+          <component :is="loading ? VideoPause : Promotion" />
+        </el-icon>
       </button>
     </div>
   </div>

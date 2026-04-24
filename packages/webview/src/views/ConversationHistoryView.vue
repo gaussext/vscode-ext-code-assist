@@ -12,12 +12,20 @@
       </div>
     </div>
     <div class="conversation-history-body">
-      <div v-for="conv in conversations" :key="conv.id" class="conversation-item"
-        @click="onConversationChange(conv.id)">
+      <div v-for="conv in conversations" :key="conv.id" class="conversation-item">
         <span class="conversation-item-title">{{ conv.title }}</span>
-        <el-icon v-if="conversations.length > 1" class="icon-delete" @click.stop="onDeleteConversation(conv.id)">
-          <Delete />
-        </el-icon>
+        <div class="vscode-button-group hover-visible">
+          <button class="vscode-button-form" @click="onConversationChange(conv.id)">
+            <el-icon v-if="conversations.length > 1">
+              <Promotion />
+            </el-icon>
+          </button>
+          <button class="vscode-button-form" @click.stop="onDeleteConversation(conv.id)">
+            <el-icon v-if="conversations.length > 1" class="icon-delete" >
+              <Delete />
+            </el-icon>
+          </button>
+        </div>
       </div>
     </div>
     <div class="conversation-history-footer">
@@ -32,7 +40,7 @@ import { useConversationStore } from '@/stores/conversation';
 import { useMessageStore } from '@/stores/message';
 import { firstElement, sleep } from '@/utils';
 import { useRouter } from 'vue-router';
-import { Delete, Download, Setting } from '@element-plus/icons-vue';
+import { Delete, Download, Promotion, Setting } from '@element-plus/icons-vue';
 import { storeToRefs } from 'pinia';
 import { onMounted } from 'vue';
 
@@ -112,10 +120,10 @@ onMounted(async () => {
   background-color: transparent;
   border: 1px solid var(--vscode-pickerGroup-border);
   color: var(--vscode-list-highlightForeground);
+  opacity: .8;
 
   &:hover {
-    background-color: var(--vscode-pickerGroup-border);
-    color: var(--vscode-list-highlightForeground);
+    opacity: 1;
   }
 
   .conversation-item-title {
@@ -127,11 +135,14 @@ onMounted(async () => {
 
   .icon-delete {
     cursor: pointer;
-    color: var(--vscode-charts-red);
+  }
+
+
+  .hover-visible {
     visibility: hidden;
   }
 
-  &:hover .icon-delete {
+  &:hover .hover-visible {
     visibility: visible;
   }
 }

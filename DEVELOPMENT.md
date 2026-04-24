@@ -58,6 +58,12 @@ vscode-ext-code-assist/
 使用十种编程语言输出 WebSocket 服务示例代码
 ```
 
+> 测试 HTML (xss)
+
+```bash
+使用 HTML 编写一个调查问卷
+```
+
 > 测试 Mermaid
 
 ```bash

@@ -1,7 +1,6 @@
 <template>
   <div class="chat-container">
-    <!-- :loading="loading" -->
-    <ChatHeader :messages="currentMessageList"  @update:conversationId="handleConversationChange" />
+    <ChatHeader :messages="currentMessageList" :loading="loading"  @update:conversationId="handleConversationChange" />
     <ChatBody :messages="currentMessageList" :promptCode="promptCode" :currentMessage="currentMessage"
       :loading="loading" />
     <ChatFooter v-model="prompt" :promptCode="promptCode" :loading="loading" @click="onButtonClick" />
@@ -39,7 +38,6 @@ const loadMessages = async () => {
   currentMessage.value = messageLatestStore.getLatestMessageByConvId(conversationStore.conversationId);
   const loadedMessages = await messageStore.getMessagesById(conversationStore.conversationId);
   currentMessageList.value = loadedMessages;
-  console.log('loaded', conversationStore.conversationId, currentMessage.value.conversationId);
 };
 
 // 处理窗口消息
@@ -166,13 +164,6 @@ const handleChating = (result: IMessage) => {
     currentMessage.value.content = botMessage.content;
     currentMessage.value.endTime  = Date.now();
   }
-  console.log(
-    'streaming chunk',
-    currentMessage.value.conversationId,
-    currentMessage.value.content.length,
-    botMessage.conversationId,
-    botMessage.content.length
-  );
 };
 
 // AI 结束回答
@@ -183,13 +174,6 @@ const handleChatEnd = async (result: IMessage) => {
   botMessage.startTime = result.startTime;
   botMessage.loadTime = result.loadTime;
   botMessage.endTime = result.endTime;
-  console.log(
-    'streaming end',
-    currentMessage.value.conversationId,
-    currentMessage.value.content.length,
-    botMessage.conversationId,
-    botMessage.content.length
-  );
   // 跨页面更新会话
   let messages = await messageStore.getMessagesById(result.conversationId);
   messages = [...messages, botMessage];

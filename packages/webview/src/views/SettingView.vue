@@ -10,7 +10,8 @@
     </div>
     <div class="provider-setting-body">
       <div v-for="provider in providers" :key="provider.id" class="provider-item">
-        <el-icon v-if="providers.length > 1" class="icon-delete" @click="handleRemoveProvider(provider.id)">
+        <el-icon v-if="providers.length > 1" class="hover-visible icon-delete"
+          @click="handleRemoveProvider(provider.id)">
           <Delete />
         </el-icon>
         <div class="form-section">
@@ -24,7 +25,7 @@
         <div class="form-section">
           <label style="display: flex; align-items: center; gap: 8px;">
             <span>Models</span>
-            <el-icon style="cursor: pointer;" @click="getModels(provider)" >
+            <el-icon style="cursor: pointer;" @click="getModels(provider)">
               <Refresh></Refresh>
             </el-icon>
           </label>
@@ -110,6 +111,7 @@ const onConfirmClick = () => {
     font-size: 14px;
     font-weight: 500;
   }
+
 }
 
 .provider-setting-body {
@@ -124,14 +126,22 @@ const onConfirmClick = () => {
   border: 1px solid var(--vscode-pickerGroup-border);
   margin-bottom: 12px;
   position: relative;
+
+  .hover-visible {
+    visibility: hidden;
+  }
+
+  &:hover .hover-visible {
+    visibility: visible;
+  }
 }
 
 .icon-delete {
   position: absolute;
-  top: 8px;
-  right: 8px;
+  top: 12px;
+  right: 12px;
+  font-size: 16px;
   cursor: pointer;
-  color: #f56c6c;
 }
 
 .form-section {

@@ -129,11 +129,6 @@ body {
   padding: 0 4px;
 }
 
-.footer-area #chat-button {
-  cursor: pointer;
-  width: 32px;
-}
-
 .footer-area .prompt-area {
   height: var(--app-footer-height);
 }
