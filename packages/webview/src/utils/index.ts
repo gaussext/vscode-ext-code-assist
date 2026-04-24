@@ -114,7 +114,7 @@ export const queueAsync = <T extends IMessage>(result: T, callback: Callback<T>)
   if (result.type === 'delta') {
     Array.from({ length: result.delta.length }).forEach((_, index) => {
       const char = result.delta[index];
-      resultQueue.push({ type: 'delta', delta: char });
+      resultQueue.push({ type: 'delta', delta: char, conversationId: result.conversationId });
     });
   } else {
     resultQueue.push(result);

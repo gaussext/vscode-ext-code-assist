@@ -1,5 +1,5 @@
 <template>
-  <div class="markdown-content" v-if="renderedContent">
+  <div v-if="renderedContent" class="markdown-content">
     <div v-html="renderedContent"></div>
   </div>
   <div v-else-if="loading" class="loading">
@@ -13,6 +13,7 @@
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue';
 import { marked } from '@/utils/marked';
+import DOMPurify from 'dompurify';
 
 const props = defineProps({
   content: {
@@ -29,14 +30,14 @@ const renderMarkdown = async () => {
     renderedContent.value = '';
     return;
   }
-  
+
   loading.value = true;
   try {
     const result = await marked.parse(props.content);
-    renderedContent.value = result;
+    renderedContent.value = DOMPurify.sanitize(result);
   } catch (error) {
     console.error('Markdown rendering error:', error);
-    renderedContent.value = props.content;
+    renderedContent.value = DOMPurify.sanitize(props.content);
   } finally {
     loading.value = false;
   }

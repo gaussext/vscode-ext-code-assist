@@ -1,25 +1,28 @@
 import { useSettingStore } from '@/stores/setting';
-import * as uuid from 'uuid';
+import * as UUID from 'uuid';
 
 export class ChatConversation {
-  id: string = '0';
+  id: string = UUID.v4();
   title: string = '新建对话';
-  uuid: string = uuid.v4();
+  isSummary: boolean = false;
 }
 
 type MessageRole = 'system' | 'user' | 'assistant';
 
 export class ChatMessage {
+  id: string = UUID.v4();
+  conversationId: string = UUID.v4();
   role: MessageRole = 'system';
   model: string = 'qwen3:0.6b';
   content: string = '';
-  uuid: string = uuid.v4();
   startTime?: number = Date.now();
-  timestamp?: number = Date.now();
-  constructor(role: MessageRole) {
+  loadTime?: number = Date.now();
+  endTime?: number = Date.now();
+  constructor(role: MessageRole, conversationId: string) {
     const settingStore = useSettingStore();
     this.role = role;
     this.model = settingStore.currentModel.id;
+    this.conversationId = conversationId;
   }
 }
 

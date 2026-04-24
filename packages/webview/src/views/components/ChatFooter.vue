@@ -18,17 +18,18 @@
     </div>
     <div id="chat-tool">
       <div></div>
-      <button id="chat-button" @click="$emit('click')">
-        <component :is="loading ? VideoPause : Promotion" />
+      <button class="vscode-button-form" @click="$emit('click')">
+        <el-icon>
+          <component :is="loading ? VideoPause : Promotion" />
+        </el-icon>
       </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { marked } from '@/utils/marked';
-import { VideoPause, Promotion, Setting } from '@element-plus/icons-vue';
-import Markdown from './Markdown.vue';
+import { VideoPause, Promotion } from '@element-plus/icons-vue';
+import Markdown from '@/components/Markdown.vue';
 
 const modelValue = defineModel<string>({ required: true });
 

@@ -14,10 +14,9 @@ body {
 #app {
   margin: 0;
   --app-header-height: 28px;
-  --app-body-height: calc(100vh - 156px);
-  --app-footer-height: 100px;
+  --app-footer-height: 64px;
+  --app-body-height: calc(100vh - var(--app-header-height) - var(--app-footer-height) - 32px);
 }
-
 
 .app-header .header-area-tool {
   box-sizing: border-box;
@@ -46,10 +45,15 @@ body {
 
 .header-icon svg {
   cursor: pointer;
+  &:hover {
+    color: #409eff;
+  }
 }
 
-.header-icon svg:hover {
-  color: #409eff;
+
+.header-icon.disabled svg {
+  cursor: not-allowed;
+  color: #ccc;
 }
 
 .chat-container {
@@ -125,13 +129,8 @@ body {
   padding: 0 4px;
 }
 
-.footer-area #setting-button,
-.footer-area #chat-button {
-  width: 32px;
-}
-
 .footer-area .prompt-area {
-  height: 100px;
+  height: var(--app-footer-height);
 }
 
 .footer-area .prompt-code {

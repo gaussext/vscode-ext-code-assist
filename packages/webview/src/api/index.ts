@@ -6,6 +6,10 @@ class ChatService {
     return chatRpcService.models(params);
   }
 
+  summary(params: IChatParams) {
+    return chatRpcService.summary(params);
+  }
+
   chat(params: IChatParams, callback: any, end: any) {
     return chatRpcService.streamMessage(params, {
       onChunk: callback,

@@ -2,7 +2,7 @@
   <div id="messages" class="app-body messages-area" :class="{ 'has-code': promptCode }">
     <div
       v-for="message in messages"
-      :key="message.uuid"
+      :key="message.id"
       :class="['message', message.role === 'assistant' ? 'message-ai' : '']"
     >
       <div v-if="message.role === 'assistant'">
@@ -12,7 +12,7 @@
         <Markdown :content="message.content" />
         <div style="margin-top: 4px; display: flex; align-items: center">
           <a class="link-copy copy-markdown" @click="copyToClipboard(message.content)">复制 Markdown</a>
-          <AppMessageInfo v-if="message.role === 'assistant'" :message="message"></AppMessageInfo>
+          <MessageInfo v-if="message.role === 'assistant'" :message="message" />
         </div>
       </div>
       <div v-else>
@@ -27,14 +27,14 @@
       </div>
     </div>
     <div
-      v-show="loading"
-      :key="latestMessage.uuid"
-      :class="['message', latestMessage.role === 'assistant' ? 'message-ai' : 'message-you']"
+      v-show="loading && currentMessage.content"
+      :key="currentMessage.id"
+      :class="['message', currentMessage.role === 'assistant' ? 'message-ai' : 'message-you']"
     >
       <div style="margin-bottom: 8px">
-        <span>{{ latestMessage.model }}</span>
+        <span>{{ currentMessage.model }}</span>
       </div>
-      <div ref="latestMessageRef"></div>
+      <div ref="currentMessageRef"></div>
     </div>
     <div ref="messagesEndRef"></div>
   </div>
@@ -44,19 +44,19 @@
 import { ChatMessage } from '@/models/Model';
 import { copyToClipboard } from '@/utils';
 import { onMounted, ref, watch } from 'vue';
-import AppMessageInfo from './AppMessageInfo.vue';
+import MessageInfo from '@/components/MessageInfo.vue';
 import { marked } from '@/utils/marked';
-import Markdown from './Markdown.vue';
+import Markdown from '@/components/Markdown.vue';
 
 const props = defineProps<{
   messages: ChatMessage[];
-  latestMessage: ChatMessage;
+  currentMessage: ChatMessage;
   loading: boolean;
   promptCode: string;
 }>();
 
 const messagesEndRef = ref<HTMLDivElement | null>(null);
-const latestMessageRef = ref<HTMLDivElement | null>(null);
+const currentMessageRef = ref<HTMLDivElement | null>(null);
 
 // 滚动到底部
 const scrollToBottom = () => {
@@ -66,12 +66,16 @@ const scrollToBottom = () => {
 };
 
 watch(
-  () => props.latestMessage.content,
+  () => props.currentMessage,
   async () => {
-    if (latestMessageRef.value) {
-      const result = await marked.parse(props.latestMessage.content);
-      latestMessageRef.value.innerHTML = result;
+    if (currentMessageRef.value && props.currentMessage.content) {
+      const result = await marked.parse(props.currentMessage.content);
+      currentMessageRef.value.innerHTML = result;
     }
+  },
+  {
+    deep: true,
+    immediate: true,
   }
 );
 

@@ -39,7 +39,7 @@ vscode-ext-code-assist/
 
 ## 技术栈
 
-- TypeScript, VS Code Extension API, Vue 3, Vite, Webpack, pnpm, DeepSeek API
+- TypeScript, VS Code Extension API, Vue 3, Vite, Webpack, pnpm, OpenAI API
 
 ## 测试
 
@@ -56,6 +56,12 @@ vscode-ext-code-assist/
 ```bash
 使用十种编程语言输出 HTTP 服务示例代码
 使用十种编程语言输出 WebSocket 服务示例代码
+```
+
+> 测试 HTML (xss)
+
+```bash
+使用 HTML 编写一个调查问卷
 ```
 
 > 测试 Mermaid
