@@ -5,16 +5,16 @@
         <UsageInfo :info="info" />
       </div>
       <div class="header-icon-group right">
-        <el-icon class="header-icon" @click="downloadConversation">
+        <el-icon class="header-icon" :class="{'disabled': loading}" @click="downloadConversation">
           <Download />
         </el-icon>
-        <el-icon class="header-icon" @click="onCreateConversation">
+        <el-icon class="header-icon" :class="{'disabled': loading}" @click="onCreateConversation">
           <FolderAdd />
         </el-icon>
-        <el-icon class="header-icon" @click="$router.push('/history')">
+        <el-icon class="header-icon" :class="{'disabled': loading}" @click="gotoHistory">
           <FolderOpened />
         </el-icon>
-        <el-icon class="header-icon" @click="$router.push('/setting')">
+        <el-icon class="header-icon" :class="{'disabled': loading}" @click="gotoSetting">
           <Setting></Setting>
         </el-icon>
       </div>
@@ -28,19 +28,24 @@
 <script setup lang="ts">
 import { useConversationStore } from '@/stores/conversation';
 import { useMessageStore } from '@/stores/message';
-import { getTokenCount, lastElement } from '@/utils';
+import { getTokenCount } from '@/utils';
 import { computed } from 'vue';
 import type { ChatMessage } from '@/models/Model';
 import UsageInfo from '@/components/UsageInfo.vue';
 import { MAX_TOKEN_LENGTH } from '@/stores/constants';
 import { Setting, Download, FolderAdd, FolderOpened } from '@element-plus/icons-vue';
+import { useRouter } from 'vue-router';
 
+const router = useRouter();
 const conversationStore = useConversationStore();
 const messageStore = useMessageStore();
 
 const props = defineProps({
   messages: {
     default: () => [] as ChatMessage[],
+  },
+  loading: {
+    default: false,
   },
 });
 
@@ -82,12 +87,14 @@ const emit = defineEmits<{
 }>();
 
 const downloadConversation = async () => {
+  if (props.loading) { return; }
   const conversation = conversationStore.getConversationById(conversationStore.conversationId);
   if (!conversation) { return; }
   await messageStore.downloadConversation(conversationStore.conversationId, conversation.title);
 };
 
 const onCreateConversation = async () => {
+  if (props.loading) { return; }
   if (props.messages.length === 0) {
     return;
   }
@@ -96,6 +103,17 @@ const onCreateConversation = async () => {
   emit('create');
   emit('update:conversationId', conv.id);
 };
+
+const gotoHistory = () => {
+  if (props.loading) { return; }
+  router.push('/history');
+};
+
+const gotoSetting = () => {
+  if (props.loading) { return; }
+  router.push('/setting');
+};
+
 </script>
 
 <style lang="scss">

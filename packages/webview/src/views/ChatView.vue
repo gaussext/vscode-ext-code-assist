@@ -1,12 +1,8 @@
 <template>
   <div class="chat-container">
-    <ChatHeader :messages="currentMessageList" @update:conversationId="handleConversationChange" />
-    <ChatBody
-      :messages="currentMessageList"
-      :promptCode="promptCode"
-      :currentMessage="currentMessage"
-      :loading="loading"
-    />
+    <ChatHeader :messages="currentMessageList" :loading="loading" @update:conversationId="handleConversationChange" />
+    <ChatBody :messages="currentMessageList" :promptCode="promptCode" :currentMessage="currentMessage"
+      :loading="loading" />
     <ChatFooter v-model="prompt" :promptCode="promptCode" :loading="loading" @click="onButtonClick" />
   </div>
 </template>
@@ -163,10 +159,7 @@ const handleChating = (result: IMessage) => {
   // 当前页面更新消息
   currentMessage.value = messageLatestStore.getLatestMessageByConvId(conversationStore.conversationId);
   if (currentMessage.value.conversationId === result.conversationId) {
-    if (currentMessage.value.content === '...') {
-      currentMessage.value.content = '';
-    }
-    currentMessage.value.content += result.delta;
+    currentMessage.value.content = botMessage.content;
   }
   console.log(
     'streaming chunk',
