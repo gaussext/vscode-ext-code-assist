@@ -124,6 +124,13 @@ const gotoSetting = () => {
 </script>
 
 <style lang="scss">
+.app-header .header-area-tool {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: var(--app-header-height);
+  padding-top: 2px;
+}
 
 .header-title {
   font-size: 12px;

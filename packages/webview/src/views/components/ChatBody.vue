@@ -66,3 +66,31 @@ onMounted(() => {
   scrollToBottom();
 });
 </script>
+
+<style lang="scss">
+.messages-area {
+  margin-top: 8px;
+  margin-bottom: 8px;
+  padding: 4px 8px 8px 0;
+  border-radius: 4px;
+  height: var(--chat-body-height);
+  overflow-y: auto;
+
+  .chat-message {
+    margin-bottom: 16px;
+  }
+  .message-bot {
+    background-color: transparent;
+  }
+}
+
+.messages-area.has-code {
+  padding-bottom: 200px;
+}
+
+.messages-area  .messgae-user .markdown-content {
+  background-color: var(--vscode-editor-background);
+  padding: 8px;
+  border-radius: 8px;
+}
+</style>

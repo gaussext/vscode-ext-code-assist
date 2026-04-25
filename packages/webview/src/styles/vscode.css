@@ -1,9 +1,6 @@
 :root {
-  --container-paddding: 20px;
-  --input-padding-vertical: 6px;
-  --input-padding-horizontal: 4px;
-  --input-margin-vertical: 4px;
-  --input-margin-horizontal: 0;
+  --button-padding-vertical: 6px;
+  --button-padding-horizontal: 4px;
 }
 
 body {
@@ -12,21 +9,6 @@ body {
   font-weight: var(--vscode-font-weight);
   font-family: var(--vscode-font-family);
   background-color: var(--vscode-editor-background);
-}
-
-ol,
-ul {
-  padding-left: var(--container-paddding);
-}
-
-body > *,
-form > * {
-  margin-block-start: var(--input-margin-vertical);
-  margin-block-end: var(--input-margin-vertical);
-}
-
-*:focus {
-  outline-color: var(--vscode-focusBorder) !important;
 }
 
 a {
@@ -43,9 +25,11 @@ code {
   font-family: var(--vscode-editor-font-family);
 }
 
+/* Button */
+
 .vscode-button {
   border: none;
-  padding: var(--input-padding-vertical) var(--input-padding-horizontal);
+  padding: var(--button-padding-vertical) var(--button-padding-horizontal);
   width: 100%;
   text-align: center;
   outline: 1px solid transparent;
@@ -77,6 +61,31 @@ code {
   background: var(--vscode-button-secondaryHoverBackground);
 }
 
+.vscode-button-form {
+  padding: 6px 12px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background-color: #272822;
+  color: #fff;
+  cursor: pointer;
+}
+
+.vscode-button-form:hover {
+  background-color: #3a3a32;
+}
+
+.vscode-button-form.primary {
+  background-color: #409eff;
+  border-color: #409eff;
+  color: #fff;
+}
+
+.vscode-button-form.primary:hover {
+  background-color: #66b1ff;
+}
+
+/* Textarea */
+
 .vscode-textarea {
   height: 100%;
   padding: 4px;
@@ -107,25 +116,3 @@ code {
   gap: 8px;
 }
 
-.vscode-button-form {
-  padding: 6px 12px;
-  border: 1px solid #444;
-  border-radius: 4px;
-  background-color: #272822;
-  color: #fff;
-  cursor: pointer;
-}
-
-.vscode-button-form:hover {
-  background-color: #3a3a32;
-}
-
-.vscode-button-form.primary {
-  background-color: #409eff;
-  border-color: #409eff;
-  color: #fff;
-}
-
-.vscode-button-form.primary:hover {
-  background-color: #66b1ff;
-}

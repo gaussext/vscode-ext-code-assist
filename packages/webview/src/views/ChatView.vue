@@ -373,3 +373,16 @@ onUnmounted(() => {
   window.removeEventListener('message', handleWindowMessage);
 });
 </script>
+
+<style>
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 400px;
+  max-width: 800px;
+  margin: 0 auto;
+  max-height: 100vh;
+  padding: 0 4px;
+}
+</style>

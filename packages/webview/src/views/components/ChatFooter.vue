@@ -50,3 +50,41 @@ const handleKeyPress = (e: KeyboardEvent) => {
   }
 };
 </script>
+
+<style>
+.footer-area {
+  height: var(--chat-footer-height);
+  position: relative;
+}
+
+.footer-area .vscode-textarea {
+  width: 100%;
+  height: 100%;
+  border-radius: 4px;
+}
+
+.footer-area #chat-tool {
+  position: absolute;
+  width: 100%;
+  bottom: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+.footer-area .prompt-area {
+  height: var(--chat-footer-height);
+}
+
+.footer-area .prompt-code {
+  position: absolute;
+  width: calc(100% - 36px);
+  bottom: 108px;
+  height: 200px;
+  overflow-y: auto;
+  padding: 4px;
+  border-radius: 4px;
+}
+
+</style>
