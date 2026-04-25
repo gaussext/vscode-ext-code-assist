@@ -1,5 +1,5 @@
 import type { IChatParams, IModelParams } from '@/models/Model';
-import { EnumRpcMessage, WebviewRpcClient } from 'vscode-webview-rpc';
+import { EnumRpcMessage, WebviewRpcClient } from 'code-assit-rpc';
 import { RpcMock } from './rpc-mock';
 import type { IChunk } from '@/types';
 

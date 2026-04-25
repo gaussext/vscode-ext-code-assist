@@ -1,5 +1,5 @@
 {
-  "name": "vscode-webview-rpc",
+  "name": "code-assit-rpc",
   "version": "1.0.0",
   "description": "RPC communication library for VS Code webview with streaming support",
   "main": "./dist/index.js",

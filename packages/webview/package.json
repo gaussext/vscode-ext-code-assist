@@ -19,7 +19,7 @@
     "marked-highlight": "^2.2.1",
     "pinia": "^3.0.4",
     "uuid": "^11.1.0",
-    "vscode-webview-rpc": "workspace:*",
+    "code-assit-rpc": "workspace:*",
     "vue": "^3.5.13",
     "vue-router": "^5.0.4"
   },

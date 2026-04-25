@@ -1,6 +1,6 @@
-# vscode-webview-rpc
+# code-assit-rpc
 
-[![npm version](https://img.shields.io/npm/v/vscode-webview-rpc.svg)](https://www.npmjs.com/package/vscode-webview-rpc)
+[![npm version](https://img.shields.io/npm/v/code-assit-rpc.svg)](https://www.npmjs.com/package/code-assit-rpc)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 VS Code Webview RPC 通讯库，支持流式数据传输。
@@ -16,7 +16,7 @@ VS Code Webview RPC 通讯库，支持流式数据传输。
 ## 安装
 
 ```bash
-pnpm install vscode-webview-rpc
+pnpm install code-assit-rpc
 ```
 
 ## 使用方法
@@ -25,7 +25,7 @@ pnpm install vscode-webview-rpc
 
 ```typescript
 import * as vscode from 'vscode';
-import { WebviewRpcServer } from 'vscode-webview-rpc';
+import { WebviewRpcServer } from 'code-assit-rpc';
 
 // 创建 RPC 服务器
 const rpcServer = new WebviewRpcServer(webview);
@@ -49,7 +49,7 @@ rpcServer.registerHandlers('chat', {
 ### Webview 端
 
 ```typescript
-import { WebviewRpcClient } from 'vscode-webview-rpc';
+import { WebviewRpcClient } from 'code-assit-rpc';
 
 // 创建 RPC 客户端
 const rpcClient = new WebviewRpcClient(vscode);

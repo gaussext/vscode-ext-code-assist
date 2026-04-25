@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { EnumRpcMessage, WebviewRpcServer } from 'vscode-webview-rpc';
+import { EnumRpcMessage, WebviewRpcServer } from 'code-assit-rpc';
 import { streamMessageHandler, stopChatHandler, modelsHandler, summaryHandler } from './controllers/ChatController';
 
 export function createRpc(webview: vscode.Webview) {

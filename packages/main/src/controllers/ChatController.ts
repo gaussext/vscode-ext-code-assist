@@ -1,7 +1,7 @@
 import { OpenAIService } from '../services';
 import { IChatParams, IChunk } from '../models';
 import log from 'loglevel';
-import { IChannel, RpcHandler } from 'vscode-webview-rpc';
+import { IChannel, RpcHandler } from 'code-assit-rpc';
 
 const openaiService = new OpenAIService();
 
