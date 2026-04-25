@@ -9,11 +9,7 @@
         <div style="margin-bottom: 8px">
           <span>{{ message.model }}</span>
         </div>
-        <Markdown :content="message.content" :reasoning="message.reasoning" />
-        <div style="margin-top: 4px; height: 24px; display: flex; align-items: center">
-          <a class="link-copy copy-markdown" @click="copyToClipboard(message.content)">Copy Markdown</a>
-          <MessageInfo v-if="message.role === 'assistant'" :message="message" />
-        </div>
+        <Markdown :message="message" />
       </div>
       <div v-else>
         <div style="display: flex; justify-content: flex-end; margin-bottom: 8px">
@@ -21,7 +17,7 @@
         </div>
         <div style="display: flex; justify-content: flex-end; width: 100%">
           <div class="message-you">
-            <Markdown :content="message.content" :reasoning="message.reasoning" />
+            <Markdown :message="message" />
           </div>
         </div>
       </div>
@@ -34,7 +30,7 @@
       <div style="margin-bottom: 8px">
         <span>{{ currentMessage.model }}</span>
       </div>
-      <Markdown :key="currentMessage.endTime" :content="currentMessage.content" :reasoning="currentMessage.reasoning" />
+      <Markdown :show-info="false" :message="currentMessage" />
     </div>
     <div ref="messagesEndRef"></div>
   </div>
@@ -42,9 +38,7 @@
 
 <script setup lang="ts">
 import { ChatMessage } from '@/models/Model';
-import { copyToClipboard } from '@/utils';
 import { onMounted, ref, watch } from 'vue';
-import MessageInfo from '@/components/MessageInfo.vue';
 import Markdown from '@/components/Markdown.vue';
 
 

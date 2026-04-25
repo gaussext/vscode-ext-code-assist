@@ -46,7 +46,7 @@ code.hljs {
   position: relative;
 }
 
-code.hljs .copy-button {
+code.hljs .hljs-button-copy {
   position: absolute;
   top: 8px;
   right: 8px;
@@ -62,10 +62,10 @@ code.hljs .copy-button {
   z-index: 10;
 }
 
-code.hljs:hover .copy-button {
+code.hljs:hover .hljs-button-copy {
   opacity: 1;
 }
 
-code.hljs .copy-button:hover {
+code.hljs .hljs-button-copy:hover {
   background-color: var(--vscode-button-hoverBackground);
 }

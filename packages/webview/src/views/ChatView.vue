@@ -156,17 +156,17 @@ const handleChating = (result: IMessage) => {
   // 跨页面更新消息
   const botMessage = messageLatestStore.getLatestMessageByConvId(result.conversationId);
   if (result.type === 'reasoning') {
+    console.log('reasoning');
     botMessage.reasoning += result.data || '';
   }
   if (result.type === 'content') {
+    console.log('content');
     botMessage.content += result.data || '';
   }
   // 当前页面更新消息
-  currentMessage.value = messageLatestStore.getLatestMessageByConvId(conversationStore.conversationId);
   if (currentMessage.value.conversationId === result.conversationId) {
     currentMessage.value.content = botMessage.content;
     currentMessage.value.reasoning = botMessage.reasoning;
-    currentMessage.value.endTime = Date.now();
   }
 };
 
@@ -187,11 +187,11 @@ const handleChatEnd = async (result: IMessage) => {
   if (conversationStore.conversationId === result.conversationId) {
     currentMessageList.value = messages;
   }
+  // 
   currentMessage.value = messageLatestStore.getLatestMessageByConvId(conversationStore.conversationId);
   if (currentMessage.value.conversationId === result.conversationId) {
     currentMessage.value.content = botMessage.content;
     currentMessage.value.reasoning = botMessage.reasoning;
-    currentMessage.value.endTime = Date.now();
   }
   // 生成摘要
   const conversation = await conversationStore.getConversationById(result.conversationId);
