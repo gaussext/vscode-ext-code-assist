@@ -20,6 +20,13 @@
             <option v-for="model in currentModels" :key="model.value" :value="model.value">{{ model.label }}</option>
           </select>
         </div>
+        <div class="form-section">
+          <label>Chat Model</label>
+          <select v-model="summaryModelHash" class="vscode-select">
+            <option v-if="currentModels.length === 0" value="" disabled>Select a model</option>
+            <option v-for="model in currentModels" :key="model.value" :value="model.value">{{ model.label }}</option>
+          </select>
+        </div>
       </div>
       <div class="provider-setting-header">
         <h2 class="provider-setting-title">Provider</h2>
@@ -84,6 +91,7 @@ const settingStore = useSettingStore();
 
 const providers = ref(providerStore.providers);
 const currentModelHash = ref(settingStore.currentModelHash || '');
+const summaryModelHash = ref(settingStore.summaryModelHash || '');
 
 const currentModels = computed(() => {
   let result: IOption[] = [];
@@ -137,6 +145,8 @@ const handleResetClick = async () => {
   setTimeout(() => {
     currentModelHash.value = currentModels.value[0].value;
     settingStore.setCurrentModelHash(currentModelHash.value);
+    summaryModelHash.value = currentModels.value[0].value;
+    settingStore.setSummaryModelHash(summaryModelHash.value);
   });
 };
 
@@ -144,6 +154,7 @@ const onConfirmClick = () => {
   if (providers.value.length > 0) {
     providerStore.setProviders(providers.value);
     settingStore.setCurrentModelHash(currentModelHash.value);
+    settingStore.setSummaryModelHash(summaryModelHash.value);
     router.push('/');
   }
 };
@@ -182,7 +193,7 @@ const onConfirmClick = () => {
 
 .provider-setting-body {
   flex: 1;
-  max-height: calc(100vh - 256px);
+  max-height: calc(100vh - 320px);
   overflow-y: auto;
 }
 

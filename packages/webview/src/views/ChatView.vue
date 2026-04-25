@@ -103,7 +103,7 @@ const enqueue = async (value: IMessage) => {
 const handleChatRequest = async (messages: ChatMessage[]) => {
   loading.value = true;
   // 获取当前模型参数
-  const { baseURL, apiKey, model } = settingStore.getModelParams();
+  const { baseURL, apiKey, model } = settingStore.getModelParams(settingStore.currentModelHash);
   // 记录当前对话ID
   const currentConversationId = conversationStore.conversationId;
   messageLatestStore.deleteLatestMessageByConvId(currentConversationId);
@@ -198,7 +198,7 @@ const handleChatEnd = async (result: IMessage) => {
 
 const handleSummary = (conversationId: string, messages: ChatMessage[]) => {
   // 获取当前模型参数
-  const { baseURL, apiKey, model } = settingStore.getModelParams();
+  const { baseURL, apiKey, model } = settingStore.getModelParams(settingStore.summaryModelHash);
   return chatService
     .summary({
       baseURL,

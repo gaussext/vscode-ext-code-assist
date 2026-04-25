@@ -13,6 +13,11 @@ const storeConversations = localforage.createInstance({
 export const useConversationStore = defineStore('conversation', () => {
   const conversations = ref<ChatConversation[]>([]);
   const conversationId = ref<string>(localStorage.getItem(EnumStorageKey.ConversationId) || '');
+  const conversationTitle = ref<string>('');
+
+  const setConversationTitle = (title: string) => {
+    conversationTitle.value = title;
+  };
 
   const getConversations = async (): Promise<ChatConversation[]> => {
     const res = await storeConversations.getItem('data');
@@ -22,6 +27,7 @@ export const useConversationStore = defineStore('conversation', () => {
     if (conversations.value.length === 0) {
       const conv = new ChatConversation()
       setConversationId(conv.id)
+      setConversationTitle(conv.title ?? '');
       conversations.value.push(conv);
       setConversations(conversations.value)
     }
@@ -64,6 +70,7 @@ export const useConversationStore = defineStore('conversation', () => {
   };
 
   const updateConversationTitle = async (conversationId: string, title: string) => {
+    setConversationTitle(title);
     conversations.value.forEach((item) => {
       if (item.id === conversationId) {
         item.title = title;
@@ -79,10 +86,12 @@ export const useConversationStore = defineStore('conversation', () => {
   };
 
   return {
-    conversationId,
     conversations,
+    conversationId,
+    conversationTitle,
     // 
     setConversationId,
+    setConversationTitle,
     // 
     getConversations,
     clearConversations,

@@ -74,5 +74,4 @@ vscode-ext-code-assist/
 
 ```bash
 使用 Latex 语法编写麦克斯韦方程组
-使用 Latex 语法编写欧拉公式
 ```
