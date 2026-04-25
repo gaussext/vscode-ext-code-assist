@@ -6,8 +6,13 @@ export interface IChatParams {
   baseURL?: string;
 }
 
+export interface IChunk {
+  type: 'content' | 'reasoning' | 'error';
+  data: string;
+}
+
 export interface StreamCallbacks {
-  onChunk: (delta: string) => void;
+  onChunk: (delta: IChunk) => void;
   onComplete: () => void;
   onError: (error: Error) => void;
 }

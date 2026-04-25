@@ -19,24 +19,24 @@
           <span>{{ info.totalDuration }} Second</span>
         </div>
         <div class="tooltip__item">
-          <span>Token :</span>
-          <span>{{ info.tokens }} Tokens</span>
-        </div>
-        <div class="tooltip__item">
-          <span>Token Speed: </span>
-          <span>{{ info.tokensSpeed }} Tokens/s</span>
-        </div>
-        <div class="tooltip__item">
-          <span>Char :</span>
+          <span>Char Count:</span>
           <span>{{ info.chars }} Chars</span>
+        </div>
+        <div class="tooltip__item">
+          <span>Token Count:</span>
+          <span>{{ info.tokens }} Token</span>
         </div>
         <div class="tooltip__item">
           <span>Char Speed: </span>
           <span>{{ info.charsSpeed }} Chars/s</span>
         </div>
+        <div class="tooltip__item">
+          <span>Token Speed: </span>
+          <span>{{ info.tokensSpeed }} Token/s</span>
+        </div>
       </div>
     </template>
-    <el-icon>
+    <el-icon style="cursor: pointer;">
       <QuestionFilled />
     </el-icon>
   </el-tooltip>
@@ -44,6 +44,7 @@
 <script lang="ts" setup>
 import { ChatMessage } from '@/models/Model';
 import { getTokenCount } from '@/utils';
+import { getMessageInfoFromMessage } from '@/utils/token';
 import { QuestionFilled } from '@element-plus/icons-vue';
 
 const props = defineProps({
@@ -52,26 +53,7 @@ const props = defineProps({
   },
 });
 
-const getInfoFromMessage = (message: ChatMessage) => {
-  const loadDuration = ((message.loadTime - message.startTime || 1000) / 1000).toFixed(2);
-  const evalDuration = ((message.endTime - message.loadTime || 1000) / 1000).toFixed(2);
-  const totalDuration = ((message.endTime - message.startTime || 1000) / 1000).toFixed(2);
-  const tokens = getTokenCount(message.content);
-  const tokensSpeed = (tokens / parseFloat(evalDuration)).toFixed(2);
-  const chars = message.content.length;
-  const charsSpeed = (chars / parseFloat(evalDuration)).toFixed(2);
-  return {
-    loadDuration,
-    evalDuration,
-    totalDuration,
-    tokens,
-    tokensSpeed,
-    chars,
-    charsSpeed,
-  };
-};
-
-const info = getInfoFromMessage(props.message);
+const info = getMessageInfoFromMessage(props.message);
 </script>
 <style lang="scss" scoped>
 .tooltip__item {

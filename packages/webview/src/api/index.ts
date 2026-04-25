@@ -1,17 +1,17 @@
 import type { IChatParams, IModelParams } from '@/models/Model';
-import { chatRpcService } from './rpc';
+import { chatRpcClient } from './rpc';
 
 class ChatService {
   models(params: IModelParams) {
-    return chatRpcService.models(params);
+    return chatRpcClient.models(params);
   }
 
   summary(params: IChatParams) {
-    return chatRpcService.summary(params);
+    return chatRpcClient.summary(params);
   }
 
   chat(params: IChatParams, callback: any, end: any) {
-    return chatRpcService.streamMessage(params, {
+    return chatRpcClient.streamMessage(params, {
       onChunk: callback,
       onComplete: end,
       onError: (error: Error) => {
@@ -22,7 +22,7 @@ class ChatService {
   }
 
   stop() {
-    return chatRpcService.stopChat();
+    return chatRpcClient.stopChat();
   }
 }
 

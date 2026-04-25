@@ -44,11 +44,14 @@ export class OpenAIService {
           signal: this.controller.signal,
         }
       )) as any;
-
       for await (const chunk of stream) {
-        const delta = chunk.choices[0]?.delta?.content || '';
-        if (delta) {
-          callbacks.onChunk(delta);
+        const reasoning = chunk.choices[0]?.delta?.reasoning || chunk.choices[0]?.delta?.reasoning_content || '';
+        if (reasoning) {
+          callbacks.onChunk({ type: 'reasoning', data: reasoning });
+        }
+        const content = chunk.choices[0]?.delta?.content || '';
+        if (content) {
+          callbacks.onChunk({ type: 'content', data: content });
         }
       }
       callbacks.onComplete();

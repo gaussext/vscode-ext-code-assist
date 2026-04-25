@@ -9,8 +9,8 @@
         <div style="margin-bottom: 8px">
           <span>{{ message.model }}</span>
         </div>
-        <Markdown :content="message.content" />
-        <div style="margin-top: 4px; display: flex; align-items: center">
+        <Markdown :content="message.content" :reasoning="message.reasoning" />
+        <div style="margin-top: 4px; height: 24px; display: flex; align-items: center">
           <a class="link-copy copy-markdown" @click="copyToClipboard(message.content)">复制 Markdown</a>
           <MessageInfo v-if="message.role === 'assistant'" :message="message" />
         </div>
@@ -21,20 +21,20 @@
         </div>
         <div style="display: flex; justify-content: flex-end; width: 100%">
           <div class="message-you">
-            <Markdown :content="message.content" />
+            <Markdown :content="message.content" :reasoning="message.reasoning" />
           </div>
         </div>
       </div>
     </div>
     <div
-      v-show="loading && currentMessage.content"
+      v-show="loading"
       :key="currentMessage.id"
       :class="['message', currentMessage.role === 'assistant' ? 'message-ai' : 'message-you']"
     >
       <div style="margin-bottom: 8px">
         <span>{{ currentMessage.model }}</span>
       </div>
-      <div ref="currentMessageRef"></div>
+      <Markdown :key="currentMessage.endTime" :content="currentMessage.content" :reasoning="currentMessage.reasoning" />
     </div>
     <div ref="messagesEndRef"></div>
   </div>
@@ -45,8 +45,8 @@ import { ChatMessage } from '@/models/Model';
 import { copyToClipboard } from '@/utils';
 import { onMounted, ref, watch } from 'vue';
 import MessageInfo from '@/components/MessageInfo.vue';
-import { marked } from '@/utils/marked';
 import Markdown from '@/components/Markdown.vue';
+
 
 const props = defineProps<{
   messages: ChatMessage[];
@@ -56,7 +56,6 @@ const props = defineProps<{
 }>();
 
 const messagesEndRef = ref<HTMLDivElement | null>(null);
-const currentMessageRef = ref<HTMLDivElement | null>(null);
 
 // 滚动到底部
 const scrollToBottom = () => {
@@ -65,19 +64,6 @@ const scrollToBottom = () => {
   });
 };
 
-watch(
-  () => props.currentMessage,
-  async () => {
-    if (currentMessageRef.value && props.currentMessage.content) {
-      const result = await marked.parse(props.currentMessage.content);
-      currentMessageRef.value.innerHTML = result;
-    }
-  },
-  {
-    deep: true,
-    immediate: true,
-  }
-);
 
 watch(
   () => props.messages,

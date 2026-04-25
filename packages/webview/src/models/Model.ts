@@ -15,6 +15,7 @@ export class ChatMessage {
   role: MessageRole = 'system';
   model: string = 'qwen3:0.6b';
   content: string = '';
+  reasoning?: string = '';
   startTime?: number = Date.now();
   loadTime?: number = Date.now();
   endTime?: number = Date.now();
