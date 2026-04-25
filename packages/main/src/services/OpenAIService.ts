@@ -8,10 +8,10 @@ export class OpenAIService {
 
   private getClient(apiKey: string, baseURL?: string) {
     if (!baseURL) {
-      throw new Error('请配置 baseURL');
+      throw new Error('Please configure baseURL');
     }
     if (!apiKey) {
-      throw new Error('请配置 API Key');
+      throw new Error('Please configure API Key');
     }
     this.client = new OpenAI({
       apiKey: apiKey,
@@ -44,11 +44,14 @@ export class OpenAIService {
           signal: this.controller.signal,
         }
       )) as any;
-
       for await (const chunk of stream) {
-        const delta = chunk.choices[0]?.delta?.content || '';
-        if (delta) {
-          callbacks.onChunk(delta);
+        const reasoning = chunk.choices[0]?.delta?.reasoning || chunk.choices[0]?.delta?.reasoning_content || '';
+        if (reasoning) {
+          callbacks.onChunk({ type: 'reasoning', data: reasoning });
+        }
+        const content = chunk.choices[0]?.delta?.content || '';
+        if (content) {
+          callbacks.onChunk({ type: 'content', data: content });
         }
       }
       callbacks.onComplete();

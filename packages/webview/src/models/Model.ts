@@ -3,7 +3,7 @@ import * as UUID from 'uuid';
 
 export class ChatConversation {
   id: string = UUID.v4();
-  title: string = '新建对话';
+  title: string = 'New Session';
   isSummary: boolean = false;
 }
 
@@ -15,6 +15,7 @@ export class ChatMessage {
   role: MessageRole = 'system';
   model: string = 'qwen3:0.6b';
   content: string = '';
+  reasoning?: string = '';
   startTime?: number = Date.now();
   loadTime?: number = Date.now();
   endTime?: number = Date.now();

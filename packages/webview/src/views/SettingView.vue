@@ -1,7 +1,7 @@
 <template>
   <div class="provider-setting-container">
     <div class="provider-setting-header">
-      <h2 class="provider-setting-title">供应商配置</h2>
+      <h2 class="provider-setting-title">Provider Setting</h2>
       <div class="header-icon-group right">
         <el-icon class="header-icon" style="transform: rotate(90deg)" @click="$router.push('/')">
           <Download />
@@ -64,7 +64,7 @@ const getModels = async (provider: ProviderVo) => {
     const models = res.body.data || [];
     provider.models = models.map((m) => m.id).join(',');
   } catch (error) {
-    console.log(error);
+    console.error(error);
   }
 };
 

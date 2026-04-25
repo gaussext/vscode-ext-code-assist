@@ -1,7 +1,7 @@
 <template>
   <div class="conversation-history-container">
     <div class="conversation-history-header">
-      <h2 class="conversation-history-title">历史记录</h2>
+      <h2 class="conversation-history-title">Conversation History</h2>
       <div class="header-icon-group right">
         <el-icon class="header-icon" style="transform: rotate(90deg);" @click="$router.push('/')">
           <Download />
@@ -16,12 +16,12 @@
         <span class="conversation-item-title">{{ conv.title }}</span>
         <div class="vscode-button-group hover-visible">
           <button class="vscode-button-form" @click="onConversationChange(conv.id)">
-            <el-icon v-if="conversations.length > 1">
+            <el-icon >
               <Promotion />
             </el-icon>
           </button>
-          <button class="vscode-button-form" @click.stop="onDeleteConversation(conv.id)">
-            <el-icon v-if="conversations.length > 1" class="icon-delete" >
+          <button v-if="conversations.length > 1" class="vscode-button-form" @click.stop="onDeleteConversation(conv.id)">
+            <el-icon class="icon-delete" >
               <Delete />
             </el-icon>
           </button>

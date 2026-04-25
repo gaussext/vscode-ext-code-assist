@@ -1,3 +1,5 @@
+import { IChannel } from "./RpcServer";
+
 export type RpcMessageType = 'request' | 'response' | 'stream' | 'error' | 'complete';
 
 export interface RpcMessage<T = unknown> {
@@ -50,12 +52,8 @@ export interface RpcHandler<TParams = unknown, TResult = unknown> {
 
 export interface RpcStreamHandler<TParams = any, TChunk = any> {
   (
+    stream: IChannel<TChunk>,
     params?: TParams,
-    stream?: {
-      write: (chunk: TChunk) => void;
-      complete: () => void;
-      error: (err: Error) => void;
-    }
   ): Promise<void> | void;
 }
 

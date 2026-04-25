@@ -1,54 +1,65 @@
 <template>
-  <div v-if="renderedContent" class="markdown-content">
-    <div v-html="renderedContent"></div>
-  </div>
-  <div v-else-if="loading" class="loading">
-    渲染中...
-  </div>
-  <div v-else class="empty">
-    无内容
+  <div class="markdown-render">
+    <el-collapse v-if="reasoning" expand-icon-position="left">
+      <el-collapse-item title="Think">
+        {{ reasoning }}
+      </el-collapse-item>
+    </el-collapse>
+    <div v-if="renderedContent" class="markdown-content">
+      <div v-html="renderedContent"></div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import { renderMarkdown } from '@/utils/markdown';
 import { ref, watch, onMounted } from 'vue';
-import { marked } from '@/utils/marked';
-import DOMPurify from 'dompurify';
 
 const props = defineProps({
   content: {
     type: String,
-    default: ''
-  }
+    default: '',
+  },
+  reasoning: {
+    type: String,
+    default: '',
+  },
 });
 
 const renderedContent = ref('');
-const loading = ref(false);
 
-const renderMarkdown = async () => {
+const renderContent = async () => {
   if (!props.content) {
     renderedContent.value = '';
     return;
   }
 
-  loading.value = true;
   try {
-    const result = await marked.parse(props.content);
-    renderedContent.value = DOMPurify.sanitize(result);
+    renderedContent.value = await renderMarkdown(props.content);
   } catch (error) {
     console.error('Markdown rendering error:', error);
-    renderedContent.value = DOMPurify.sanitize(props.content);
-  } finally {
-    loading.value = false;
+    renderedContent.value = await renderMarkdown(props.content);
   }
 };
 
-watch(() => props.content, () => {
-  renderMarkdown();
-}, { immediate: true });
+watch(
+  () => props.reasoning,
+  () => {
+    renderContent();
+  },
+  { immediate: true }
+);
+
+watch(
+  () => props.content,
+  () => {
+    renderContent();
+  },
+  { immediate: true }
+);
 
 onMounted(() => {
-  renderMarkdown();
+  renderContent();
 });
 </script>
 

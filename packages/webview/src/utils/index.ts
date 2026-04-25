@@ -110,11 +110,11 @@ const executeNextTask = async (callback) => {
 type Callback<T> = (result: T) => void;
 
 export const queueAsync = <T extends IMessage>(result: T, callback: Callback<T>) => {
-  // 拆分 delta 为单个字符
-  if (result.type === 'delta') {
-    Array.from({ length: result.delta.length }).forEach((_, index) => {
-      const char = result.delta[index];
-      resultQueue.push({ type: 'delta', delta: char, conversationId: result.conversationId });
+  // 拆分 content 为单个字符
+  if (result.type !== 'end') {
+    Array.from({ length: result.data?.length || 0 }).forEach((_, index) => {
+      const char = result.data[index];
+      resultQueue.push({ type: result.type, data: char, conversationId: result.conversationId });
     });
   } else {
     resultQueue.push(result);

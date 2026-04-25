@@ -1,6 +1,6 @@
 <template>
   <div class="chat-container">
-    <ChatHeader :messages="currentMessageList" :loading="loading"  @update:conversationId="handleConversationChange" />
+    <ChatHeader :messages="currentMessageList" :loading="loading" @update:conversationId="handleConversationChange" />
     <ChatBody :messages="currentMessageList" :promptCode="promptCode" :currentMessage="currentMessage"
       :loading="loading" />
     <ChatFooter v-model="prompt" :promptCode="promptCode" :loading="loading" @click="onButtonClick" />
@@ -19,7 +19,7 @@ import { useSettingStore } from '@/stores/setting';
 import { useConversationStore } from '@/stores/conversation';
 import { useMessageStore } from '@/stores/message';
 import { useMessageLatestStore } from '@/stores/message-latest';
-import type { IMessage } from '../types';
+import type { IMessage, IChunk } from '../types';
 
 const settingStore = useSettingStore();
 const conversationStore = useConversationStore();
@@ -89,7 +89,8 @@ const handleWindowMessage = (e: MessageEvent) => {
 const enqueue = async (value: IMessage) => {
   queueAsync(value, (result) => {
     switch (result.type) {
-      case 'delta':
+      case 'content':
+      case 'reasoning':
         handleChating(result);
         break;
       case 'end':
@@ -106,9 +107,9 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
   loading.value = true;
   // 记录当前对话ID
   const currentConversationId = conversationStore.conversationId;
+  messageLatestStore.deleteLatestMessageByConvId(currentConversationId);
   currentMessage.value = messageLatestStore.getLatestMessageByConvId(currentConversationId);
   currentMessage.value.model = settingStore.currentModel.id;
-  currentMessage.value.content = '...';
   const startTime = Date.now();
   let loadTime = 0;
   try {
@@ -119,12 +120,12 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
         model: settingStore.currentModel.id,
         messages: messages.map((item) => ({ role: item.role, content: item.content })),
       },
-      (delta: string) => {
+      (chunk: IChunk) => {
         if (!loadTime) {
           loadTime = Date.now();
         }
         const endTime = Date.now();
-        enqueue({ conversationId: currentConversationId, type: 'delta', delta, startTime, loadTime, endTime });
+        enqueue({ conversationId: currentConversationId, type: chunk.type, data: chunk.data, startTime, loadTime, endTime });
       },
       () => {
         if (!loadTime) {
@@ -141,8 +142,8 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
     const endTime = Date.now();
     enqueue({
       conversationId: currentConversationId,
-      type: 'delta',
-      delta: '请求失败: ' + error.message,
+      type: 'error',
+      data: 'Request failed: ' + error.message,
       startTime,
       loadTime,
       endTime,
@@ -154,15 +155,18 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
 const handleChating = (result: IMessage) => {
   // 跨页面更新消息
   const botMessage = messageLatestStore.getLatestMessageByConvId(result.conversationId);
-  if (botMessage.content === '...') {
-    botMessage.content = '';
+  if (result.type === 'reasoning') {
+    botMessage.reasoning += result.data || '';
   }
-  botMessage.content += result.delta;
+  if (result.type === 'content') {
+    botMessage.content += result.data || '';
+  }
   // 当前页面更新消息
   currentMessage.value = messageLatestStore.getLatestMessageByConvId(conversationStore.conversationId);
   if (currentMessage.value.conversationId === result.conversationId) {
     currentMessage.value.content = botMessage.content;
-    currentMessage.value.endTime  = Date.now();
+    currentMessage.value.reasoning = botMessage.reasoning;
+    currentMessage.value.endTime = Date.now();
   }
 };
 
@@ -186,10 +190,11 @@ const handleChatEnd = async (result: IMessage) => {
   currentMessage.value = messageLatestStore.getLatestMessageByConvId(conversationStore.conversationId);
   if (currentMessage.value.conversationId === result.conversationId) {
     currentMessage.value.content = botMessage.content;
-    currentMessage.value.endTime  = Date.now();
+    currentMessage.value.reasoning = botMessage.reasoning;
+    currentMessage.value.endTime = Date.now();
   }
   // 生成摘要
-  const conversation = conversationStore.getConversationById(result.conversationId);
+  const conversation = await conversationStore.getConversationById(result.conversationId);
   if (conversation && !conversation.isSummary) {
     await handleSummary(result.conversationId, messages);
   }

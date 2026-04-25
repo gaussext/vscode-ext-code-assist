@@ -1,15 +1,17 @@
 import type { IChatParams, IModelParams } from '@/models/Model';
 import { EnumRpcMessage, WebviewRpcClient } from 'vscode-webview-rpc';
 import { RpcMock } from './rpc-mock';
+import type { IChunk } from '@/types';
 
 export interface StreamCallbacks {
-  onChunk: (delta: string) => void;
+  onChunk: (chunk: IChunk) => void;
   onComplete: () => void;
   onError: (error: Error) => void;
 }
 
-class ChatRpcService {
+class ChatRpcClient {
   private rpcClient: WebviewRpcClient;
+  private abortController: AbortController = new AbortController();
 
   constructor() {
     if (globalThis.acquireVsCodeApi) {
@@ -33,9 +35,14 @@ class ChatRpcService {
     if (!model) {
       throw new Error('model required');
     }
+    this.abortController = new AbortController();
     this.rpcClient.streamCall(EnumRpcMessage.Stream, params, {
-      onChunk: (chunk: any) => {
-        callbacks.onChunk(chunk.delta);
+      onChunk: (chunk: IChunk) => {
+        if (this.abortController.signal.aborted) {
+          callbacks.onComplete();
+          return;
+        }
+        callbacks.onChunk(chunk);
       },
       onComplete: () => {
         callbacks.onComplete();
@@ -51,6 +58,7 @@ class ChatRpcService {
       RpcMock.abort();
       return;
     }
+    this.abortController.abort();
     return this.rpcClient.call(EnumRpcMessage.Stop, {});
   }
 
@@ -69,4 +77,4 @@ class ChatRpcService {
   }
 }
 
-export const chatRpcService = new ChatRpcService();
+export const chatRpcClient = new ChatRpcClient();

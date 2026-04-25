@@ -15,15 +15,15 @@ import type {
   RpcStreamHandler,
 } from './types';
 
-interface IChannel {
-  write: StreamCallback<unknown>;
+export interface IChannel<T> {
+  write: StreamCallback<T>;
   complete: CompleteCallback;
   error: ErrorCallback;
 }
 
 export class RpcServer {
   private handlers: Map<string, RpcStreamHandler | RpcHandler> = new Map();
-  private pendingRequests: Map<string, IChannel> = new Map();
+  private pendingRequests: Map<string, IChannel<unknown>> = new Map();
   private options: RpcServerOptions;
 
   constructor(options: RpcServerOptions = {}) {
@@ -73,8 +73,8 @@ export class RpcServer {
     }
 
     if (this.isStreamRequest(data)) {
-      const streamHandler = handler as any;
-      const streamContext = {
+      const streamHandler = handler as RpcStreamHandler;
+      const streamContext: IChannel<unknown> = {
         write: (chunk: unknown) => {
           const message = this.writeStreamChunk(id, chunk, 0, false);
           this.sendMessage(message);
@@ -90,7 +90,7 @@ export class RpcServer {
       };
 
       try {
-        const result = streamHandler(data, streamContext);
+        const result = streamHandler(streamContext, data);
         if (result instanceof Promise) {
           result.catch((err: Error) => {
             const message = this.errorStream(id, err);

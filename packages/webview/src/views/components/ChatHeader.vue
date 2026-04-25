@@ -29,15 +29,14 @@
 </template>
 
 <script setup lang="ts">
-import { useConversationStore } from '@/stores/conversation';
-import { useMessageStore } from '@/stores/message';
-import { getTokenCount } from '@/utils';
-import { computed, onMounted, ref, watch } from 'vue';
 import type { ChatMessage } from '@/models/Model';
 import UsageInfo from '@/components/UsageInfo.vue';
-import { MAX_TOKEN_LENGTH } from '@/stores/constants';
+import { useConversationStore } from '@/stores/conversation';
+import { useMessageStore } from '@/stores/message';
+import { computed, onMounted, ref, watch } from 'vue';
 import { Setting, Download, FolderAdd, FolderOpened } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
+import { getUsageInfoFromMessages } from '@/utils/token';
 
 const router = useRouter();
 const conversationStore = useConversationStore();
@@ -53,10 +52,10 @@ const props = defineProps({
   },
 });
 
-const loadTitle = () => {
-  const conversation = conversationStore.getConversationById(conversationStore.conversationId);
+const loadTitle = async () => {
+  const conversation = await conversationStore.getConversationById(conversationStore.conversationId);  
   if (conversation && conversation.title) {
-    title.value = conversation.title?.slice?.(0, 10) ?? '';
+    title.value = conversation.title ?? '';
   }
 };
 
@@ -68,32 +67,8 @@ watch(
   { immediate: true }
 );
 
-onMounted(() => {
-  loadTitle();
-});
-
 const info = computed(() => {
-  const result = {
-    temp: 0,
-    user: 0,
-    assistant: 0,
-    upload: 0,
-    window: 0,
-    width: 0,
-  };
-  props.messages?.forEach((message) => {
-    const tokens = getTokenCount(message?.content ?? '');
-    if (message.role === 'user' || message.role === 'system') {
-      result.user = result.user + tokens;
-      const upload = result.user + result.assistant;
-      result.upload = result.upload + upload;
-    } else {
-      result.assistant = result.assistant + tokens;
-    }
-  });
-  result.window = result.user + result.assistant;
-  result.width = (result.window * 100) / MAX_TOKEN_LENGTH;
-  return result;
+  return getUsageInfoFromMessages(props.messages);
 });
 
 const barStyle = computed(() => {
@@ -113,7 +88,7 @@ const downloadConversation = async () => {
   if (props.loading) {
     return;
   }
-  const conversation = conversationStore.getConversationById(conversationStore.conversationId);
+  const conversation = await conversationStore.getConversationById(conversationStore.conversationId);
   if (!conversation) {
     return;
   }
@@ -149,17 +124,23 @@ const gotoSetting = () => {
 </script>
 
 <style lang="scss">
+
+.header-title {
+  font-size: 12px;
+  color: var(--vscode-panelTitle-activeForeground);
+}
+
 .header-area-bar {
   margin-top: 2px;
   margin-bottom: 2px;
   width: 100%;
   height: 2px;
-  background-color: #777;
+  background-color: var(--vscode-chart-axis);
 }
 
 .header-area-bar__inner {
   height: 2px;
   width: var(--width);
-  background-color: var(--vscode-charts-blue);
+  background-color: var(--vscode-charts-foreground);
 }
 </style>

@@ -1,15 +1,15 @@
 import { OpenAIService } from '../services';
-import { IChatParams } from '../models';
+import { IChatParams, IChunk } from '../models';
 import log from 'loglevel';
-import { RpcHandler } from 'vscode-webview-rpc';
+import { IChannel, RpcHandler } from 'vscode-webview-rpc';
 
 const openaiService = new OpenAIService();
 
-export const streamMessageHandler = async (params: IChatParams, stream: any) => {
+export const streamMessageHandler = async (stream: IChannel<IChunk>, params: IChatParams) => {
   log.info('streamMessageHandler', params);
   await openaiService.chat(params, {
-    onChunk: (delta: string) => {
-      stream.write({ delta });
+    onChunk: (chunk: IChunk) => {
+      stream.write(chunk);
     },
     onComplete: () => {
       stream.complete();

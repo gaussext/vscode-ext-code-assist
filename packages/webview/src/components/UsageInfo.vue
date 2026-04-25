@@ -1,31 +1,15 @@
 <template>
-  <div class="info-block">
-    <div class="info-item">
-      <span>U</span>
-      <span>{{ info.user }}</span>
-      <span>/</span>
-      <el-icon>
-        <Top />
-      </el-icon>
-      <span>{{ info.upload }}</span>
-      <span>/</span>
-      <el-icon>
-        <Bottom />
-      </el-icon>
-      <span>{{ info.assistant }}</span>
-      <span>/</span>
-      <span>Ctx</span>
-      <span>{{ info.window }}</span>
-      <span>/</span>
-      <span>Max</span>
-      <span>{{ MAX_TOKEN_LENGTH }}</span>
-    </div>
+  <div class="usage-info">
+    <span>Context</span>
+    <span>{{ info.window }}</span>
+    <span>/</span>
+    <span>Max</span>
+    <span>{{ MAX_TOKEN_LENGTH }}</span>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { MAX_TOKEN_LENGTH } from '@/stores/constants';
-import { Top, Bottom } from '@element-plus/icons-vue';
 
 const props = defineProps({
   info: {
@@ -43,12 +27,12 @@ const props = defineProps({
 </script>
 
 <style>
-.info-item {
+.usage-info {
   display: flex;
   align-items: center;
   line-height: 14px;
   gap: 4px;
-  color: #fff;
+  color: var(--vscode-icon-foreground);
   font-size: 12px;
   font-family: monospace;
 

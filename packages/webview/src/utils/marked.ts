@@ -14,7 +14,7 @@ export const marked = new Marked(
         const validLang = language && hljs.getLanguage(language) ? language : 'plaintext';
         const highlighted = hljs.highlight(code, { language: validLang }).value;
         const encoded = encodeURIComponent(code)
-        const buttonHtml = `<button class="copy-button" data-code="${encoded}" onclick="copyCode(this)"><span class="copy-text">复制</span></button>`;
+        const buttonHtml = `<button class="copy-button" data-code="${encoded}" onclick="copyCode(this)"><span class="copy-text">Copy</span></button>`;
         return `${buttonHtml}${highlighted}`;
       } catch {
         return code;
@@ -34,10 +34,10 @@ marked.use({ extensions: [markedKatexExtension, markedBlockKatexExtension] });
 function showCopySuccess(button: HTMLButtonElement) {
   const textSpan = button.querySelector('.copy-text');
   if (textSpan) {
-    textSpan.textContent = '已复制';
+    textSpan.textContent = 'Copied';
     button.classList.add('copy-success');
     setTimeout(() => {
-      textSpan.textContent = '复制';
+      textSpan.textContent = 'Copy';
       button.classList.remove('copy-success');
     }, 2000);
   }
