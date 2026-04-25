@@ -4,7 +4,7 @@ import DOMPurify from 'dompurify';
 export const reasoningStartTag = `<details><summary>Think</summary>`;
 export const reasoningEndTag = `</details>`;
 
-const cleanHtml = (markdown: string) => {
+export const cleanHtml = (markdown: string) => {
   return DOMPurify.sanitize(markdown, {
     ALLOWED_TAGS: [
       'h1',
