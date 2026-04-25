@@ -51,6 +51,12 @@ const props = defineProps({
   },
 });
 
+onMounted(async () => {
+  const conversation = await conversationStore.getConversationById(conversationStore.conversationId);
+  if (conversation) {
+    conversationStore.setConversationTitle(conversation.title);
+  }
+});
 
 const info = computed(() => {
   return getUsageInfoFromMessages(props.messages);
