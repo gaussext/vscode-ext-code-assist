@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
+    "code-assit-rpc": "workspace:*",
     "dompurify": "^3.4.1",
     "element-plus": "^2.9.9",
     "highlight.js": "^11.11.1",
@@ -19,7 +20,6 @@
     "marked-highlight": "^2.2.1",
     "pinia": "^3.0.4",
     "uuid": "^11.1.0",
-    "code-assit-rpc": "workspace:*",
     "vue": "^3.5.13",
     "vue-router": "^5.0.4"
   },
