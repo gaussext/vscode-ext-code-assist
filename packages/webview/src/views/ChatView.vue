@@ -143,6 +143,7 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
       }
     );
   } catch (error: any) {
+    queueRender?.dispose();
     if (!loadTime) {
       loadTime = Date.now();
     }
@@ -178,7 +179,6 @@ const handleChating = (result: IMessage) => {
 
 // AI 结束回答
 const handleChatEnd = async (result: IMessage) => {
-  
   // 跨页面更新最新消息
   const botMessage = messageLatestStore.getLatestMessageByConvId(result.conversationId);
   botMessage.startTime = result.startTime;

@@ -19,6 +19,7 @@ export class QueueRender {
   }
 
   dispose() {
+    this.callback = null;
     clearInterval(this.timer);
   }
   // 执行队列中的任务
