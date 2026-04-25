@@ -1,7 +1,8 @@
 <template>
   <div class="chat-message message-bot">
     <div class="message-title">
-      <span>{{ message.model }}</span>
+      <span>Bot</span>
+      <span>({{ message.model }})</span>
     </div>
     <el-collapse v-if="message.reasoning" class="reasoning-content" expand-icon-position="left">
       <el-collapse-item title="Think">

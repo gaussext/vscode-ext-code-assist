@@ -13,9 +13,9 @@ const routes: RouteRecordRaw[] = [
     component: () => import('../views/SettingView.vue')
   },
   {
-    path: '/history',
-    name: 'History',
-    component: () => import('../views/ConversationHistoryView.vue')
+    path: '/session',
+    name: 'Session',
+    component: () => import('../views/SessionView.vue')
   }
 ];
 

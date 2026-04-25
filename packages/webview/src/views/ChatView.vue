@@ -8,18 +8,19 @@
 </template>
 
 <script setup lang="ts">
+import { useConversationStore } from '@/stores/useConversationStore';
+import { useMessageLatestStore } from '@/stores/useMessageLatestStore';
+import { useMessageStore } from '@/stores/useMessageStore';
+import { useProviderStore } from '@/stores/useProviderStore';
 import { queueAsync } from '@/utils';
 import { onMounted, onUnmounted, ref, unref } from 'vue';
 import { chatService } from '../api';
+import { ChatMessage } from '../models/Model';
+import type { IChunk, IMessage } from '../types';
 import ChatBody from './components/ChatBody.vue';
 import ChatFooter from './components/ChatFooter.vue';
 import ChatHeader from './components/ChatHeader.vue';
-import { EnumTemperature, ChatMessage } from '../models/Model';
-import { useSettingStore } from '@/stores/setting';
-import { useConversationStore } from '@/stores/conversation';
-import { useMessageStore } from '@/stores/message';
-import { useMessageLatestStore } from '@/stores/message-latest';
-import type { IMessage, IChunk } from '../types';
+import { useSettingStore } from '@/stores/useSettingStore';
 
 const settingStore = useSettingStore();
 const conversationStore = useConversationStore();
@@ -43,7 +44,6 @@ const loadMessages = async () => {
 // 处理窗口消息
 const handleWindowMessage = (e: MessageEvent) => {
   const { type, text } = e.data;
-  settingStore.setTemperature(EnumTemperature.CodeAndMath);
   switch (type) {
     case 'optimization':
       handleOptimization(text);
@@ -64,17 +64,14 @@ const handleWindowMessage = (e: MessageEvent) => {
       handleUpgradeReact(text);
       break;
     case 'analysis': {
-      settingStore.setTemperature(EnumTemperature.DataAnalysis);
       handleAnalysis(text);
       break;
     }
     case 'translation': {
-      settingStore.setTemperature(EnumTemperature.Translation);
       handleTranslation(text);
       break;
     }
     case 'appreciation': {
-      settingStore.setTemperature(EnumTemperature.CreativeWriting);
       handleAppreciation(text);
       break;
     }
@@ -105,19 +102,21 @@ const enqueue = async (value: IMessage) => {
 // 等待 AI 回复
 const handleChatRequest = async (messages: ChatMessage[]) => {
   loading.value = true;
+  // 获取当前模型参数
+  const { baseURL, apiKey, model } = settingStore.getModelParams();
   // 记录当前对话ID
   const currentConversationId = conversationStore.conversationId;
   messageLatestStore.deleteLatestMessageByConvId(currentConversationId);
   currentMessage.value = messageLatestStore.getLatestMessageByConvId(currentConversationId);
-  currentMessage.value.model = settingStore.currentModel.id;
+  currentMessage.value.model = model;
   const startTime = Date.now();
   let loadTime = 0;
   try {
     await chatService.chat(
       {
-        baseURL: settingStore.currentProvider.baseURL,
-        apiKey: settingStore.currentProvider.apiKey,
-        model: settingStore.currentModel.id,
+        baseURL,
+        apiKey,
+        model,
         messages: messages.map((item) => ({ role: item.role, content: item.content })),
       },
       (chunk: IChunk) => {
@@ -198,11 +197,13 @@ const handleChatEnd = async (result: IMessage) => {
 };
 
 const handleSummary = (conversationId: string, messages: ChatMessage[]) => {
+  // 获取当前模型参数
+  const { baseURL, apiKey, model } = settingStore.getModelParams();
   return chatService
     .summary({
-      baseURL: settingStore.currentProvider.baseURL,
-      apiKey: settingStore.currentProvider.apiKey,
-      model: settingStore.currentModel.id,
+      baseURL,
+      apiKey,
+      model,
       messages: messages.map((item) => ({ role: item.role, content: item.content })),
     })
     .then((result) => {
@@ -291,7 +292,6 @@ const handleAnalysis = (code: string) => {
   if (!code) {
     return;
   }
-  settingStore.setTemperature(EnumTemperature.DataAnalysis);
   prompt.value = `分析一下这段数据`;
   promptCode.value = `
 \`\`\`

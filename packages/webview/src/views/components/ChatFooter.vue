@@ -18,7 +18,7 @@
     </div>
     <div id="chat-tool">
       <div></div>
-      <button class="vscode-button-form" @click="$emit('click')">
+      <button class="vscode-button" @click="$emit('click')">
         <el-icon>
           <component :is="loading ? VideoPause : Promotion" />
         </el-icon>

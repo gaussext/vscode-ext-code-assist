@@ -31,8 +31,8 @@
 <script setup lang="ts">
 import type { ChatMessage } from '@/models/Model';
 import UsageInfo from '@/components/UsageInfo.vue';
-import { useConversationStore } from '@/stores/conversation';
-import { useMessageStore } from '@/stores/message';
+import { useConversationStore } from '@/stores/useConversationStore';
+import { useMessageStore } from '@/stores/useMessageStore';
 import { computed, onMounted, ref, watch } from 'vue';
 import { Setting, Download, FolderAdd, FolderOpened } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
@@ -112,7 +112,7 @@ const gotoHistory = () => {
   if (props.loading) {
     return;
   }
-  router.push('/history');
+  router.push('/session');
 };
 
 const gotoSetting = () => {
