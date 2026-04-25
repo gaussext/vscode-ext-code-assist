@@ -95,6 +95,7 @@ const onCreateConversation = async () => {
   }
   const conv = await conversationStore.createConversation();
   conversationStore.setConversationId(conv.id);
+  conversationStore.setConversationTitle(conv.title);
   emit('create');
   emit('update:conversationId', conv.id);
 };

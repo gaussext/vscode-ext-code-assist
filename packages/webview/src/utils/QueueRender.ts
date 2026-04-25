@@ -1,4 +1,3 @@
-import { ChatMessage } from '@/models/Model';
 import type { IMessage } from '@/types';
 import { groupBy } from 'lodash';
 
