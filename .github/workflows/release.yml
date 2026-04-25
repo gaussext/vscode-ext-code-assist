@@ -35,4 +35,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           files: |
-            *.visx # 发布的文件路径
+            *.vsix
