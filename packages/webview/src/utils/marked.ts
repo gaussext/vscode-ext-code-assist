@@ -11,7 +11,7 @@ export const marked = new Marked(
     async: true,
     async highlight(code, language) {
       try {
-        const validLang = language && hljs.getLanguage(language) ? language : 'plaintext';
+        const validLang = language && hljs.getLanguage(language) ? language : 'typescript';
         const highlighted = hljs.highlight(code, { language: validLang }).value;
         const encoded = encodeURIComponent(code)
         const buttonHtml = `<button class="hljs-button-copy" data-code="${encoded}" onclick="copyCode(this)"><span class="copy-text">Copy</span></button>`;
