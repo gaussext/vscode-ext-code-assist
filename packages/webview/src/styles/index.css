@@ -94,10 +94,6 @@ body {
   background-color: transparent;
 }
 
-.messages-area .message-user {
-  width: auto;
-  max-width: 400px;
-}
 .messages-area  .messgae-user .markdown-content {
   background-color: var(--vscode-editor-background);
   padding: 8px;

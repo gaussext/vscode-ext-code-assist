@@ -24,6 +24,8 @@ const props = defineProps({
 </script>
 
 <style scoped>
+
+
 .message-title {
   display: flex;
   justify-content: flex-end;
@@ -33,5 +35,9 @@ const props = defineProps({
 .message-content {
   display: flex;
   justify-content: flex-end;
+}
+
+.markdown-content {
+  max-width: 100%;
 }
 </style>

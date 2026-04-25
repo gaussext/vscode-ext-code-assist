@@ -1,7 +1,7 @@
-import hljs from './hljs';
+import hljs from './markdown-hljs';
 import { Marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
-import { markedKatexExtension, markedBlockKatexExtension } from './katex';
+import { markedKatexExtension, markedBlockKatexExtension } from './markdown-katex';
 import { copyToClipboard } from '.';
 
 export const marked = new Marked(

@@ -96,6 +96,11 @@ code {
 .vscode-textarea::placeholder {
   color: var(--vscode-input-placeholderForeground);
 }
+
+.vscode-textarea:focus {
+  border-color: var(--vscode-inputOption-activeBorder);
+}
+
 .vscode-button-group {
   display: flex;
   align-items: center;

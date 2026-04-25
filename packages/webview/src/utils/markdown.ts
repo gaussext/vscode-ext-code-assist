@@ -1,4 +1,4 @@
-import { marked } from '@/utils/marked';
+import { marked } from '@/utils/markdown-marked';
 import DOMPurify from 'dompurify';
 
 export const reasoningStartTag = `<details><summary>Think</summary>`;

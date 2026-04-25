@@ -38,7 +38,6 @@ const tryScrollToBottom = () => {
   const scrollHeight = messagesAreaRef.value?.scrollHeight || 0;
   const clientHeight = messagesAreaRef.value?.clientHeight || 0;
   const isBottom = Math.abs((scrollTop + clientHeight) - scrollHeight) < 100;
-  console.log(isBottom);
   if (isBottom) {
     footerRef.value?.scrollIntoView({ behavior: 'smooth' });
   }

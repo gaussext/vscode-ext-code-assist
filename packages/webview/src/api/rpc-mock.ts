@@ -7,8 +7,7 @@ export class RpcMock {
 Etiam tempus cum sem turpis ligula sociosqu pellentesque. Ante vulputate pellentesque nullam faucibus primis habitasse ac. Et vestibulum justo quis cum magnis suscipit interdum. Per natoque aptent habitant gravida vel vivamus rutrum.
 Potenti gravida nulla porttitor egestas class fusce ornare. Nullam condimentum eget suscipit congue sociosqu ornare dictumst. Amet pulvinar sit scelerisque risus a sagittis pretium. Etiam congue neque class leo eget luctus diam.
 `;
-  static content = `# RPC client not initialized. This is Mock Response.
-${TEST}`;
+  static content = TEST;
   static abortController = new AbortController();
 
   static async mockStream(callbacks: StreamCallbacks) {

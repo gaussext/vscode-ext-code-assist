@@ -221,7 +221,7 @@ const handleOptimization = (code: string) => {
   prompt.value = `完善或优化一下这段代码`;
 
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
@@ -233,7 +233,7 @@ const handleExplanation = (code: string) => {
   }
   prompt.value = `解释一下这段代码的作用`;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
@@ -245,7 +245,7 @@ const handleComment = (code: string) => {
   }
   prompt.value = `给下面这段代码补充注释`;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
@@ -257,7 +257,7 @@ const handleUpgradeClass = (code: string) => {
   }
   prompt.value = `将以下代码转换为 ES6 Class 语法，请确保转换后的代码符合 ES6 语法规范，并且能够正常运行。只要回答代码部分，不要有多余的文字，代码如下：`;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
@@ -269,7 +269,7 @@ const handleUpgradeVue = (code: string) => {
   }
   prompt.value = `将以下代码转换为 Vue 3 的 Composition API 组件，请确保转换后的代码符合 Vue 3 的 Composition API 规范，并且能够正常运行。只要回答js/ts代码部分，不要有多余的文字，代码如下：`;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
@@ -281,7 +281,7 @@ const handleUpgradeReact = (code: string) => {
   }
   prompt.value = `将以下代码转换为 React.FC 组件，请确保转换后的代码符合 ES6 语法规范，并且能够正常运行。只要回答代码部分，不要有多余的文字，代码如下：`;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
