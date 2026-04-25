@@ -99,7 +99,7 @@ const executeNextTask = async (callback) => {
     isExecuting = true;
     const result = resultQueue.shift();
     callback(result);
-    const delay = calcDelay(resultQueue.length);
+      const delay = calcDelay(resultQueue.length);
     if (delay > 4) {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
@@ -110,15 +110,7 @@ const executeNextTask = async (callback) => {
 type Callback<T> = (result: T) => void;
 
 export const queueAsync = <T extends IMessage>(result: T, callback: Callback<T>) => {
-  // 拆分 content 为单个字符
-  if (result.type !== 'end') {
-    Array.from({ length: result.data?.length || 0 }).forEach((_, index) => {
-      const char = result.data[index];
-      resultQueue.push({ type: result.type, data: char, conversationId: result.conversationId });
-    });
-  } else {
-    resultQueue.push(result);
-  }
+  resultQueue.push(result);
   // 如果没有正在执行的任务，开始执行
   if (!isExecuting) {
     executeNextTask(callback);
