@@ -28,6 +28,7 @@ jobs:
 
       - name: Build artifacts
         run: |
+          pnpm i # 安装依赖
           pnpm vsce # 运行构建脚本
           
       - name: Create Release

@@ -33,7 +33,7 @@ pnpm run lint
 vscode-ext-code-assist/
 ├── packages/
 │   ├── main/                    # VS Code 扩展主程序
-│   ├── vscode-webview-rpc/      # Webview RPC 通信库
+│   ├── code-assist-rpc/      # Webview RPC 通信库
 │   └── webview/                 # Vue 3 前端界面
 ```
 
@@ -74,5 +74,4 @@ vscode-ext-code-assist/
 
 ```bash
 使用 Latex 语法编写麦克斯韦方程组
-使用 Latex 语法编写欧拉公式
 ```

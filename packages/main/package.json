@@ -13,7 +13,7 @@
   "dependencies": {
     "loglevel": "^1.9.2",
     "openai": "^4.28.0",
-    "code-assit-rpc": "workspace:*"
+    "code-assist-rpc": "workspace:*"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.16",

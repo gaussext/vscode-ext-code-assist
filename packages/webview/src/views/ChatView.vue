@@ -11,8 +11,6 @@
 import { useConversationStore } from '@/stores/useConversationStore';
 import { useMessageLatestStore } from '@/stores/useMessageLatestStore';
 import { useMessageStore } from '@/stores/useMessageStore';
-import { useProviderStore } from '@/stores/useProviderStore';
-import { queueAsync } from '@/utils';
 import { onMounted, onUnmounted, ref, unref } from 'vue';
 import { chatService } from '../api';
 import { ChatMessage } from '../models/Model';
@@ -21,6 +19,7 @@ import ChatBody from './components/ChatBody.vue';
 import ChatFooter from './components/ChatFooter.vue';
 import ChatHeader from './components/ChatHeader.vue';
 import { useSettingStore } from '@/stores/useSettingStore';
+import { QueueRender } from '@/utils/QueueRender';
 
 const settingStore = useSettingStore();
 const conversationStore = useConversationStore();
@@ -83,15 +82,23 @@ const handleWindowMessage = (e: MessageEvent) => {
   }
 };
 
+let queueRender: QueueRender | null = null;
+
+onUnmounted(() => {
+  queueRender?.dispose();
+});
+
 const enqueue = async (value: IMessage) => {
-  queueAsync(value, (result) => {
+  queueRender?.queueAsync(value, (result) => {
     switch (result.type) {
       case 'content':
       case 'reasoning':
         handleChating(result);
         break;
-      case 'end':
+      case 'end':{
         handleChatEnd(result);
+        queueRender?.dispose();
+      }
         break;
       default:
         break;
@@ -102,8 +109,9 @@ const enqueue = async (value: IMessage) => {
 // 等待 AI 回复
 const handleChatRequest = async (messages: ChatMessage[]) => {
   loading.value = true;
+  queueRender = new QueueRender();
   // 获取当前模型参数
-  const { baseURL, apiKey, model } = settingStore.getModelParams();
+  const { baseURL, apiKey, model } = settingStore.getModelParams(settingStore.currentModelHash);
   // 记录当前对话ID
   const currentConversationId = conversationStore.conversationId;
   messageLatestStore.deleteLatestMessageByConvId(currentConversationId);
@@ -135,6 +143,7 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
       }
     );
   } catch (error: any) {
+    queueRender?.dispose();
     if (!loadTime) {
       loadTime = Date.now();
     }
@@ -155,11 +164,11 @@ const handleChating = (result: IMessage) => {
   // 跨页面更新消息
   const botMessage = messageLatestStore.getLatestMessageByConvId(result.conversationId);
   if (result.type === 'reasoning') {
-    console.log('reasoning');
+    console.log('reasoning', result.data);
     botMessage.reasoning += result.data || '';
   }
   if (result.type === 'content') {
-    console.log('content');
+    console.log('content', result.data);
     botMessage.content += result.data || '';
   }
   // 当前页面更新消息
@@ -170,7 +179,6 @@ const handleChating = (result: IMessage) => {
 
 // AI 结束回答
 const handleChatEnd = async (result: IMessage) => {
-  
   // 跨页面更新最新消息
   const botMessage = messageLatestStore.getLatestMessageByConvId(result.conversationId);
   botMessage.startTime = result.startTime;
@@ -198,7 +206,7 @@ const handleChatEnd = async (result: IMessage) => {
 
 const handleSummary = (conversationId: string, messages: ChatMessage[]) => {
   // 获取当前模型参数
-  const { baseURL, apiKey, model } = settingStore.getModelParams();
+  const { baseURL, apiKey, model } = settingStore.getModelParams(settingStore.summaryModelHash);
   return chatService
     .summary({
       baseURL,

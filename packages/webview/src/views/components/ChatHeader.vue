@@ -5,7 +5,7 @@
         <UsageInfo :info="info" />
       </div>
       <div class="header-title">
-        {{ title }}
+        {{ conversationStore.conversationTitle }}
       </div>
       <div class="header-icon-group right">
         <el-icon class="header-icon" :class="{ disabled: loading }" @click="downloadConversation">
@@ -41,7 +41,6 @@ import { getUsageInfoFromMessages } from '@/utils/token';
 const router = useRouter();
 const conversationStore = useConversationStore();
 const messageStore = useMessageStore();
-const title = ref('');
 
 const props = defineProps({
   messages: {
@@ -52,20 +51,12 @@ const props = defineProps({
   },
 });
 
-const loadTitle = async () => {
-  const conversation = await conversationStore.getConversationById(conversationStore.conversationId);  
-  if (conversation && conversation.title) {
-    title.value = conversation.title ?? '';
+onMounted(async () => {
+  const conversation = await conversationStore.getConversationById(conversationStore.conversationId);
+  if (conversation) {
+    conversationStore.setConversationTitle(conversation.title);
   }
-};
-
-watch(
-  () => conversationStore.conversationId,
-  () => {
-    loadTitle();
-  },
-  { immediate: true }
-);
+});
 
 const info = computed(() => {
   return getUsageInfoFromMessages(props.messages);
@@ -104,6 +95,7 @@ const onCreateConversation = async () => {
   }
   const conv = await conversationStore.createConversation();
   conversationStore.setConversationId(conv.id);
+  conversationStore.setConversationTitle(conv.title);
   emit('create');
   emit('update:conversationId', conv.id);
 };

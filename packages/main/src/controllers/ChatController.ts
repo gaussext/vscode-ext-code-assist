@@ -1,7 +1,7 @@
 import { OpenAIService } from '../services';
 import { IChatParams, IChunk } from '../models';
 import log from 'loglevel';
-import { IChannel, RpcHandler } from 'code-assit-rpc';
+import { IChannel, RpcHandler } from 'code-assist-rpc';
 
 const openaiService = new OpenAIService();
 
