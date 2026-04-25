@@ -23,7 +23,7 @@ packages/
 └── webview/    # Vue 3 frontend (Vite) — embeds rpc via workspace:*
 ```
 
-- `packages/rpc` is a published lib (not vscode-webview-rpc — that dir is empty/missing)
+- `packages/rpc` is a published lib (not code-assist-rpc — that dir is empty/missing)
 - Both `main` and `webview` depend on `code-assit-rpc` via `workspace:*`
 
 ## Developer Commands
