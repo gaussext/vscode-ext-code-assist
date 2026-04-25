@@ -65,7 +65,7 @@ Dorothy followed her through many of the beautiful rooms in her castle
 
 ```html
 <iframe 
-src="//player.bilibili.com/player.html?aid=35265997&bvid=BV12b411w78Y&cid=61801377&page=1"
+src="https://player.bilibili.com/player.html?aid=35265997&bvid=BV12b411w78Y&cid=61801377&page=1"
 scrolling="no" 
 border="0" 
 frameborder="no" 
@@ -77,7 +77,7 @@ height="480"
 ```
 
 <iframe 
-src="//player.bilibili.com/player.html?aid=35265997&bvid=BV12b411w78Y&cid=61801377&page=1"
+src="https://player.bilibili.com/player.html?aid=35265997&bvid=BV12b411w78Y&cid=61801377&page=1"
 scrolling="no" 
 border="0" 
 frameborder="no" 
