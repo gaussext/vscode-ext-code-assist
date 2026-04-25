@@ -36,16 +36,15 @@
         </div>
       </div>
     </template>
-    <el-icon style="cursor: pointer;">
-      <QuestionFilled />
+    <el-icon class="message-icon">
+      <InfoFilled />
     </el-icon>
   </el-tooltip>
 </template>
 <script lang="ts" setup>
 import { ChatMessage } from '@/models/Model';
-import { getTokenCount } from '@/utils';
 import { getMessageInfoFromMessage } from '@/utils/token';
-import { QuestionFilled } from '@element-plus/icons-vue';
+import { InfoFilled } from '@element-plus/icons-vue';
 
 const props = defineProps({
   message: {

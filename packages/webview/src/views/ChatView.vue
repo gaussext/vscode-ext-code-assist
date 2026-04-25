@@ -8,18 +8,19 @@
 </template>
 
 <script setup lang="ts">
+import { useConversationStore } from '@/stores/useConversationStore';
+import { useMessageLatestStore } from '@/stores/useMessageLatestStore';
+import { useMessageStore } from '@/stores/useMessageStore';
+import { useProviderStore } from '@/stores/useProviderStore';
 import { queueAsync } from '@/utils';
 import { onMounted, onUnmounted, ref, unref } from 'vue';
 import { chatService } from '../api';
+import { ChatMessage } from '../models/Model';
+import type { IChunk, IMessage } from '../types';
 import ChatBody from './components/ChatBody.vue';
 import ChatFooter from './components/ChatFooter.vue';
 import ChatHeader from './components/ChatHeader.vue';
-import { EnumTemperature, ChatMessage } from '../models/Model';
-import { useSettingStore } from '@/stores/setting';
-import { useConversationStore } from '@/stores/conversation';
-import { useMessageStore } from '@/stores/message';
-import { useMessageLatestStore } from '@/stores/message-latest';
-import type { IMessage, IChunk } from '../types';
+import { useSettingStore } from '@/stores/useSettingStore';
 
 const settingStore = useSettingStore();
 const conversationStore = useConversationStore();
@@ -43,7 +44,6 @@ const loadMessages = async () => {
 // 处理窗口消息
 const handleWindowMessage = (e: MessageEvent) => {
   const { type, text } = e.data;
-  settingStore.setTemperature(EnumTemperature.CodeAndMath);
   switch (type) {
     case 'optimization':
       handleOptimization(text);
@@ -64,17 +64,14 @@ const handleWindowMessage = (e: MessageEvent) => {
       handleUpgradeReact(text);
       break;
     case 'analysis': {
-      settingStore.setTemperature(EnumTemperature.DataAnalysis);
       handleAnalysis(text);
       break;
     }
     case 'translation': {
-      settingStore.setTemperature(EnumTemperature.Translation);
       handleTranslation(text);
       break;
     }
     case 'appreciation': {
-      settingStore.setTemperature(EnumTemperature.CreativeWriting);
       handleAppreciation(text);
       break;
     }
@@ -105,19 +102,21 @@ const enqueue = async (value: IMessage) => {
 // 等待 AI 回复
 const handleChatRequest = async (messages: ChatMessage[]) => {
   loading.value = true;
+  // 获取当前模型参数
+  const { baseURL, apiKey, model } = settingStore.getModelParams();
   // 记录当前对话ID
   const currentConversationId = conversationStore.conversationId;
   messageLatestStore.deleteLatestMessageByConvId(currentConversationId);
   currentMessage.value = messageLatestStore.getLatestMessageByConvId(currentConversationId);
-  currentMessage.value.model = settingStore.currentModel.id;
+  currentMessage.value.model = model;
   const startTime = Date.now();
   let loadTime = 0;
   try {
     await chatService.chat(
       {
-        baseURL: settingStore.currentProvider.baseURL,
-        apiKey: settingStore.currentProvider.apiKey,
-        model: settingStore.currentModel.id,
+        baseURL,
+        apiKey,
+        model,
         messages: messages.map((item) => ({ role: item.role, content: item.content })),
       },
       (chunk: IChunk) => {
@@ -156,23 +155,22 @@ const handleChating = (result: IMessage) => {
   // 跨页面更新消息
   const botMessage = messageLatestStore.getLatestMessageByConvId(result.conversationId);
   if (result.type === 'reasoning') {
+    console.log('reasoning');
     botMessage.reasoning += result.data || '';
   }
   if (result.type === 'content') {
+    console.log('content');
     botMessage.content += result.data || '';
   }
   // 当前页面更新消息
-  currentMessage.value = messageLatestStore.getLatestMessageByConvId(conversationStore.conversationId);
   if (currentMessage.value.conversationId === result.conversationId) {
-    currentMessage.value.content = botMessage.content;
-    currentMessage.value.reasoning = botMessage.reasoning;
-    currentMessage.value.endTime = Date.now();
+    currentMessage.value = structuredClone(botMessage);
   }
 };
 
 // AI 结束回答
 const handleChatEnd = async (result: IMessage) => {
-  loading.value = false;
+  
   // 跨页面更新最新消息
   const botMessage = messageLatestStore.getLatestMessageByConvId(result.conversationId);
   botMessage.startTime = result.startTime;
@@ -185,14 +183,10 @@ const handleChatEnd = async (result: IMessage) => {
   messageStore.setMessagesById(result.conversationId, messages);
   // 更新当前页面消息列表
   if (conversationStore.conversationId === result.conversationId) {
-    currentMessageList.value = messages;
+    currentMessageList.value = [...currentMessageList.value, botMessage];
   }
-  currentMessage.value = messageLatestStore.getLatestMessageByConvId(conversationStore.conversationId);
-  if (currentMessage.value.conversationId === result.conversationId) {
-    currentMessage.value.content = botMessage.content;
-    currentMessage.value.reasoning = botMessage.reasoning;
-    currentMessage.value.endTime = Date.now();
-  }
+  // 确保同步更新 UI
+  loading.value = false;
   // 生成摘要
   const conversation = await conversationStore.getConversationById(result.conversationId);
   if (conversation && !conversation.isSummary) {
@@ -203,11 +197,13 @@ const handleChatEnd = async (result: IMessage) => {
 };
 
 const handleSummary = (conversationId: string, messages: ChatMessage[]) => {
+  // 获取当前模型参数
+  const { baseURL, apiKey, model } = settingStore.getModelParams();
   return chatService
     .summary({
-      baseURL: settingStore.currentProvider.baseURL,
-      apiKey: settingStore.currentProvider.apiKey,
-      model: settingStore.currentModel.id,
+      baseURL,
+      apiKey,
+      model,
       messages: messages.map((item) => ({ role: item.role, content: item.content })),
     })
     .then((result) => {
@@ -226,7 +222,7 @@ const handleOptimization = (code: string) => {
   prompt.value = `完善或优化一下这段代码`;
 
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
@@ -238,7 +234,7 @@ const handleExplanation = (code: string) => {
   }
   prompt.value = `解释一下这段代码的作用`;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
@@ -250,7 +246,7 @@ const handleComment = (code: string) => {
   }
   prompt.value = `给下面这段代码补充注释`;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
@@ -262,7 +258,7 @@ const handleUpgradeClass = (code: string) => {
   }
   prompt.value = `将以下代码转换为 ES6 Class 语法，请确保转换后的代码符合 ES6 语法规范，并且能够正常运行。只要回答代码部分，不要有多余的文字，代码如下：`;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
@@ -274,7 +270,7 @@ const handleUpgradeVue = (code: string) => {
   }
   prompt.value = `将以下代码转换为 Vue 3 的 Composition API 组件，请确保转换后的代码符合 Vue 3 的 Composition API 规范，并且能够正常运行。只要回答js/ts代码部分，不要有多余的文字，代码如下：`;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
@@ -286,7 +282,7 @@ const handleUpgradeReact = (code: string) => {
   }
   prompt.value = `将以下代码转换为 React.FC 组件，请确保转换后的代码符合 ES6 语法规范，并且能够正常运行。只要回答代码部分，不要有多余的文字，代码如下：`;
   promptCode.value = `
-\`\`\`typescript
+\`\`\`
 ${code}
 \`\`\``;
   onButtonClick();
@@ -296,7 +292,6 @@ const handleAnalysis = (code: string) => {
   if (!code) {
     return;
   }
-  settingStore.setTemperature(EnumTemperature.DataAnalysis);
   prompt.value = `分析一下这段数据`;
   promptCode.value = `
 \`\`\`
@@ -378,3 +373,16 @@ onUnmounted(() => {
   window.removeEventListener('message', handleWindowMessage);
 });
 </script>
+
+<style>
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 400px;
+  max-width: 800px;
+  margin: 0 auto;
+  max-height: 100vh;
+  padding: 0 4px;
+}
+</style>

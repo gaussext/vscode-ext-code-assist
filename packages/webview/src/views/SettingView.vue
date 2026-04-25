@@ -1,97 +1,156 @@
 <template>
-  <div class="provider-setting-container">
-    <div class="provider-setting-header">
-      <h2 class="provider-setting-title">Provider Setting</h2>
+  <div class="setting-container">
+    <div class="setting-header">
+      <h2 class="setting-header-title">Settings</h2>
       <div class="header-icon-group right">
         <el-icon class="header-icon" style="transform: rotate(90deg)" @click="$router.push('/')">
           <Download />
         </el-icon>
       </div>
     </div>
-    <div class="provider-setting-body">
-      <div v-for="provider in providers" :key="provider.id" class="provider-item">
-        <el-icon v-if="providers.length > 1" class="hover-visible icon-delete"
-          @click="handleRemoveProvider(provider.id)">
-          <Delete />
-        </el-icon>
+    <div class="setting-body">
+      <div class="model-setting-header">
+        <h2 class="model-setting-title">Model</h2>
+      </div>
+      <div class="model-setting-body">
         <div class="form-section">
-          <label>Base URL</label>
-          <input v-model="provider.baseURL" placeholder="https://api.example.com" />
+          <label>Chat Model</label>
+          <select v-model="currentModelHash" class="vscode-select">
+            <option v-if="currentModels.length === 0" value="" disabled>Select a model</option>
+            <option v-for="model in currentModels" :key="model.value" :value="model.value">{{ model.label }}</option>
+          </select>
         </div>
-        <div class="form-section">
-          <label>API Key</label>
-          <input v-model="provider.apiKey" type="password" placeholder="sk-..." />
-        </div>
-        <div class="form-section">
-          <label style="display: flex; align-items: center; gap: 8px;">
-            <span>Models</span>
-            <el-icon style="cursor: pointer;" @click="getModels(provider)">
-              <Refresh></Refresh>
-            </el-icon>
-          </label>
-          <input v-model="provider.models" placeholder="model1,model2,model3" />
+      </div>
+      <div class="provider-setting-header">
+        <h2 class="provider-setting-title">Provider</h2>
+      </div>
+      <div class="provider-setting-body">
+        <div v-for="provider in providers" :key="provider.id" class="provider-item">
+          <el-icon v-if="providers.length > 1" class="hover-visible icon-delete"
+            @click="handleRemoveProvider(provider.id)">
+            <Delete />
+          </el-icon>
+          <div class="form-container">
+            <div class="form-section">
+              <label>Base URL</label>
+              <input v-model="provider.baseURL" class="vscode-input" placeholder="https://api.example.com" />
+            </div>
+            <div class="form-section">
+              <label>API Key</label>
+              <input v-model="provider.apiKey" class="vscode-input" type="password" placeholder="sk-..." />
+            </div>
+          </div>
+
+          <div class="preview-container">
+            <div class="form-section">
+              <label style="display: flex; align-items: center; gap: 8px">
+                <span>Models</span>
+                <el-icon style="cursor: pointer" @click="getModels(provider)">
+                  <Refresh></Refresh>
+                </el-icon>
+              </label>
+              <div class="model-container">
+                <div v-for="model in provider.models" :key="model.id" class="model-item">{{ model.id }}</div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
     <div class="setting-footer">
       <div style="flex: 1">
-        <button class="vscode-button-form" @click="handleAddProvider">Add Provider</button>
+        <button class="vscode-button" @click="handleAddProvider">Add Provider</button>
       </div>
-      <button class="vscode-button-form" @click="handleResetClick">Reset</button>
-      <button class="vscode-button-form primary" @click="onConfirmClick">OK</button>
+      <button class="vscode-button" @click="handleResetClick">Reset</button>
+      <button class="vscode-button primary" @click="onConfirmClick">OK</button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { Provider, ProviderVo, useSettingStore, type IModel } from '@/stores/setting';
-import { useRouter } from 'vue-router';
-import { Delete, Download, Refresh } from '@element-plus/icons-vue';
-import { ref } from 'vue';
 import { chatService } from '@/api';
+import type { IOption, Model } from '@/models/Model';
+import { createDefaultProvider, Provider } from '@/models/Provider';
+import { useProviderStore } from '@/stores/useProviderStore';
+import { useSettingStore } from '@/stores/useSettingStore';
+import { sha256 } from '@/utils/hash';
+import { Delete, Download, Refresh } from '@element-plus/icons-vue';
+import { computed, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 const router = useRouter();
+const providerStore = useProviderStore();
 const settingStore = useSettingStore();
-const providers = ref(Provider.toVo(settingStore.providers));
 
-const getModels = async (provider: ProviderVo) => {
+const providers = ref(providerStore.providers);
+const currentModelHash = ref(settingStore.currentModelHash || '');
+
+const currentModels = computed(() => {
+  let result: IOption[] = [];
+  providers.value.forEach((p) => {
+    p.models.forEach((m) => {
+      let option = {
+        label: m.id + '(' + p.baseURL + ')',
+        value: m.hash,
+      };
+      if (!result.find((o) => o.value === option.value)) {
+        result.push(option);
+      } 
+    });
+  });
+  return result;
+});
+
+const getModels = async (provider: Provider) => {
   const json = await chatService.models({
     baseURL: provider.baseURL,
     apiKey: provider.apiKey,
   });
   try {
     const res = JSON.parse(json);
-    const models = res.body.data || [];
-    provider.models = models.map((m) => m.id).join(',');
+    const models = res.body.data || ([] as Model[]);
+    const modelsWithHash: Model[] = [];
+    for (const model of models) {
+      const hash = await sha256(provider.baseURL + provider.apiKey + model.id);
+      modelsWithHash.push({
+        id: model.id,
+        hash,
+      });
+    }
+    provider.models = modelsWithHash;
   } catch (error) {
     console.error(error);
   }
 };
 
-const handleAddProvider = () => {
-  providers.value.push(new ProviderVo());
+const handleAddProvider = async () => {
+  providers.value.push(await createDefaultProvider());
 };
+
 const handleRemoveProvider = (id: string) => {
   providers.value = providers.value.filter((p) => p.id !== id);
 };
 
-const handleResetClick = () => {
-  settingStore.resetProviders();
-  providers.value = Provider.toVo(settingStore.providers);
+const handleResetClick = async () => {
+  await providerStore.resetProviders();
+  providers.value = providerStore.providers;
+  setTimeout(() => {
+    currentModelHash.value = currentModels.value[0].value;
+    settingStore.setCurrentModelHash(currentModelHash.value);
+  });
 };
 
 const onConfirmClick = () => {
-  // save
-  // redirect to home page
   if (providers.value.length > 0) {
-    settingStore.setProviders(Provider.toDto(providers.value));
+    providerStore.setProviders(providers.value);
+    settingStore.setCurrentModelHash(currentModelHash.value);
     router.push('/');
   }
 };
 </script>
 
 <style lang="scss" scoped>
-.provider-setting-container {
+.setting-container {
   min-width: 400px;
   max-width: 800px;
   margin: 0 auto;
@@ -100,6 +159,8 @@ const onConfirmClick = () => {
   flex-direction: column;
 }
 
+.setting-header,
+.model-setting-header,
 .provider-setting-header {
   display: flex;
   justify-content: space-between;
@@ -107,16 +168,21 @@ const onConfirmClick = () => {
   height: 28px;
   margin-bottom: 8px;
 
+  .setting-header-title {
+    font-size: 16px;
+    font-weight: 500;
+  }
+
+  .model-setting-title,
   .provider-setting-title {
     font-size: 14px;
     font-weight: 500;
   }
-
 }
 
 .provider-setting-body {
   flex: 1;
-  max-height: calc(100vh - 120px);
+  max-height: calc(100vh - 256px);
   overflow-y: auto;
 }
 
@@ -126,6 +192,16 @@ const onConfirmClick = () => {
   border: 1px solid var(--vscode-pickerGroup-border);
   margin-bottom: 12px;
   position: relative;
+  display: flex;
+  gap: 8px;
+
+  .form-container {
+    width: 320px;
+  }
+
+  .preview-container {
+    flex: 1;
+  }
 
   .hover-visible {
     visibility: hidden;
@@ -154,20 +230,6 @@ const onConfirmClick = () => {
   font-weight: 500;
 }
 
-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #444;
-  border-radius: 4px;
-  background-color: #272822;
-  color: #fff;
-  font-size: 14px;
-}
-
-input:focus {
-  outline: none;
-  border-color: #409eff;
-}
 
 .models-section {
   margin-top: 20px;
@@ -187,19 +249,18 @@ input:focus {
   gap: 8px;
 }
 
-.model-item {
+.model-container {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.model-item {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid #444;
   border-radius: 4px;
-}
-
-.model-name-input {
-  width: 150px;
-}
-
-.model-id-input {
-  flex: 1;
+  background-color: #272822;
 }
 
 .setting-footer {
@@ -207,5 +268,6 @@ input:focus {
   justify-content: flex-end;
   gap: 10px;
   padding: 0 8px;
+  margin-top: 12px;
 }
 </style>

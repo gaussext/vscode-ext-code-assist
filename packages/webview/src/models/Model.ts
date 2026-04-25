@@ -1,4 +1,3 @@
-import { useSettingStore } from '@/stores/setting';
 import * as UUID from 'uuid';
 
 export class ChatConversation {
@@ -13,16 +12,14 @@ export class ChatMessage {
   id: string = UUID.v4();
   conversationId: string = UUID.v4();
   role: MessageRole = 'system';
-  model: string = 'qwen3:0.6b';
+  model: string = '';
   content: string = '';
   reasoning?: string = '';
   startTime?: number = Date.now();
   loadTime?: number = Date.now();
   endTime?: number = Date.now();
   constructor(role: MessageRole, conversationId: string) {
-    const settingStore = useSettingStore();
     this.role = role;
-    this.model = settingStore.currentModel.id;
     this.conversationId = conversationId;
   }
 }
@@ -34,7 +31,7 @@ export interface IChatParams {
   baseURL: string;
 }
 
-export interface IModelParams {
+export interface IProviderParams {
   apiKey: string;
   baseURL: string;
 }
@@ -44,4 +41,14 @@ export enum EnumTemperature {
   DataAnalysis = 1.0,
   Translation = 1.3,
   CreativeWriting = 1.5,
+}
+
+export class Model {
+  id: string = ''
+  hash?: string = '';
+}
+
+export interface IOption {
+  value: string;
+  label: string;
 }

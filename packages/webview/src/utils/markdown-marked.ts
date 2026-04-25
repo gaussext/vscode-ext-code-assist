@@ -1,7 +1,7 @@
-import hljs from './hljs';
+import hljs from './markdown-hljs';
 import { Marked } from 'marked';
 import { markedHighlight } from 'marked-highlight';
-import { markedKatexExtension, markedBlockKatexExtension } from './katex';
+import { markedKatexExtension, markedBlockKatexExtension } from './markdown-katex';
 import { copyToClipboard } from '.';
 
 export const marked = new Marked(
@@ -11,10 +11,10 @@ export const marked = new Marked(
     async: true,
     async highlight(code, language) {
       try {
-        const validLang = language && hljs.getLanguage(language) ? language : 'plaintext';
+        const validLang = language && hljs.getLanguage(language) ? language : 'typescript';
         const highlighted = hljs.highlight(code, { language: validLang }).value;
         const encoded = encodeURIComponent(code)
-        const buttonHtml = `<button class="copy-button" data-code="${encoded}" onclick="copyCode(this)"><span class="copy-text">Copy</span></button>`;
+        const buttonHtml = `<button class="hljs-button-copy" data-code="${encoded}" onclick="copyCode(this)"><span class="copy-text">Copy</span></button>`;
         return `${buttonHtml}${highlighted}`;
       } catch {
         return code;

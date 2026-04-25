@@ -58,19 +58,19 @@ export const useConversationStore = defineStore('conversation', () => {
     return convs.find((item) => item.id === id);
   };
 
-  const clearConversations = () => {
+  const clearConversations = async () => {
     conversations.value = [];
-    return setConversations([]);
+    return await setConversations([]);
   };
 
-  const updateConversationTitle = (conversationId: string, title: string) => {
+  const updateConversationTitle = async (conversationId: string, title: string) => {
     conversations.value.forEach((item) => {
       if (item.id === conversationId) {
         item.title = title;
         item.isSummary = true;
       }
     });
-    return setConversations(conversations.value);
+    return await setConversations(conversations.value);
   };
 
   const setConversationId = (id: string) => {

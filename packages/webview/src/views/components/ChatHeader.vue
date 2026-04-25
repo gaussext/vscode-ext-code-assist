@@ -1,5 +1,5 @@
 <template>
-  <div class="app-header header-area">
+  <div class="app-header chat-header header-area">
     <div class="header-area-tool">
       <div class="header-icon-group" style="display: flex; align-items: center; gap: 4px">
         <UsageInfo :info="info" />
@@ -31,8 +31,8 @@
 <script setup lang="ts">
 import type { ChatMessage } from '@/models/Model';
 import UsageInfo from '@/components/UsageInfo.vue';
-import { useConversationStore } from '@/stores/conversation';
-import { useMessageStore } from '@/stores/message';
+import { useConversationStore } from '@/stores/useConversationStore';
+import { useMessageStore } from '@/stores/useMessageStore';
 import { computed, onMounted, ref, watch } from 'vue';
 import { Setting, Download, FolderAdd, FolderOpened } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';
@@ -112,7 +112,7 @@ const gotoHistory = () => {
   if (props.loading) {
     return;
   }
-  router.push('/history');
+  router.push('/session');
 };
 
 const gotoSetting = () => {
@@ -124,6 +124,13 @@ const gotoSetting = () => {
 </script>
 
 <style lang="scss">
+.app-header .header-area-tool {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  height: var(--app-header-height);
+  padding-top: 2px;
+}
 
 .header-title {
   font-size: 12px;

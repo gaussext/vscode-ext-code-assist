@@ -4,14 +4,15 @@ import App from './App.vue';
 import router from './router';
 
 import './styles/reset.css';
+// vscode
 import './styles/theme.css'
 import './styles/vscode.css';
-// 
-import './styles/atom-one-dark.min.css';
+// markdown
 import './styles/markdown.css';
-// 
+// lib
 import 'element-plus/theme-chalk/dark/css-vars.css';
 import 'element-plus/dist/index.css';
+// app
 import './styles/index.css';
 
 const app = createApp(App);

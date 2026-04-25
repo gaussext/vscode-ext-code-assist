@@ -1,8 +1,8 @@
-import type { IChatParams, IModelParams } from '@/models/Model';
+import type { IChatParams, IProviderParams } from '@/models/Model';
 import { chatRpcClient } from './rpc';
 
 class ChatService {
-  models(params: IModelParams) {
+  models(params: IProviderParams) {
     return chatRpcClient.models(params);
   }
 

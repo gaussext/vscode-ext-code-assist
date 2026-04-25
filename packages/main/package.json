@@ -13,7 +13,7 @@
   "dependencies": {
     "loglevel": "^1.9.2",
     "openai": "^4.28.0",
-    "vscode-webview-rpc": "workspace:*"
+    "code-assit-rpc": "workspace:*"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.16",
