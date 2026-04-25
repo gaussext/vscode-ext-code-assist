@@ -1,0 +1,37 @@
+<template>
+  <div class="chat-message message-stream">
+    <div class="message-title">
+      <span>{{ message.model }}</span>
+    </div>
+    <el-collapse v-if="message.reasoning" class="reasoning-content" expand-icon-position="left" is-active>
+      <el-collapse-item title="Think">
+        {{ message.reasoning }}
+      </el-collapse-item>
+    </el-collapse>
+    <div v-if="message.content" class="markdown-content">
+      <Markdown :content="message.content" />
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import Markdown from '@/components/Markdown.vue';
+import { ChatMessage } from '@/models/Model';
+
+const props = defineProps({
+  message: {
+    type: Object,
+    default: () => new ChatMessage('assistant', ''),
+  },
+});
+</script>
+
+<style scoped>
+.message-title {
+  margin-bottom: 8px;
+}
+
+.reasoning-content {
+  margin-bottom: 16px;
+}
+</style>

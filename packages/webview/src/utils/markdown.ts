@@ -41,6 +41,7 @@ const cleanHtml = (markdown: string) => {
       'em',
       'del',
       's',
+      'button',
     ],
     ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'data-code', 'onclick', 'open'],
   });

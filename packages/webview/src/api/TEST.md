@@ -33,7 +33,11 @@ flowchart LR
 ```
 
 ## XSS
+
 <h1> H1 标签测试</h1>
+
+按钮可以渲染 button
+<button>提交</button>
 
 不应该渲染 input
 <input type="text" placeholder="请输入">

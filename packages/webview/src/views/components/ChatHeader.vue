@@ -1,5 +1,5 @@
 <template>
-  <div class="app-header header-area">
+  <div class="app-header chat-header header-area">
     <div class="header-area-tool">
       <div class="header-icon-group" style="display: flex; align-items: center; gap: 4px">
         <UsageInfo :info="info" />

@@ -14,8 +14,8 @@ body {
 #app {
   margin: 0;
   --app-header-height: 28px;
-  --app-footer-height: 64px;
-  --app-body-height: calc(100vh - var(--app-header-height) - var(--app-footer-height) - 32px);
+  --chat-footer-height: 64px;
+  --chat-body-height: calc(100vh - var(--app-header-height) - var(--chat-footer-height) - 32px);
 }
 
 .app-header .header-area-tool {
@@ -73,7 +73,7 @@ body {
   margin-bottom: 8px;
   padding: 4px 8px 8px 0;
   border-radius: 4px;
-  height: var(--app-body-height);
+  height: var(--chat-body-height);
   overflow-y: auto;
 }
 
@@ -82,27 +82,26 @@ body {
 }
 
 .footer-area {
-  height: var(--app-footer-height);
+  height: var(--chat-footer-height);
   position: relative;
 }
 
-.messages-area .message-you,
-.messages-area .message-ai {
+.messages-area .chat-message {
   margin-bottom: 16px;
-  line-height: 1.35;
-  border: 1px solid transparent;
-  padding: 8px;
-  border-radius: 4px;
-  background-color: var(--vscode-editor-background);
 }
 
-.messages-area .message-ai {
+.messages-area .message-bot {
   background-color: transparent;
 }
 
-.messages-area .message-you {
+.messages-area .message-user {
   width: auto;
   max-width: 400px;
+}
+.messages-area  .messgae-user .markdown-content {
+  background-color: var(--vscode-editor-background);
+  padding: 8px;
+  border-radius: 8px;
 }
 
 .message-icon {
@@ -126,7 +125,7 @@ body {
 }
 
 .footer-area .prompt-area {
-  height: var(--app-footer-height);
+  height: var(--chat-footer-height);
 }
 
 .footer-area .prompt-code {
@@ -152,6 +151,6 @@ body {
   background-color: transparent;
 }
 .el-collapse-item .el-collapse-item__content {
-  padding-bottom: 8px;
+  padding-bottom: 16px;
   color: inherit;
 }

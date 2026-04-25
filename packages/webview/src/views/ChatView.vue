@@ -165,14 +165,13 @@ const handleChating = (result: IMessage) => {
   }
   // 当前页面更新消息
   if (currentMessage.value.conversationId === result.conversationId) {
-    currentMessage.value.content = botMessage.content;
-    currentMessage.value.reasoning = botMessage.reasoning;
+    currentMessage.value = structuredClone(botMessage);
   }
 };
 
 // AI 结束回答
 const handleChatEnd = async (result: IMessage) => {
-  loading.value = false;
+  
   // 跨页面更新最新消息
   const botMessage = messageLatestStore.getLatestMessageByConvId(result.conversationId);
   botMessage.startTime = result.startTime;
@@ -185,14 +184,10 @@ const handleChatEnd = async (result: IMessage) => {
   messageStore.setMessagesById(result.conversationId, messages);
   // 更新当前页面消息列表
   if (conversationStore.conversationId === result.conversationId) {
-    currentMessageList.value = messages;
+    currentMessageList.value = [...currentMessageList.value, botMessage];
   }
-  // 
-  currentMessage.value = messageLatestStore.getLatestMessageByConvId(conversationStore.conversationId);
-  if (currentMessage.value.conversationId === result.conversationId) {
-    currentMessage.value.content = botMessage.content;
-    currentMessage.value.reasoning = botMessage.reasoning;
-  }
+  // 确保同步更新 UI
+  loading.value = false;
   // 生成摘要
   const conversation = await conversationStore.getConversationById(result.conversationId);
   if (conversation && !conversation.isSummary) {
