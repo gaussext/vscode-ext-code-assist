@@ -3,7 +3,7 @@ import * as UUID from 'uuid';
 
 export class ChatConversation {
   id: string = UUID.v4();
-  title: string = '新建对话';
+  title: string = 'New Session';
   isSummary: boolean = false;
 }
 

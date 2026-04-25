@@ -10,7 +10,7 @@
         v-model="modelValue"
         type="textarea"
         class="vscode-textarea"
-        placeholder="请输入您的问题，使用 Shift + Enter 换行"
+        placeholder="Enter your question, use Shift + Enter to line break"
         :disabled="loading"
         @keypress="handleKeyPress"
       >

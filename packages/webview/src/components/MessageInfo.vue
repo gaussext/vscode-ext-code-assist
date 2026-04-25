@@ -1,5 +1,5 @@
 <template>
-  <el-tooltip class="item" effect="dark" placement="top">
+  <el-tooltip effect="dark" placement="top">
     <template #content>
       <div class="tooltip">
         <div class="tooltip__item">

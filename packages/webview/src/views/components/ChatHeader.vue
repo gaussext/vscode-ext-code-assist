@@ -52,10 +52,10 @@ const props = defineProps({
   },
 });
 
-const loadTitle = () => {
-  const conversation = conversationStore.getConversationById(conversationStore.conversationId);
+const loadTitle = async () => {
+  const conversation = await conversationStore.getConversationById(conversationStore.conversationId);  
   if (conversation && conversation.title) {
-    title.value = conversation.title?.slice?.(0, 10) ?? '';
+    title.value = conversation.title ?? '';
   }
 };
 
@@ -66,10 +66,6 @@ watch(
   },
   { immediate: true }
 );
-
-onMounted(() => {
-  loadTitle();
-});
 
 const info = computed(() => {
   return getUsageInfoFromMessages(props.messages);
@@ -92,7 +88,7 @@ const downloadConversation = async () => {
   if (props.loading) {
     return;
   }
-  const conversation = conversationStore.getConversationById(conversationStore.conversationId);
+  const conversation = await conversationStore.getConversationById(conversationStore.conversationId);
   if (!conversation) {
     return;
   }
@@ -128,17 +124,23 @@ const gotoSetting = () => {
 </script>
 
 <style lang="scss">
+
+.header-title {
+  font-size: 12px;
+  color: var(--vscode-panelTitle-activeForeground);
+}
+
 .header-area-bar {
   margin-top: 2px;
   margin-bottom: 2px;
   width: 100%;
   height: 2px;
-  background-color: #777;
+  background-color: var(--vscode-chart-axis);
 }
 
 .header-area-bar__inner {
   height: 2px;
   width: var(--width);
-  background-color: var(--vscode-charts-blue);
+  background-color: var(--vscode-charts-foreground);
 }
 </style>

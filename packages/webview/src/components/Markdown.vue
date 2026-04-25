@@ -1,9 +1,10 @@
 <template>
   <div class="markdown-render">
-    <details v-if="reasoning" class="reasoning-content" open>
-      <summary>Think</summary>
-      {{ reasoning }}
-    </details>
+    <el-collapse v-if="reasoning" expand-icon-position="left">
+      <el-collapse-item title="Think">
+        {{ reasoning }}
+      </el-collapse-item>
+    </el-collapse>
     <div v-if="renderedContent" class="markdown-content">
       <div v-html="renderedContent"></div>
     </div>

@@ -45,8 +45,9 @@ body {
 
 .header-icon svg {
   cursor: pointer;
+  color: var(--vscode-icon-foreground);
   &:hover {
-    color: #409eff;
+    color: #fff;
   }
 }
 
@@ -149,4 +150,9 @@ body {
   border-radius: 4px;
   cursor: pointer;
   outline: none;
+}
+
+.el-collapse-item .el-collapse-item__header,
+.el-collapse-item .el-collapse-item__wrap {
+  background-color: transparent;
 }

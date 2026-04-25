@@ -143,7 +143,7 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
     enqueue({
       conversationId: currentConversationId,
       type: 'error',
-      data: '请求失败: ' + error.message,
+      data: 'Request failed: ' + error.message,
       startTime,
       loadTime,
       endTime,
@@ -156,11 +156,9 @@ const handleChating = (result: IMessage) => {
   // 跨页面更新消息
   const botMessage = messageLatestStore.getLatestMessageByConvId(result.conversationId);
   if (result.type === 'reasoning') {
-    console.log('reasoning');
     botMessage.reasoning += result.data || '';
   }
   if (result.type === 'content') {
-    console.log('content');
     botMessage.content += result.data || '';
   }
   // 当前页面更新消息
@@ -196,7 +194,7 @@ const handleChatEnd = async (result: IMessage) => {
     currentMessage.value.endTime = Date.now();
   }
   // 生成摘要
-  const conversation = conversationStore.getConversationById(result.conversationId);
+  const conversation = await conversationStore.getConversationById(result.conversationId);
   if (conversation && !conversation.isSummary) {
     await handleSummary(result.conversationId, messages);
   }

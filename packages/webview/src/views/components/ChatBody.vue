@@ -11,7 +11,7 @@
         </div>
         <Markdown :content="message.content" :reasoning="message.reasoning" />
         <div style="margin-top: 4px; height: 24px; display: flex; align-items: center">
-          <a class="link-copy copy-markdown" @click="copyToClipboard(message.content)">复制 Markdown</a>
+          <a class="link-copy copy-markdown" @click="copyToClipboard(message.content)">Copy Markdown</a>
           <MessageInfo v-if="message.role === 'assistant'" :message="message" />
         </div>
       </div>
@@ -63,7 +63,6 @@ const scrollToBottom = () => {
     messagesEndRef.value?.scrollIntoView({ behavior: 'smooth' });
   });
 };
-
 
 watch(
   () => props.messages,

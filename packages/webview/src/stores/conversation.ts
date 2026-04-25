@@ -50,11 +50,12 @@ export const useConversationStore = defineStore('conversation', () => {
     return setConversations(conversations.value);
   };
 
-  const getConversationById = (id: string) => {
+  const getConversationById = async (id: string) => {
     if (!id) {
       return null;
     }
-    return conversations.value.find((item) => item.id === id);
+    const convs = await getConversations();
+    return convs.find((item) => item.id === id);
   };
 
   const clearConversations = () => {
