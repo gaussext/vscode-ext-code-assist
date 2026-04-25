@@ -1,7 +1,7 @@
 <template>
   <div class="app-footer footer-area">
     <div v-if="promptCode" class="prompt-code">
-      {{ promptCode }}
+      <Markdown :content="promptCode"></Markdown>
     </div>
     <div class="prompt-area">
       <textarea
@@ -29,6 +29,7 @@
 
 <script setup lang="ts">
 import { VideoPause, Promotion } from '@element-plus/icons-vue';
+import Markdown from '@/components/Markdown.vue';
 
 const modelValue = defineModel<string>({ required: true });
 

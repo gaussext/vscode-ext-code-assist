@@ -42,8 +42,10 @@ export const cleanHtml = (markdown: string) => {
       'del',
       's',
       'button',
+      'iframe',
     ],
-    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'data-code', 'onclick', 'open'],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'open', 'width', 'height', 'border','frameborder', 'onclick'],
+    ALLOW_DATA_ATTR: true,
   });
 };
 
