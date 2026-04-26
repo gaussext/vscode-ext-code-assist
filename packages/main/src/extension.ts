@@ -8,12 +8,12 @@ function setupChatWebview(context: vscode.ExtensionContext) {
 
   const openViewAndSendMessage = (type: string, text: string) => {
     if (provider.isVisible()) {
-      return provider.onSelection(type, text);
+      return provider.postMessage(type, text);
     }
     vscode.commands.executeCommand('workbench.view.extension.chat-container');
     vscode.commands.executeCommand('code-assist.view.focus');
     setTimeout(() => {
-      provider.onSelection(type, text);
+      provider.postMessage(type, text);
     }, 1000);
   };
 
