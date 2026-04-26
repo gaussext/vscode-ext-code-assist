@@ -31,13 +31,8 @@ export interface JsonRpcError {
 export interface RpcClientOptions {
   timeout?: number;
   streamTimeout?: number;
-  debug?: boolean;
 }
 
-export interface RpcServerOptions {
-  debug?: boolean;
-}
-
-export interface RpcHandler<TParams = any, TResult = any> {
-  (params?: TParams): Promise<ReadableStream<TResult>> | ReadableStream<TResult> | Promise<TResult> | TResult | void;
+export interface RpcHandler {
+  (params?: any): Promise<ReadableStream<unknown>> | Promise<unknown>;
 }

@@ -1,10 +1,9 @@
 import OpenAI from 'openai';
 import log from 'loglevel';
-import { IChatParams } from 'code-assist-shared';
+import { IChatParams, IProviderParams } from 'code-assist-shared';
 
 export class OpenAIService {
   private client: OpenAI | null = null;
-  private controller: AbortController | null = null;
 
   private getClient(apiKey: string, baseURL?: string) {
     if (!baseURL) {
@@ -22,52 +21,65 @@ export class OpenAIService {
   }
 
   async models(params: IChatParams) {
-    log.info('models', params);
+    log.info('OpenAI models request', params);
     const { apiKey, baseURL } = params;
     try {
       const client = this.getClient(apiKey, baseURL);
-      return client.models.list();
+      const resp = await client.models.list();
+      console.log('OpenAI models response', resp);
+      return resp;
     } catch (error: any) {
-      return 'OpenAI models error: ' + error.message;
+      return {
+        message: 'OpenAI api error: ' + error.message,
+      };
     }
   }
 
   async chat(params: IChatParams) {
-    log.info('chat', params);
+    log.info('OpenAI chat request', params);
     const { apiKey, baseURL } = params;
     try {
       const client = this.getClient(apiKey, baseURL);
-      return client.chat.completions.create({
+      const resp = await client.chat.completions.create({
         model: params.model,
         messages: params.messages,
         stream: false,
       });
+      console.log('OpenAI chat response', resp);
+      return resp;
     } catch (error: any) {
-      return 'OpenAI compact error: ' + error.message;
+      return {
+        message: 'OpenAI api error: ' + error.message,
+      };
     }
   }
 
   async chatStream(params: IChatParams) {
-    this.controller = new AbortController();
     const { apiKey, baseURL } = params;
-    log.info('stream', params);
+    log.info('OpenAI stream', params);
     const client = this.getClient(apiKey, baseURL);
-    return client.chat.completions.create(
-      {
+    try {
+      const stream = await client.chat.completions.create({
         model: params.model,
         messages: params.messages,
         stream: true,
-      },
-      {
-        signal: this.controller.signal,
-      }
-    );
+      });
+      return new ReadableStream({
+        async start(controller) {
+          for await (const chunk of stream) {
+            controller.enqueue(chunk);
+          }
+          controller.close();
+        },
+      });
+    } catch (error: any) {
+      return {
+        message: 'OpenAI api error: ' + error.message,
+      };
+    }
   }
 
-  stop(params: any) {
-    if (this.controller) {
-      this.controller.abort();
-      this.controller = null;
-    }
+  stop() {
+    return Promise.resolve({ message: 'Stop not implemented for OpenAI' });
   }
 }

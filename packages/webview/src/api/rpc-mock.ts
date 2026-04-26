@@ -1,6 +1,7 @@
-import { sleep } from '@/utils';
-import type { StreamCallbacks } from './rpc';
+import { shuffleArray, sleep } from '@/utils';
 import TEST from './TEST.md?raw';
+import type { IChatChunk } from '@/types';
+import { sl } from 'element-plus/es/locale/index.mjs';
 
 export class RpcMock {
   static reasoning = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
@@ -10,30 +11,82 @@ Tempus in diam non malesuada penatibus hendrerit ultrices.`;
   static content = TEST;
   static abortController = new AbortController();
 
-  static async mockStream(callbacks: StreamCallbacks) {
+  static async loadContent() {
+    const TEST = await import('./TEST.md?raw');
+    this.content = TEST.default;
+  }
+
+  static async mockModels() {
+    await sleep(1000);
+    return Promise.resolve({
+      body: {
+        object: 'list',
+        data: shuffleArray([
+          {
+            id: 'qwen3:4b',
+            object: 'model',
+            created: 1776875731,
+            owned_by: 'library',
+          },
+          {
+            id: 'qwen3:1.7b',
+            object: 'model',
+            created: 1776875342,
+            owned_by: 'library',
+          },
+          {
+            id: 'qwen3:0.6b',
+            object: 'model',
+            created: 1775916074,
+            owned_by: 'library',
+          },
+
+          {
+            id: 'deepseek-v4-flash',
+            object: 'model',
+            owned_by: 'deepseek',
+          },
+          {
+            id: 'deepseek-v4-pro',
+            object: 'model',
+            owned_by: 'deepseek',
+          },
+        ]),
+      },
+    });
+  }
+
+  static mockChatStream(): ReadableStream<IChatChunk> {
     this.abortController = new AbortController();
+    return new ReadableStream<IChatChunk>({
+      start: async (controller) => {
+        await this.mockReasoningStream(controller);
+        await this.mockContentStream(controller);
+        controller.close();
+      },
+    });
+  }
+
+  static async mockReasoningStream(controller) {
     for (const char of this.reasoning) {
       await sleep(0);
       if (this.abortController.signal.aborted) {
-        callbacks.onComplete();
+        controller.close();
         return;
       }
-      callbacks.onChunk({ type: 'reasoning', data: char });
+      controller.enqueue({ type: 'reasoning', data: char });
     }
+  }
+
+  static async mockContentStream(controller) {
     for (const char of this.content) {
       await sleep(0);
       if (this.abortController.signal.aborted) {
-        callbacks.onComplete();
+        controller.close();
         return;
       }
-      callbacks.onChunk({ type: 'content', data: char });
+      controller.enqueue({ type: 'content', data: char });
     }
-    callbacks.onComplete();
-  }
-
-  static async mock() {
-    await sleep(3000);
-    return this.content;
   }
 
   static abort() {

@@ -1,6 +1,8 @@
+# Markdown
+
 ## 标题
 
-```
+```markdown
 ### 三级标题
 
 #### 四级标题
@@ -28,7 +30,7 @@
 
 ## 任务列表
 
-```
+```makdown
 - [x] Todo1
 - [ ] Todo2
 ```
@@ -40,7 +42,7 @@
 
 使用>符号标记一段引用
 
-```
+```text
 > Dorothy followed her through many of the beautiful rooms in her castle.
 ```
 
@@ -48,7 +50,7 @@ Dorothy followed her through many of the beautiful rooms in her castle
 
 ## 表格
 
-```
+```markdown
 | Syntax    | Description |
 | --------- | ----------- |
 | Header    | Title       |
@@ -59,33 +61,6 @@ Dorothy followed her through many of the beautiful rooms in her castle
 | --------- | ----------- |
 | Header    | Title       |
 | Paragraph | Text        |
-
-
-## 视频
-
-```html
-<iframe 
-src="https://player.bilibili.com/player.html?aid=35265997&bvid=BV12b411w78Y&cid=61801377&page=1"
-scrolling="no" 
-border="0" 
-frameborder="no" 
-framespacing="0" 
-allowfullscreen="no" 
-width="640" 
-height="480"
-></iframe>
-```
-
-<iframe 
-src="https://player.bilibili.com/player.html?aid=35265997&bvid=BV12b411w78Y&cid=61801377&page=1"
-scrolling="no" 
-border="0" 
-frameborder="no" 
-framespacing="0" 
-allowfullscreen="no" 
-width="640" 
-height="480"
-></iframe>
 
 ## 代码块
 

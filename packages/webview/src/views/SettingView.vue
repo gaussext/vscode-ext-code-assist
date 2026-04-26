@@ -56,7 +56,6 @@
               <input v-model="provider.apiKey" class="vscode-input" type="password" placeholder="sk-..." />
             </div>
           </div>
-
           <div class="preview-container">
             <div class="form-section">
               <label style="display: flex; align-items: center; gap: 8px">
@@ -85,7 +84,7 @@
 
 <script lang="ts" setup>
 import { chatService } from '@/api';
-import type { IOption, Model } from '@/models/Model';
+import type { IStandardItem } from '@/types';
 import { createDefaultProvider, Provider } from '@/models/Provider';
 import { useProviderStore } from '@/stores/useProviderStore';
 import { useSettingStore } from '@/stores/useSettingStore';
@@ -93,6 +92,7 @@ import { sha256 } from '@/utils/hash';
 import { Delete, Download, Refresh } from '@element-plus/icons-vue';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import type { Model } from '@/models/Model';
 
 const router = useRouter();
 const providerStore = useProviderStore();
@@ -103,7 +103,7 @@ const currentModelHash = ref(settingStore.currentModelHash || '');
 const summaryModelHash = ref(settingStore.summaryModelHash || '');
 
 const currentModels = computed(() => {
-  const groups: Record<string, IOption[]> = {};
+  const groups: Record<string, IStandardItem<string>[]> = {};
   providers.value.forEach((p) => {
     if (!groups[p.baseURL]) {
       groups[p.baseURL] = [];
@@ -125,12 +125,11 @@ const currentModels = computed(() => {
 });
 
 const getModels = async (provider: Provider) => {
-  const json = await chatService.models({
-    baseURL: provider.baseURL,
-    apiKey: provider.apiKey,
-  });
   try {
-    const res = JSON.parse(json);
+    const res = await chatService.models({
+      baseURL: provider.baseURL,
+      apiKey: provider.apiKey,
+    });
     const models = res.body.data || ([] as Model[]);
     const modelsWithHash: Model[] = [];
     for (const model of models) {
@@ -214,7 +213,7 @@ const onConfirmClick = () => {
 .model-setting-body {
   display: flex;
   gap: 8px;
-  .model-setting-item{
+  .model-setting-item {
     flex: 1;
   }
 }

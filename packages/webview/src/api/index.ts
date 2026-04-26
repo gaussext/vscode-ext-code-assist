@@ -1,24 +1,18 @@
-import type { IChatParams, IProviderParams } from '@/models/Model';
+import type { IChatParams, IProviderParams } from 'code-assist-shared';
 import { chatRpcClient } from './rpc';
+import type { IChatChunk } from '@/types';
 
 class ChatService {
   models(params: IProviderParams) {
     return chatRpcClient.models(params);
   }
 
-  summary(params: IChatParams) {
-    return chatRpcClient.summary(params);
+  chat(params: IChatParams) {
+    return chatRpcClient.chat(params);
   }
 
-  chat(params: IChatParams, callback: any, end: any) {
-    return chatRpcClient.streamMessage(params, {
-      onChunk: callback,
-      onComplete: end,
-      onError: (error: Error) => {
-        callback(`Error: ${error.message}`);
-        end();
-      }
-    });
+  chatStream(params: IChatParams): ReadableStream<IChatChunk> {
+    return chatRpcClient.chatStream(params);
   }
 
   stop() {

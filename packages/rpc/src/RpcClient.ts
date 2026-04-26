@@ -1,8 +1,4 @@
-import type {
-  RpcClientOptions,
-  JsonRpcRequest,
-  JsonRpcResponse,
-} from './types';
+import type { RpcClientOptions, JsonRpcRequest, JsonRpcResponse } from './types';
 
 interface IPromiseChannel {
   resolve: (value: unknown) => void;
@@ -11,7 +7,7 @@ interface IPromiseChannel {
   streamController?: ReadableStreamDefaultController<unknown>;
 }
 
-const JSONRPC_VERSION = "2.0";
+const JSONRPC_VERSION = '2.0';
 
 const enum RpcInternalType {
   Stream = '__stream__',
@@ -28,7 +24,6 @@ export abstract class RpcClient {
     this.options = {
       timeout: 30 * 1000,
       streamTimeout: 10 * 60 * 1000,
-      debug: false,
       ...options,
     };
   }
@@ -46,6 +41,7 @@ export abstract class RpcClient {
   protected abstract log(level: string, message: string, ...args: unknown[]): void;
 
   handleMessage(message: string): void {
+    this.log('info', 'Received message', message);
     try {
       const msg = JSON.parse(message);
       if (this.isJsonRpcResponse(msg)) {
@@ -54,28 +50,17 @@ export abstract class RpcClient {
         this.processInternalMessage(msg);
       }
     } catch (error) {
-      if (this.options.debug) {
-        this.log('error', 'RPC Client: Failed to parse message', error);
-      }
+      this.log('error', 'RPC Client: Failed to parse message', error);
     }
   }
 
   private isJsonRpcResponse(msg: unknown): msg is JsonRpcResponse {
-    return (
-      typeof msg === 'object' &&
-      msg !== null &&
-      (msg as any).jsonrpc === JSONRPC_VERSION &&
-      'id' in msg
-    );
+    return typeof msg === 'object' && msg !== null && (msg as any).jsonrpc === JSONRPC_VERSION && 'id' in msg;
   }
 
   private isInternalMessage(msg: unknown): boolean {
-    const type = (msg as any).__type__;
-    return (
-      type === RpcInternalType.Stream ||
-      type === RpcInternalType.Complete ||
-      type === RpcInternalType.Error
-    );
+    const type = (msg as Record<string, string>)?.__type__;
+    return type === RpcInternalType.Stream || type === RpcInternalType.Complete || type === RpcInternalType.Error;
   }
 
   private processJsonRpcResponse(msg: JsonRpcResponse): void {
@@ -111,16 +96,8 @@ export abstract class RpcClient {
     }
   }
 
-  call<TParams = unknown, TResult = unknown>(
-    method: string,
-    params: TParams,
-    stream?: false
-  ): Promise<TResult>;
-  call<TParams = unknown, TChunk = unknown>(
-    method: string,
-    params: TParams,
-    stream: true
-  ): ReadableStream<TChunk>;
+  call<TParams = unknown, TResult = unknown>(method: string, params: TParams, stream?: false): Promise<TResult>;
+  call<TParams = unknown, TChunk = unknown>(method: string, params: TParams, stream: true): ReadableStream<TChunk>;
   call<TParams = unknown, TResult = unknown>(
     method: string,
     params: TParams,
@@ -131,13 +108,10 @@ export abstract class RpcClient {
     if (stream) {
       return new ReadableStream<TResult>({
         start: (controller) => {
-          const timeout = setTimeout(
-            () => {
-              this.pendingRequests.delete(id);
-              controller.error(new Error(`Request timeout: ${method}`));
-            },
-            this.options.streamTimeout ?? 600000
-          );
+          const timeout = setTimeout(() => {
+            this.pendingRequests.delete(id);
+            controller.error(new Error(`Request timeout: ${method}`));
+          }, this.options.streamTimeout ?? 600000);
 
           this.pendingRequests.set(id, {
             resolve: () => {},

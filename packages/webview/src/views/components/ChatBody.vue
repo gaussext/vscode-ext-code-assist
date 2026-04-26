@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { ChatMessage } from '@/models/Model';
+import { ChatMessage } from '@/models/Message';
 import { onMounted, ref, watch } from 'vue';
 import MessageUser from './MessageUser.vue';
 import MessageBot from './MessageBot.vue';

@@ -24,7 +24,7 @@
 </template>
 
 <script setup lang="ts">
-import { ChatMessage } from '@/models/Model';
+import { ChatMessage } from '@/models/Message';
 import { copyToClipboard } from '@/utils';
 import { Check, CopyDocument } from '@element-plus/icons-vue';
 import { ref } from 'vue';

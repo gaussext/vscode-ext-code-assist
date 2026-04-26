@@ -42,7 +42,7 @@
   </el-tooltip>
 </template>
 <script lang="ts" setup>
-import { ChatMessage } from '@/models/Model';
+import { ChatMessage } from '@/models/Message';
 import { getMessageInfoFromMessage } from '@/utils/token';
 import { InfoFilled } from '@element-plus/icons-vue';
 

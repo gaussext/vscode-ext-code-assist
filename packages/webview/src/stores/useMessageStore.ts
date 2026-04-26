@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import localforage from 'localforage';
-import { ChatMessage } from '@/models/Model';
+import type { ChatMessage } from '@/models/Message';
+
 
 const storeMessages = localforage.createInstance({
   name: 'code-assist',

@@ -23,13 +23,13 @@ import { useMessageLatestStore } from '@/stores/useMessageLatestStore';
 import { useMessageStore } from '@/stores/useMessageStore';
 import { onMounted, onUnmounted, ref, unref } from 'vue';
 import { chatService } from '../api';
-import { ChatMessage } from '../models/Model';
-import type { IChunk, IMessage } from '../types';
+import { ChatMessage } from '../models/Message';
 import ChatBody from './components/ChatBody.vue';
 import ChatFooter from './components/ChatFooter.vue';
 import ChatHeader from './components/ChatHeader.vue';
 import { useSettingStore } from '@/stores/useSettingStore';
 import { QueueRender } from '@/utils/QueueRender';
+import type { IChatChunkMerge } from '@/types';
 
 const settingStore = useSettingStore();
 const conversationStore = useConversationStore();
@@ -98,7 +98,7 @@ onUnmounted(() => {
   queueRender?.dispose();
 });
 
-const enqueue = async (value: IMessage) => {
+const enqueue = async (value: IChatChunkMerge) => {
   queueRender?.queueAsync(value, (result) => {
     switch (result.type) {
       case 'content':
@@ -131,35 +131,36 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
   const startTime = Date.now();
   let loadTime = 0;
   try {
-    await chatService.chat(
-      {
-        baseURL,
-        apiKey,
-        model,
-        messages: messages.map((item) => ({ role: item.role, content: item.content })),
-      },
-      (chunk: IChunk) => {
-        if (!loadTime) {
-          loadTime = Date.now();
-        }
-        const endTime = Date.now();
-        enqueue({
-          conversationId: currentConversationId,
-          type: chunk.type,
-          data: chunk.data,
-          startTime,
-          loadTime,
-          endTime,
-        });
-      },
-      () => {
-        if (!loadTime) {
-          loadTime = Date.now();
-        }
+    const stream = chatService.chatStream({
+      baseURL,
+      apiKey,
+      model,
+      messages: messages.map((item) => ({ role: item.role, content: item.content })),
+    });
+    const reader = stream.getReader();
+    while (true) {
+      const { done, value } = await reader.read();      
+      if (!loadTime) {
+        loadTime = Date.now();
+      }
+      if (done) {
         const endTime = Date.now();
         enqueue({ conversationId: currentConversationId, type: 'end', startTime, loadTime, endTime });
+        break;
       }
-    );
+      if (!loadTime) {
+        loadTime = Date.now();
+      }
+      const endTime = Date.now();
+      enqueue({
+        conversationId: currentConversationId,
+        type: value.type,
+        data: value.data,
+        startTime,
+        loadTime,
+        endTime,
+      });
+    }
   } catch (error: any) {
     queueRender?.dispose();
     if (!loadTime) {
@@ -178,7 +179,7 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
   }
 };
 
-const handleChating = (result: IMessage) => {
+const handleChating = (result: IChatChunkMerge) => {
   // 跨页面更新消息
   const botMessage = messageLatestStore.getLatestMessageByConvId(result.conversationId);
   if (result.type === 'reasoning') {
@@ -196,7 +197,7 @@ const handleChating = (result: IMessage) => {
 };
 
 // AI 结束回答
-const handleChatEnd = async (result: IMessage) => {
+const handleChatEnd = async (result: IChatChunkMerge) => {
   // 跨页面更新最新消息
   const botMessage = messageLatestStore.getLatestMessageByConvId(result.conversationId);
   botMessage.startTime = result.startTime;
@@ -226,11 +227,16 @@ const handleSummary = (conversationId: string, messages: ChatMessage[]) => {
   // 获取当前模型参数
   const { baseURL, apiKey, model } = settingStore.getModelParams(settingStore.summaryModelHash);
   return chatService
-    .summary({
+    .chat({
       baseURL,
       apiKey,
       model,
-      messages: messages.map((item) => ({ role: item.role, content: item.content })),
+      messages: 
+      [
+        ...messages.map((item) => ({ role: item.role, content: item.content })),
+        { role: 'user', content: '请用20字以内总结以上对话主题，作为对话标题直接返回，不需要任何标点和修饰' }
+      ]
+      ,
     })
     .then((result) => {
       const summary = result?.choices?.[0]?.message?.content || '';

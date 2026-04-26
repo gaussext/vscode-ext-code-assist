@@ -16,6 +16,5 @@ declare module 'vue' {
     MessageInfo: typeof import('./src/components/MessageInfo.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    UsageInfo: typeof import('./src/components/UsageInfo.vue')['default']
   }
 }
