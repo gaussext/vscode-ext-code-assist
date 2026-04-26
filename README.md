@@ -37,6 +37,10 @@ code --install-extension code-assist-*.vsix
 
 通过 `Ctrl+Shift+P` / `Cmd+Shift+P` 访问所有 `Code Assist:` 开头的命令。
 
+### 预览图
+
+![v1.0.0-beta.10.png](https://www.gausszhou.top/static/data/github/code-assist/v1.0.0-beta.10.png)
+
 ## 许可证
 
 MIT License

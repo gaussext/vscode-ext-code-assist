@@ -6,9 +6,6 @@
         <el-icon class="header-icon" style="transform: rotate(90deg)" @click="$router.push('/')">
           <Download />
         </el-icon>
-        <el-icon class="header-icon" @click="$router.push('/setting')">
-          <Setting></Setting>
-        </el-icon>
       </div>
     </div>
     <div class="conversation-history-body">
@@ -162,8 +159,7 @@ onMounted(async () => {
 .conversation-history-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  padding: 0 8px;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 12px;
 }
 </style>
