@@ -67,6 +67,7 @@ const onConversationChange = async (id: string) => {
 const onAddConversation = async () => {
   const conv = await conversationStore.createConversation();
   conversationStore.setConversationId(conv.id);
+  conversationStore.setConversationTitle(conv.title ?? '');
 };
 
 const onDeleteConversation = async (id: string) => {
@@ -79,7 +80,7 @@ const onDeleteConversation = async (id: string) => {
 };
 
 const onClearConversation = async () => {
-  await conversationStore.clearConversations();
+  await conversationStore.resetConversations();
   const convs = await conversationStore.getConversations();
   if (convs.length > 0) {
     conversationStore.setConversationId(firstElement(convs).id);
@@ -94,7 +95,7 @@ onMounted(async () => {
 <style lang="scss" scoped>
 .conversation-history-container {
   min-width: 400px;
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 0 4px;
   display: flex;

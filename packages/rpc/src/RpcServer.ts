@@ -1,5 +1,3 @@
-import { Webview } from 'vscode';
-import log from 'loglevel';
 import type {
   RpcMessage,
   RpcRequest,
@@ -21,7 +19,7 @@ export interface IChannel<T> {
   error: ErrorCallback;
 }
 
-export class RpcServer {
+export abstract class RpcServer {
   private handlers: Map<string, RpcStreamHandler | RpcHandler> = new Map();
   private pendingRequests: Map<string, IChannel<unknown>> = new Map();
   private options: RpcServerOptions;
@@ -30,12 +28,17 @@ export class RpcServer {
     this.options = { debug: false, ...options };
   }
 
-  sendMessage(message: string): void {
-    throw new Error('sendMessage must be implemented by subclass');
-  }
+  abstract sendMessage(message: string): void;
+
+  /**
+   * 抽象日志方法，由子类实现具体的日志输出。
+   * @param level 日志级别（'info' | 'debug' | 'error'）
+   * @param args  要记录的信息
+   */
+  abstract log(level: string, ...args: unknown[]): void;
 
   registerHandler(path: string, handler: RpcStreamHandler | RpcHandler) {
-    log.info('registerHandler', path);
+    this.log('info', 'registerHandler', path);
     this.handlers.set(path, handler);
   }
 
@@ -49,7 +52,7 @@ export class RpcServer {
       return this.processMessage(msg);
     } catch (error) {
       if (this.options.debug) {
-        log.error('RPC Server: Failed to parse message', error);
+        this.log('error', 'RPC Server: Failed to parse message', error);
       }
       return Promise.resolve(null);
     }
@@ -64,8 +67,8 @@ export class RpcServer {
 
   private handleRequest(request: RpcRequest): Promise<string | null> {
     const { id, path, data } = request;
-    log.info('handleRequest', request);
-    log.debug('handler');
+    this.log('info', 'handleRequest', request);
+    this.log('debug', 'handler');
     const handler = this.handlers.get(path);
 
     if (!handler) {
@@ -122,7 +125,10 @@ export class RpcServer {
 
   private isStreamRequest(params: unknown): boolean {
     return (
-      params !== null && typeof params === 'object' && '__stream__' in params && (params as any).__stream__ === true
+      params !== null &&
+      typeof params === 'object' &&
+      '__stream__' in params &&
+      (params as any).__stream__ === true
     );
   }
 

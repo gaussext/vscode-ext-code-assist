@@ -70,6 +70,42 @@
   padding-inline-start: 16px;
 }
 
+/* ---------- 表格样式 ---------- */
+.markdown-body table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  overflow: auto;
+  margin: 8px 0;
+}
+
+.markdown-body table th,
+.markdown-body table td {
+  border: 1px solid var(--vscode-tree-tableColumnsBorder);
+  padding: 6px 13px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.markdown-body table th {
+  font-weight: 600;
+  background-color: transparent;
+}
+
+.markdown-body table tr {
+  background-color: transparent;
+  border-top: 1px solid var(--vscode-tree-tableColumnsBorder);
+}
+
+.markdown-body table tr:nth-child(even) {
+  background-color: var(--vscode-tree-tableOddRowsBackground);
+
+}
+
+/* ---------- 代码样式 ---------- */
+
 code.hljs {
   position: relative;
 }

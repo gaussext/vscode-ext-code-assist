@@ -14,7 +14,9 @@ body {
 #app {
   margin: 0;
   --app-header-height: 28px;
-  --chat-footer-height: 64px;
+  --chat-footer-height: 80px;
+  --chat-prompt-bottom: var(--chat-footer-height);
+  --chat-prompt-height: 120px;
   --chat-body-height: calc(100vh - var(--app-header-height) - var(--chat-footer-height) - 32px);
 }
 

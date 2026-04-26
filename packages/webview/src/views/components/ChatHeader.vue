@@ -1,11 +1,8 @@
 <template>
   <div class="app-header chat-header header-area">
     <div class="header-area-tool">
-      <div class="header-icon-group" style="display: flex; align-items: center; gap: 4px">
-        <UsageInfo :info="info" />
-      </div>
       <div class="header-title">
-        {{ conversationStore.conversationTitle }}
+        {{ conversationStore.conversationTitle.slice(0, 20) || 'New Session' }}
       </div>
       <div class="header-icon-group right">
         <el-icon class="header-icon" :class="{ disabled: loading }" @click="downloadConversation">
@@ -22,21 +19,16 @@
         </el-icon>
       </div>
     </div>
-    <div class="header-area-bar">
-      <div class="header-area-bar__inner" :style="barStyle"></div>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import type { ChatMessage } from '@/models/Model';
-import UsageInfo from '@/components/UsageInfo.vue';
 import { useConversationStore } from '@/stores/useConversationStore';
 import { useMessageStore } from '@/stores/useMessageStore';
-import { computed, onMounted, ref, watch } from 'vue';
-import { Setting, Download, FolderAdd, FolderOpened } from '@element-plus/icons-vue';
+import { Download, FolderAdd, FolderOpened, Setting } from '@element-plus/icons-vue';
+import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
-import { getUsageInfoFromMessages } from '@/utils/token';
 
 const router = useRouter();
 const conversationStore = useConversationStore();
@@ -56,16 +48,6 @@ onMounted(async () => {
   if (conversation) {
     conversationStore.setConversationTitle(conversation.title);
   }
-});
-
-const info = computed(() => {
-  return getUsageInfoFromMessages(props.messages);
-});
-
-const barStyle = computed(() => {
-  return {
-    '--width': `${info.value.width}%`,
-  };
 });
 
 const emit = defineEmits<{
@@ -127,19 +109,5 @@ const gotoSetting = () => {
 .header-title {
   font-size: 12px;
   color: var(--vscode-panelTitle-activeForeground);
-}
-
-.header-area-bar {
-  margin-top: 2px;
-  margin-bottom: 2px;
-  width: 100%;
-  height: 2px;
-  background-color: var(--vscode-chart-axis);
-}
-
-.header-area-bar__inner {
-  height: 2px;
-  width: var(--width);
-  background-color: var(--vscode-charts-foreground);
 }
 </style>

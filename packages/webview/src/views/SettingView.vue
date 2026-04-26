@@ -21,7 +21,7 @@
           </select>
         </div>
         <div class="form-section">
-          <label>Chat Model</label>
+          <label>Summary Model</label>
           <select v-model="summaryModelHash" class="vscode-select">
             <option v-if="currentModels.length === 0" value="" disabled>Select a model</option>
             <option v-for="model in currentModels" :key="model.value" :value="model.value">{{ model.label }}</option>
@@ -163,7 +163,7 @@ const onConfirmClick = () => {
 <style lang="scss" scoped>
 .setting-container {
   min-width: 400px;
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 0 4px;
   display: flex;

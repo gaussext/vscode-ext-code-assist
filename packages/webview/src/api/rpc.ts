@@ -1,7 +1,8 @@
 import type { IChatParams, IProviderParams } from '@/models/Model';
-import { EnumRpcMessage, WebviewRpcClient } from 'code-assist-rpc';
+import { EnumRpcMessage } from 'code-assist-rpc';
 import { RpcMock } from './rpc-mock';
 import type { IChunk } from '@/types';
+import { WebviewRpcClient } from '@/lib/WebviewRpcClient';
 
 export interface StreamCallbacks {
   onChunk: (chunk: IChunk) => void;

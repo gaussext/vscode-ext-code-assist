@@ -1,4 +1,4 @@
-import { marked } from '@/utils/markdown-marked';
+import { marked, markedWithFull } from '@/utils/markdown-marked';
 import DOMPurify from 'dompurify';
 
 export const reasoningStartTag = `<details><summary>Think</summary>`;
@@ -43,14 +43,20 @@ export const cleanHtml = (markdown: string) => {
       's',
       'button',
     ],
-    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'data-code', 'onclick', 'open'],
+    ALLOWED_ATTR: ['href', 'src', 'alt', 'title', 'class', 'open', 'width', 'height', 'border','frameborder', 'onclick'],
+    ALLOW_DATA_ATTR: true,
   });
 };
 
-export const renderMarkdown = async (markdown: string) => {
+export const renderMarkdown = async (markdown: string, mode: 'full' | 'thin' = 'thin') => {
   if (!markdown) {
     return '';
   }
-  const result = await marked.parse(markdown);
+  let result = ''
+  if (mode === 'full') {
+    result = await markedWithFull.parse(markdown);
+  } else{
+    result = await marked.parse(markdown);
+  }
   return cleanHtml(result);
 };

@@ -79,13 +79,10 @@ onMounted(() => {
   .chat-message {
     margin-bottom: 16px;
   }
-  .message-bot {
-    background-color: transparent;
-  }
-}
 
-.messages-area.has-code {
-  padding-bottom: 200px;
+  &.has-code {
+    height: calc(var(--chat-body-height) - var(--chat-prompt-height));
+  }
 }
 
 .messages-area  .messgae-user .markdown-content {
