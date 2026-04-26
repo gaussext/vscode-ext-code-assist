@@ -1,22 +1,27 @@
 import type {
-  RpcMessage,
-  RpcResponse,
-  RpcStreamChunk,
-  RpcError,
-  RpcComplete,
   RpcClientOptions,
   StreamCallback,
   CompleteCallback,
   ErrorCallback,
+  JsonRpcRequest,
+  JsonRpcResponse,
 } from './types';
 
 interface IPromiseChannel {
   resolve: (value: unknown) => void;
   reject: (error: Error) => void;
-  timeout: NodeJS.Timeout;
+  timeout: ReturnType<typeof setTimeout>;
   onChunk?: StreamCallback<unknown>;
   onComplete?: CompleteCallback;
   onError?: ErrorCallback;
+}
+
+const JSONRPC_VERSION = "2.0";
+
+const enum RpcInternalType {
+  Stream = '__stream__',
+  Complete = '__complete__',
+  Error = '__error__',
 }
 
 export abstract class RpcClient {
@@ -43,95 +48,84 @@ export abstract class RpcClient {
 
   protected abstract sendMessage(message: string): void;
 
-  /**
-   * 抽象日志方法，子类需实现具体的日志记录逻辑
-   * @param level 日志级别（如 'error', 'warn', 'info', 'debug'）
-   * @param message 日志信息
-   * @param args 附加参数
-   */
   protected abstract log(level: string, message: string, ...args: unknown[]): void;
 
   handleMessage(message: string): void {
     try {
-      const msg: RpcMessage = JSON.parse(message);
-      this.processMessage(msg);
+      const msg = JSON.parse(message);
+      if (this.isJsonRpcResponse(msg)) {
+        this.processJsonRpcResponse(msg);
+      } else if (this.isInternalMessage(msg)) {
+        this.processInternalMessage(msg);
+      }
     } catch (error) {
       if (this.options.debug) {
         this.log('error', 'RPC Client: Failed to parse message', error);
       }
-      this.handleError({
-        id: 'unknown',
-        type: 'error',
-        error: { code: 400, message: 'Invalid message format' },
-      });
     }
   }
 
-  private processMessage(msg: RpcMessage): void {
-    switch (msg.type) {
-      case 'response':
-        this.handleResponse(msg as RpcResponse);
-        break;
-      case 'stream':
-        this.handleStreamChunk(msg as RpcStreamChunk);
-        break;
-      case 'error':
-        this.handleError(msg as RpcError);
-        break;
-      case 'complete':
-        this.handleComplete(msg as RpcComplete);
-        break;
-    }
+  private isJsonRpcResponse(msg: unknown): msg is JsonRpcResponse {
+    return (
+      typeof msg === 'object' &&
+      msg !== null &&
+      (msg as any).jsonrpc === JSONRPC_VERSION &&
+      'id' in msg
+    );
   }
 
-  private handleResponse(response: RpcResponse): void {
-    const pending = this.pendingRequests.get(response.id);
+  private isInternalMessage(msg: unknown): boolean {
+    const type = (msg as any).__type__;
+    return (
+      type === RpcInternalType.Stream ||
+      type === RpcInternalType.Complete ||
+      type === RpcInternalType.Error
+    );
+  }
+
+  private processJsonRpcResponse(msg: JsonRpcResponse): void {
+    const pending = this.pendingRequests.get(msg.id);
     if (!pending) return;
+
     clearTimeout(pending.timeout);
-    this.pendingRequests.delete(response.id);
-    pending.resolve(response.data);
+    this.pendingRequests.delete(msg.id);
+
+    if (msg.error) {
+      if (pending.onError) {
+        pending.onError(new Error(msg.error.message));
+      } else {
+        pending.reject(new Error(msg.error.message));
+      }
+      return;
+    }
+
+    pending.resolve(msg.result);
   }
 
-  private handleStreamChunk(chunk: RpcStreamChunk): void {
-    const pending = this.pendingRequests.get(chunk.id);
+  private processInternalMessage(msg: any): void {
+    const id = msg.id;
+    const pending = this.pendingRequests.get(id);
     if (!pending) return;
 
-    pending.onChunk?.(chunk.data);
-
-    if (chunk.isLast) {
-      this.handleComplete({ id: chunk.id, type: 'complete' });
+    if (msg.__type__ === RpcInternalType.Stream) {
+      pending.onChunk?.(msg.data);
+    } else if (msg.__type__ === RpcInternalType.Complete) {
+      this.pendingRequests.delete(id);
+      pending.onComplete?.();
+      pending.resolve(undefined);
+    } else if (msg.__type__ === RpcInternalType.Error) {
+      clearTimeout(pending.timeout);
+      this.pendingRequests.delete(id);
+      if (pending.onError) {
+        pending.onError(new Error(msg.error.message));
+      } else {
+        pending.reject(new Error(msg.error.message));
+      }
     }
   }
 
-  private handleError(error: RpcError): void {
-    const pending = this.pendingRequests.get(error.id);
-    if (!pending) return;
-    clearTimeout(pending.timeout);
-    this.pendingRequests.delete(error.id);
-    if (pending.onError) {
-      pending.onError(new Error(error.error.message));
-    } else {
-      pending.reject(new Error(error.error.message));
-    }
-  }
-
-  private handleComplete(complete: RpcComplete): void {
-    const pending = this.pendingRequests.get(complete.id);
-    if (!pending) return;
-
-    this.pendingRequests.delete(complete.id);
-    pending.onComplete?.();
-    pending.resolve(undefined);
-  }
-
-  /**
-   * Call a method on the server.
-   * @param path
-   * @param params
-   * @returns
-   */
   call<TParams = unknown, TResult = unknown>(
-    path: string,
+    method: string,
     params: TParams
   ): Promise<TResult> {
     const id = this.generateMessageId();
@@ -139,7 +133,7 @@ export abstract class RpcClient {
     return new Promise<TResult>((resolve, reject) => {
       const timeout = setTimeout(() => {
         this.pendingRequests.delete(id);
-        reject(new Error(`Request timeout: ${path}`));
+        reject(new Error(`Request timeout: ${method}`));
       }, this.options.timeout);
 
       this.pendingRequests.set(id, {
@@ -148,25 +142,19 @@ export abstract class RpcClient {
         timeout,
       });
 
-      const message = JSON.stringify({
+      const request: JsonRpcRequest = {
+        jsonrpc: JSONRPC_VERSION,
+        method,
+        params,
         id,
-        type: 'request',
-        path,
-        data: params,
-      });
+      };
 
-      this.sendMessage(message);
+      this.sendMessage(JSON.stringify(request));
     });
   }
 
-  /**
-   * Call a method on the server that returns a stream of data.
-   * @param path
-   * @param params
-   * @param options
-   */
   streamCall<TParams = unknown, TChunk = unknown>(
-    path: string,
+    method: string,
     params: TParams,
     options: {
       onChunk: StreamCallback<TChunk>;
@@ -175,11 +163,12 @@ export abstract class RpcClient {
     }
   ) {
     const id = this.generateMessageId();
+
     return new Promise((resolve, reject) => {
       const timeout = setTimeout(
         () => {
           this.pendingRequests.delete(id);
-          reject(new Error(`Request timeout: ${path}`));
+          reject(new Error(`Request timeout: ${method}`));
         },
         this.options.streamTimeout ? this.options.streamTimeout : Infinity
       );
@@ -193,14 +182,15 @@ export abstract class RpcClient {
         onError: options.onError,
       });
 
-      const message = JSON.stringify({
+      const request: JsonRpcRequest & { __stream__: boolean } = {
+        jsonrpc: JSONRPC_VERSION,
+        method,
+        params,
         id,
-        type: 'request',
-        path,
-        data: { ...params, __stream__: true },
-      });
+        __stream__: true,
+      };
 
-      this.sendMessage(message);
+      this.sendMessage(JSON.stringify(request));
     });
   }
 

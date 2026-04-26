@@ -1,5 +1,5 @@
 import type { IChatParams, IProviderParams } from '@/models/Model';
-import { EnumRpcMessage } from 'code-assist-rpc';
+import { EnumRpcMessage } from 'code-assist-shared';
 import { RpcMock } from './rpc-mock';
 import type { IChunk } from '@/types';
 import { WebviewRpcClient } from '@/lib/WebviewRpcClient';
@@ -74,7 +74,7 @@ class ChatRpcClient {
     if (!this.rpcClient) {
       throw new Error('RPC client not initialized. model:' + params.model);
     }
-    return this.rpcClient.call(EnumRpcMessage.Summary, params);
+    return this.rpcClient.call(EnumRpcMessage.Chat, params);
   }
 }
 

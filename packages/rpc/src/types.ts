@@ -1,66 +1,27 @@
-import { IChannel } from "./RpcServer";
-
-export type RpcMessageType = 'request' | 'response' | 'stream' | 'error' | 'complete';
-
-export interface RpcMessage<T = unknown> {
+export interface JsonRpcRequest<T = unknown> {
+  jsonrpc: "2.0";
+  method: string;
+  params?: T;
   id: string;
-  type: RpcMessageType;
-  path?: string;
-  data?: T;
-  error?: {
-    code: number;
-    message: string;
-    data?: unknown;
-  };
+  __stream__?: boolean;
 }
 
-export interface RpcRequest<T = unknown> extends RpcMessage<T> {
-  type: 'request';
-  path: string;
+export interface JsonRpcResponse<T = unknown> {
+  jsonrpc: "2.0";
+  result?: T;
+  error?: JsonRpcError;
+  id: string;
 }
 
-export interface RpcResponse<T = unknown> extends RpcMessage<T> {
-  type: 'response';
+export interface JsonRpcError {
+  code: number;
+  message: string;
+  data?: unknown;
 }
-
-export interface RpcStreamChunk<T = unknown> extends RpcMessage<T> {
-  type: 'stream';
-  chunkIndex: number;
-  isLast: boolean;
-}
-
-export interface RpcError extends RpcMessage {
-  type: 'error';
-  error: {
-    code: number;
-    message: string;
-    data?: unknown;
-  };
-}
-
-export interface RpcComplete extends RpcMessage {
-  type: 'complete';
-}
-
-export type StreamCallback<T> = (chunk: T) => void;
-export type CompleteCallback = () => void;``
-export type ErrorCallback = (error: Error) => void;
-
-export interface RpcHandler<TParams = unknown, TResult = unknown> {
-  (params?: TParams): Promise<TResult> | TResult;
-}
-
-export interface RpcStreamHandler<TParams = any, TChunk = any> {
-  (
-    stream: IChannel<TChunk>,
-    params?: TParams,
-  ): Promise<void> | void;
-}
-
 
 export interface RpcClientOptions {
   timeout?: number;
-  streamTimeout ?: number;
+  streamTimeout?: number;
   debug?: boolean;
 }
 
@@ -75,4 +36,25 @@ export interface ISender {
 export interface IReceiver {
   onDidReceiveMessage?: (message: any) => void;
   addEventListener?: (event: string, callback: (message: any) => void) => void;
+}
+
+export interface IChannel<T> {
+  write: (chunk: T) => void;
+  complete: () => void;
+  error: (error: Error) => void;
+}
+
+export type StreamCallback<T> = (chunk: T) => void;
+export type CompleteCallback = () => void;
+export type ErrorCallback = (error: Error) => void;
+
+export interface RpcHandler<TParams = unknown, TResult = unknown> {
+  (params?: TParams): Promise<TResult> | TResult;
+}
+
+export interface RpcStreamHandler<TParams = any, TChunk = any> {
+  (
+    stream: IChannel<TChunk>,
+    params?: TParams,
+  ): Promise<void> | void;
 }

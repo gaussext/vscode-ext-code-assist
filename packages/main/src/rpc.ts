@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { EnumRpcMessage } from 'code-assist-rpc';
+import { EnumRpcMessage } from 'code-assist-shared';
 import { streamMessageHandler, stopChatHandler, modelsHandler, summaryHandler } from './controllers/ChatController';
 import { VscodeRpcServer } from './lib/VscodeRpcServer';
 
@@ -8,6 +8,6 @@ export function createRpc(webview: vscode.Webview) {
   rpcServer.registerHandler(EnumRpcMessage.Stream, streamMessageHandler);
   rpcServer.registerHandler(EnumRpcMessage.Stop, stopChatHandler);
   rpcServer.registerHandler(EnumRpcMessage.Models, modelsHandler);
-  rpcServer.registerHandler(EnumRpcMessage.Summary, summaryHandler);
+  rpcServer.registerHandler(EnumRpcMessage.Chat, summaryHandler);
   return rpcServer;
 }
