@@ -9,8 +9,6 @@ Class euismod maecenas sed ridiculus sociis placerat porttitor.
 Parturient erat luctus vehicula ridiculus arcu conubia tempus. 
 Tempus in diam non malesuada penatibus hendrerit ultrices.`;
   static content = TEST;
-  static abortController = new AbortController();
-
   static async loadContent() {
     const TEST = await import('./TEST.md?raw');
     this.content = TEST.default;
@@ -56,21 +54,22 @@ Tempus in diam non malesuada penatibus hendrerit ultrices.`;
     });
   }
 
-  static mockChatStream(): ReadableStream<IChatChunk> {
-    this.abortController = new AbortController();
+  static mockChatStream(signal?: AbortSignal): ReadableStream<IChatChunk> {
+    const abortController = signal ? null : new AbortController();
+    const effectiveSignal = signal || abortController?.signal;
     return new ReadableStream<IChatChunk>({
       start: async (controller) => {
-        await this.mockReasoningStream(controller);
-        await this.mockContentStream(controller);
+        await this.mockReasoningStream(controller, effectiveSignal);
+        await this.mockContentStream(controller, effectiveSignal);
         controller.close();
       },
     });
   }
 
-  static async mockReasoningStream(controller) {
+  static async mockReasoningStream(controller, signal?: AbortSignal) {
     for (const char of this.reasoning) {
       await sleep(0);
-      if (this.abortController.signal.aborted) {
+      if (signal?.aborted) {
         controller.close();
         return;
       }
@@ -78,10 +77,10 @@ Tempus in diam non malesuada penatibus hendrerit ultrices.`;
     }
   }
 
-  static async mockContentStream(controller) {
+  static async mockContentStream(controller, signal?: AbortSignal) {
     for (const char of this.content) {
       await sleep(0);
-      if (this.abortController.signal.aborted) {
+      if (signal?.aborted) {
         controller.close();
         return;
       }
@@ -90,6 +89,5 @@ Tempus in diam non malesuada penatibus hendrerit ultrices.`;
   }
 
   static abort() {
-    this.abortController.abort();
   }
 }

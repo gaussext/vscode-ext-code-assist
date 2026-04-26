@@ -6,10 +6,12 @@ const enum RpcInternalType {
   Stream = '__stream__',
   Complete = '__complete__',
   Error = '__error__',
+  Cancel = '__cancel__',
 }
 
 export abstract class RpcServer {
   private handlers: Map<string, RpcHandler> = new Map();
+  private requestControllers: Map<string, AbortController> = new Map();
 
   abstract sendMessage(message: string): void;
 
@@ -27,11 +29,28 @@ export abstract class RpcServer {
   async handleMessage(message: string): Promise<string | null> {
     try {
       const params = JSON.parse(message);
+
+      if (params.__type__ === RpcInternalType.Cancel) {
+        this.handleCancel(params.id);
+        return null;
+      }
+
       const resp = await this.handleJsonRpcRequest(params);
       return JSON.stringify(resp);
     } catch (error) {
       this.log('error', 'RPC Server: Failed to parse message', error);
       return Promise.resolve(null);
+    }
+  }
+
+  private handleCancel(id: string): void {
+    const controller = this.requestControllers.get(id);
+    if (controller) {
+      this.log('info', 'Cancelling request', id);
+      controller.abort();
+      this.requestControllers.delete(id);
+      const completeMessage = this.completeStream(id);
+      this.sendMessage(JSON.stringify(completeMessage));
     }
   }
 
@@ -60,13 +79,16 @@ export abstract class RpcServer {
     }
 
     if (__stream__) {
-      return this.handleStreamRequest(id, handler, params);
-    } else {
-      return this.handleNormalRequest(id, handler, params);
+      this.handleStreamRequest(id, handler, params);
+      return Promise.resolve(null);
     }
+
+    return this.handleNormalRequest(id, handler, params);
   }
 
   private async handleNormalRequest(id: string, handler: RpcHandler, params: unknown): Promise<JsonRpcResponse | null> {
+    const controller = new AbortController();
+    this.requestControllers.set(id, controller);
     try {
       const result = await handler(params);
       this.log('info', 'handleJsonRpcRequest result', result);
@@ -78,16 +100,20 @@ export abstract class RpcServer {
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       return this.createJsonRpcErrorResponse(id, -32603, errorMessage);
+    } finally {
+      this.requestControllers.delete(id);
     }
   }
 
-  private async handleStreamRequest(id: string, handler: RpcHandler, params: unknown): Promise<JsonRpcResponse | null> {
+  private async handleStreamRequest(id: string, handler: RpcHandler, params: unknown): Promise<void> {
+    const controller = new AbortController();
+    this.requestControllers.set(id, controller);
     try {
       let stream = await handler(params);
       this.log('info', 'handleStreamRequest stream created', stream);
       if (stream instanceof ReadableStream) {
         const reader = (stream as ReadableStream).getReader();
-        while (true) {
+        while (!controller.signal.aborted) {
           const { value, done } = await reader.read();
           if (done) {
             this.log('info', 'Stream end', value);
@@ -101,13 +127,20 @@ export abstract class RpcServer {
         }
       } else {
         this.log('error', 'Stream does not have getReader method');
+        const message = this.writeStreamChunk(id, stream);
+        this.sendMessage(JSON.stringify(message));
       }
     } catch (err) {
-      this.log('error', 'Stream request error', err);
-      const message = this.errorStream(id, err as Error);
-      this.sendMessage(JSON.stringify(message));
+      if (controller.signal.aborted) {
+        this.log('info', 'Stream request cancelled', id);
+      } else {
+        this.log('error', 'Stream request error', err);
+        const message = this.errorStream(id, err as Error);
+        this.sendMessage(JSON.stringify(message));
+      }
+    } finally {
+      this.requestControllers.delete(id);
     }
-    return Promise.resolve(null);
   }
 
   writeStreamChunk(id: string, chunk: unknown): JsonRpcInternal {

@@ -1,19 +1,10 @@
 <template>
-  <div class="chat-container" :class="{'has-code': promptCode}">
+  <div class="chat-container" :class="{ 'has-code': promptCode }">
     <ChatHeader :messages="currentMessageList" :loading="loading" @update:conversationId="handleConversationChange" />
-    <ChatBody
-      :messages="currentMessageList"
-      :promptCode="promptCode"
-      :currentMessage="currentMessage"
-      :loading="loading"
-    />
-    <ChatFooter
-      v-model="prompt"
-      :promptCode="promptCode"
-      :loading="loading"
-      @code="onCodeButtonCLick"
-      @send="onSendButtonClick"
-    />
+    <ChatBody :messages="currentMessageList" :promptCode="promptCode" :currentMessage="currentMessage"
+      :loading="loading" />
+    <ChatFooter v-model="prompt" :promptCode="promptCode" :loading="loading" @code="onCodeButtonCLick"
+      @send="onSendButtonClick" />
   </div>
 </template>
 
@@ -42,6 +33,7 @@ const currentMessageList = ref<ChatMessage[]>([]);
 const loading = ref(false);
 const prompt = ref('');
 const promptCode = ref('');
+let abortController: AbortController | null = null;
 
 // 加载消息
 const loadMessages = async () => {
@@ -95,6 +87,7 @@ const handleWindowMessage = (e: MessageEvent) => {
 let queueRender: QueueRender | null = null;
 
 onUnmounted(() => {
+  abortController?.abort();
   queueRender?.dispose();
 });
 
@@ -120,6 +113,7 @@ const enqueue = async (value: IChatChunkMerge) => {
 // 等待 AI 回复
 const handleChatRequest = async (messages: ChatMessage[]) => {
   loading.value = true;
+  abortController = new AbortController();
   queueRender = new QueueRender();
   // 获取当前模型参数
   const { baseURL, apiKey, model } = settingStore.getModelParams(settingStore.currentModelHash);
@@ -131,15 +125,18 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
   const startTime = Date.now();
   let loadTime = 0;
   try {
-    const stream = chatService.chatStream({
-      baseURL,
-      apiKey,
-      model,
-      messages: messages.map((item) => ({ role: item.role, content: item.content })),
-    });
+    const stream = chatService.chatStream(
+      {
+        baseURL,
+        apiKey,
+        model,
+        messages: messages.map((item) => ({ role: item.role, content: item.content })),
+      },
+      abortController.signal
+    );
     const reader = stream.getReader();
     while (true) {
-      const { done, value } = await reader.read();      
+      const { done, value } = await reader.read();
       if (!loadTime) {
         loadTime = Date.now();
       }
@@ -167,15 +164,13 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
       loadTime = Date.now();
     }
     const endTime = Date.now();
-    enqueue({
-      conversationId: currentConversationId,
-      type: 'error',
-      data: 'Request failed: ' + error.message,
-      startTime,
-      loadTime,
-      endTime,
-    });
     enqueue({ conversationId: currentConversationId, type: 'end', startTime, loadTime, endTime });
+    // 如果是主动取消，则不进行错误提示
+    if (error.name === 'AbortError') {
+      console.log('Chat request aborted');
+    } else {
+      console.error('Chat request error', error);
+    }
   }
 };
 
@@ -231,12 +226,10 @@ const handleSummary = (conversationId: string, messages: ChatMessage[]) => {
       baseURL,
       apiKey,
       model,
-      messages: 
-      [
+      messages: [
         ...messages.map((item) => ({ role: item.role, content: item.content })),
-        { role: 'user', content: '请用20字以内总结以上对话主题，作为对话标题直接返回，不需要任何标点和修饰' }
-      ]
-      ,
+        { role: 'user', content: '请用20字以内总结以上对话主题，作为对话标题直接返回，不需要任何标点和修饰' },
+      ],
     })
     .then((result) => {
       const summary = result?.choices?.[0]?.message?.content || '';
@@ -368,9 +361,11 @@ ${code}
 };
 
 const onCodeButtonCLick = async () => {
-  promptCode.value = prompt.value ? `\`\`\`
+  promptCode.value = prompt.value
+    ? `\`\`\`
 ${prompt.value} 
-\`\`\`` : '';
+\`\`\``
+    : '';
   prompt.value = '';
 };
 
@@ -381,7 +376,7 @@ const onSendButtonClick = async () => {
 ${promptCode.value}
 `;
   if (loading.value) {
-    await chatService.stop();
+    abortController?.abort();
     loading.value = false;
     return;
   }

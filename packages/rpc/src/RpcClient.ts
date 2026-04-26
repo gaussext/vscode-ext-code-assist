@@ -13,6 +13,7 @@ const enum RpcInternalType {
   Stream = '__stream__',
   Complete = '__complete__',
   Error = '__error__',
+  Cancel = '__cancel__',
 }
 
 export abstract class RpcClient {
@@ -96,22 +97,33 @@ export abstract class RpcClient {
     }
   }
 
-  call<TParams = unknown, TResult = unknown>(method: string, params: TParams, stream?: false): Promise<TResult>;
-  call<TParams = unknown, TChunk = unknown>(method: string, params: TParams, stream: true): ReadableStream<TChunk>;
+  private sendCancelMessage(id: string): void {
+    const cancelMsg = { id, __type__: RpcInternalType.Cancel };
+    this.sendMessage(JSON.stringify(cancelMsg));
+  }
+
+  call<TParams = unknown, TResult = unknown>(method: string, params: TParams, stream?: false, signal?: AbortSignal): Promise<TResult>;
+  call<TParams = unknown, TChunk = unknown>(method: string, params: TParams, stream: true, signal?: AbortSignal): ReadableStream<TChunk>;
   call<TParams = unknown, TResult = unknown>(
     method: string,
     params: TParams,
-    stream?: boolean
+    stream?: boolean,
+    signal?: AbortSignal
   ): Promise<TResult> | ReadableStream<TResult> {
     const id = this.generateMessageId();
 
     if (stream) {
       return new ReadableStream<TResult>({
         start: (controller) => {
+          if (signal?.aborted) {
+            controller.error(new DOMException('Aborted', 'AbortError'));
+            return;
+          }
+
           const timeout = setTimeout(() => {
             this.pendingRequests.delete(id);
             controller.error(new Error(`Request timeout: ${method}`));
-          }, this.options.streamTimeout ?? 600000);
+          }, this.options.streamTimeout);
 
           this.pendingRequests.set(id, {
             resolve: () => {},
@@ -129,14 +141,33 @@ export abstract class RpcClient {
           };
 
           this.sendMessage(JSON.stringify(request));
+
+          if (signal) {
+            signal.addEventListener('abort', () => {
+              const pending = this.pendingRequests.get(id);
+              if (pending) {
+                clearTimeout(pending.timeout);
+                this.pendingRequests.delete(id);
+                controller.close();
+                controller.error(new DOMException('Aborted', 'AbortError'));
+                this.sendCancelMessage(id);
+              }
+            }, { once: true });
+          }
         },
         cancel: () => {
           this.pendingRequests.delete(id);
+          this.sendCancelMessage(id);
         },
       });
     }
 
     return new Promise<TResult>((resolve, reject) => {
+      if (signal?.aborted) {
+        reject(new DOMException('Aborted', 'AbortError'));
+        return;
+      }
+
       const timeout = setTimeout(() => {
         this.pendingRequests.delete(id);
         reject(new Error(`Request timeout: ${method}`));
@@ -156,6 +187,18 @@ export abstract class RpcClient {
       };
 
       this.sendMessage(JSON.stringify(request));
+
+      if (signal) {
+        signal.addEventListener('abort', () => {
+          const pending = this.pendingRequests.get(id);
+          if (pending) {
+            clearTimeout(pending.timeout);
+            this.pendingRequests.delete(id);
+            reject(new DOMException('Aborted', 'AbortError'));
+            this.sendCancelMessage(id);
+          }
+        }, { once: true });
+      }
     });
   }
 

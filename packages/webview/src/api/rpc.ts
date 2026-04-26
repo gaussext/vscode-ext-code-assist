@@ -28,9 +28,9 @@ class ChatRpcClient {
     return this.rpcClient.call(EnumRpcMessage.Chat, params);
   }
 
-  chatStream(params: IChatParams): ReadableStream<IChatChunk> {
+  chatStream(params: IChatParams, signal?: AbortSignal): ReadableStream<IChatChunk> {
     if (!this.rpcClient) {
-      return RpcMock.mockChatStream();
+      return RpcMock.mockChatStream(signal);
     }
     const { baseURL, apiKey, model } = params;
     if (!baseURL) {
@@ -42,7 +42,7 @@ class ChatRpcClient {
     if (!model) {
       throw new Error('model required');
     }
-    const rawStream = this.rpcClient.call(EnumRpcMessage.ChatStream, params, true);
+    const rawStream = this.rpcClient.call(EnumRpcMessage.ChatStream, params, true, signal);
     return rawStream.pipeThrough(
       new TransformStream<any, IChatChunk>({
         transform(chunk, controller) {
