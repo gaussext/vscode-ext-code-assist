@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
 import log from 'loglevel';
-import { IChatParams, StreamCallbacks } from '../models';
+import { IChatParams } from 'code-assist-shared';
 
 export class OpenAIService {
   private client: OpenAI | null = null;
@@ -21,62 +21,25 @@ export class OpenAIService {
     return this.client;
   }
 
-  stop() {
-    if (this.controller) {
-      this.controller.abort();
-      this.controller = null;
-    }
-  }
-
-  async chat(params: IChatParams, callbacks: StreamCallbacks) {
-    this.controller = new AbortController();
+  async models(params: IChatParams) {
+    log.info('models', params);
     const { apiKey, baseURL } = params;
-    log.info('chat', params);
     try {
       const client = this.getClient(apiKey, baseURL);
-      const stream = (await client.chat.completions.create(
-        {
-          model: params.model,
-          messages: params.messages,
-          stream: true,
-        },
-        {
-          signal: this.controller.signal,
-        }
-      )) as any;
-      for await (const chunk of stream) {
-        const reasoning = chunk.choices[0]?.delta?.reasoning || chunk.choices[0]?.delta?.reasoning_content || '';
-        if (reasoning) {
-          callbacks.onChunk({ type: 'reasoning', data: reasoning });
-        }
-        const content = chunk.choices[0]?.delta?.content || '';
-        if (content) {
-          callbacks.onChunk({ type: 'content', data: content });
-        }
-      }
-      callbacks.onComplete();
+      return client.models.list();
     } catch (error: any) {
-      if (error.name === 'AbortError') {
-        log.info('OpenAI chat aborted');
-      } else {
-        log.error('OpenAI chat error:', error);
-        callbacks.onError(new Error(`Error: ${error.message}`));
-        callbacks.onComplete();
-      }
+      return 'OpenAI models error: ' + error.message;
     }
   }
 
-  async summary(params: IChatParams) {
-    log.info('summary', params);
+  async chat(params: IChatParams) {
+    log.info('chat', params);
     const { apiKey, baseURL } = params;
     try {
       const client = this.getClient(apiKey, baseURL);
       return client.chat.completions.create({
         model: params.model,
-        messages: [
-          ...params.messages,
-          { role: 'user', content: '请用20字以内总结以上对话主题，作为对话标题直接返回，不需要任何标点和修饰' },
-        ],
+        messages: params.messages,
         stream: false,
       });
     } catch (error: any) {
@@ -84,15 +47,27 @@ export class OpenAIService {
     }
   }
 
-  async models(params: IChatParams) {
-    log.info('models', params);
+  async chatStream(params: IChatParams) {
+    this.controller = new AbortController();
     const { apiKey, baseURL } = params;
-    try {
-      const client = this.getClient(apiKey, baseURL);
-      const list = await client.models.list();
-      return JSON.stringify(list);
-    } catch (error: any) {
-      return 'OpenAI models error: ' + error.message;
+    log.info('stream', params);
+    const client = this.getClient(apiKey, baseURL);
+    return client.chat.completions.create(
+      {
+        model: params.model,
+        messages: params.messages,
+        stream: true,
+      },
+      {
+        signal: this.controller.signal,
+      }
+    );
+  }
+
+  stop(params: any) {
+    if (this.controller) {
+      this.controller.abort();
+      this.controller = null;
     }
   }
 }

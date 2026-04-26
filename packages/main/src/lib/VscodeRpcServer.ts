@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { RpcServer } from 'code-assist-rpc';
-import type { IReceiver, ISender, RpcServerOptions } from 'code-assist-rpc';
+import type { RpcServerOptions } from 'code-assist-rpc';
+import { IReceiver, ISender } from 'code-assist-shared';
 
 export class VscodeRpcServer extends RpcServer {
   private sender: ISender;
