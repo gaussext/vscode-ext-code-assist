@@ -13,7 +13,7 @@
         <h2 class="model-setting-title">Model</h2>
       </div>
       <div class="model-setting-body">
-        <div class="form-section">
+        <div class="model-setting-item form-section">
           <label>Chat Model</label>
           <select v-model="currentModelHash" class="vscode-select">
             <option v-if="currentModels.length === 0" value="" disabled>Select a model</option>
@@ -23,7 +23,7 @@
             </optgroup>
           </select>
         </div>
-        <div class="form-section">
+        <div class="model-setting-item form-section">
           <label>Summary Model</label>
           <select v-model="summaryModelHash" class="vscode-select">
             <option v-if="currentModels.length === 0" value="" disabled>Select a model</option>
@@ -204,8 +204,18 @@ const onConfirmClick = () => {
 
   .model-setting-title,
   .provider-setting-title {
+    border-left: 2px solid var(--vscode-pickerGroup-border);
+    padding-left: 0.5em;
     font-size: 14px;
     font-weight: 500;
+  }
+}
+
+.model-setting-body {
+  display: flex;
+  gap: 8px;
+  .model-setting-item{
+    flex: 1;
   }
 }
 
@@ -294,8 +304,7 @@ const onConfirmClick = () => {
 .setting-footer {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  padding: 0 8px;
+  gap: 8px;
   margin-top: 12px;
 }
 </style>
