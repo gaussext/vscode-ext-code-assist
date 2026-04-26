@@ -1,8 +1,5 @@
 import type {
   RpcClientOptions,
-  StreamCallback,
-  CompleteCallback,
-  ErrorCallback,
   JsonRpcRequest,
   JsonRpcResponse,
 } from './types';
@@ -11,9 +8,7 @@ interface IPromiseChannel {
   resolve: (value: unknown) => void;
   reject: (error: Error) => void;
   timeout: ReturnType<typeof setTimeout>;
-  onChunk?: StreamCallback<unknown>;
-  onComplete?: CompleteCallback;
-  onError?: ErrorCallback;
+  streamController?: ReadableStreamDefaultController<unknown>;
 }
 
 const JSONRPC_VERSION = "2.0";
@@ -91,11 +86,7 @@ export abstract class RpcClient {
     this.pendingRequests.delete(msg.id);
 
     if (msg.error) {
-      if (pending.onError) {
-        pending.onError(new Error(msg.error.message));
-      } else {
-        pending.reject(new Error(msg.error.message));
-      }
+      pending.reject(new Error(msg.error.message));
       return;
     }
 
@@ -108,27 +99,68 @@ export abstract class RpcClient {
     if (!pending) return;
 
     if (msg.__type__ === RpcInternalType.Stream) {
-      pending.onChunk?.(msg.data);
+      pending.streamController?.enqueue(msg.data);
     } else if (msg.__type__ === RpcInternalType.Complete) {
+      clearTimeout(pending.timeout);
       this.pendingRequests.delete(id);
-      pending.onComplete?.();
-      pending.resolve(undefined);
+      pending.streamController?.close();
     } else if (msg.__type__ === RpcInternalType.Error) {
       clearTimeout(pending.timeout);
       this.pendingRequests.delete(id);
-      if (pending.onError) {
-        pending.onError(new Error(msg.error.message));
-      } else {
-        pending.reject(new Error(msg.error.message));
-      }
+      pending.streamController?.error(new Error(msg.error.message));
     }
   }
 
   call<TParams = unknown, TResult = unknown>(
     method: string,
-    params: TParams
-  ): Promise<TResult> {
+    params: TParams,
+    stream?: false
+  ): Promise<TResult>;
+  call<TParams = unknown, TChunk = unknown>(
+    method: string,
+    params: TParams,
+    stream: true
+  ): ReadableStream<TChunk>;
+  call<TParams = unknown, TResult = unknown>(
+    method: string,
+    params: TParams,
+    stream?: boolean
+  ): Promise<TResult> | ReadableStream<TResult> {
     const id = this.generateMessageId();
+
+    if (stream) {
+      return new ReadableStream<TResult>({
+        start: (controller) => {
+          const timeout = setTimeout(
+            () => {
+              this.pendingRequests.delete(id);
+              controller.error(new Error(`Request timeout: ${method}`));
+            },
+            this.options.streamTimeout ?? 600000
+          );
+
+          this.pendingRequests.set(id, {
+            resolve: () => {},
+            reject: (error) => controller.error(error),
+            timeout,
+            streamController: controller as ReadableStreamDefaultController<unknown>,
+          });
+
+          const request: JsonRpcRequest & { __stream__: boolean } = {
+            jsonrpc: JSONRPC_VERSION,
+            method,
+            params,
+            id,
+            __stream__: true,
+          };
+
+          this.sendMessage(JSON.stringify(request));
+        },
+        cancel: () => {
+          this.pendingRequests.delete(id);
+        },
+      });
+    }
 
     return new Promise<TResult>((resolve, reject) => {
       const timeout = setTimeout(() => {
@@ -147,47 +179,6 @@ export abstract class RpcClient {
         method,
         params,
         id,
-      };
-
-      this.sendMessage(JSON.stringify(request));
-    });
-  }
-
-  streamCall<TParams = unknown, TChunk = unknown>(
-    method: string,
-    params: TParams,
-    options: {
-      onChunk: StreamCallback<TChunk>;
-      onComplete: CompleteCallback;
-      onError: ErrorCallback;
-    }
-  ) {
-    const id = this.generateMessageId();
-
-    return new Promise((resolve, reject) => {
-      const timeout = setTimeout(
-        () => {
-          this.pendingRequests.delete(id);
-          reject(new Error(`Request timeout: ${method}`));
-        },
-        this.options.streamTimeout ? this.options.streamTimeout : Infinity
-      );
-
-      this.pendingRequests.set(id, {
-        resolve,
-        reject,
-        timeout,
-        onChunk: options.onChunk as StreamCallback<unknown>,
-        onComplete: options.onComplete,
-        onError: options.onError,
-      });
-
-      const request: JsonRpcRequest & { __stream__: boolean } = {
-        jsonrpc: JSONRPC_VERSION,
-        method,
-        params,
-        id,
-        __stream__: true,
       };
 
       this.sendMessage(JSON.stringify(request));

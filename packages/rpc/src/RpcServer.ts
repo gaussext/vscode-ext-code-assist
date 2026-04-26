@@ -5,9 +5,6 @@ import type {
   JsonRpcRequest,
   JsonRpcResponse,
   IChannel,
-  StreamCallback,
-  CompleteCallback,
-  ErrorCallback,
 } from './types';
 
 const JSONRPC_VERSION = "2.0";
@@ -105,7 +102,7 @@ export abstract class RpcServer {
     const streamHandler = handler as RpcStreamHandler;
     const streamContext: IChannel<unknown> = {
       write: (chunk: unknown) => {
-        const message = this.writeStreamChunk(id, chunk, 0, false);
+        const message = this.writeStreamChunk(id, chunk);
         this.sendMessage(message);
       },
       complete: () => {
@@ -133,13 +130,11 @@ export abstract class RpcServer {
     return Promise.resolve(null);
   }
 
-  writeStreamChunk(id: string, chunk: unknown, chunkIndex: number, isLast: boolean): string {
+  writeStreamChunk(id: string, chunk: unknown): string {
     const streamChunk = {
       id,
       __type__: RpcInternalType.Stream,
       data: chunk,
-      chunkIndex,
-      isLast,
     };
     return JSON.stringify(streamChunk);
   }

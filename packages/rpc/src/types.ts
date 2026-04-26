@@ -29,24 +29,11 @@ export interface RpcServerOptions {
   debug?: boolean;
 }
 
-export interface ISender {
-  postMessage: (message: string) => void;
-}
-
-export interface IReceiver {
-  onDidReceiveMessage?: (message: any) => void;
-  addEventListener?: (event: string, callback: (message: any) => void) => void;
-}
-
 export interface IChannel<T> {
   write: (chunk: T) => void;
   complete: () => void;
   error: (error: Error) => void;
 }
-
-export type StreamCallback<T> = (chunk: T) => void;
-export type CompleteCallback = () => void;
-export type ErrorCallback = (error: Error) => void;
 
 export interface RpcHandler<TParams = unknown, TResult = unknown> {
   (params?: TParams): Promise<TResult> | TResult;
