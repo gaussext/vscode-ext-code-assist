@@ -9,6 +9,7 @@ body {
   margin: 0;
   padding: 0 8px;
   height: 100vh;
+
 }
 
 #app {
@@ -18,6 +19,19 @@ body {
   --chat-prompt-bottom: var(--chat-footer-height);
   --chat-prompt-height: 120px;
   --chat-body-height: calc(100vh - var(--app-header-height) - var(--chat-footer-height) - 32px);
+}
+
+.animation-rotate {
+  animation: rotate 1s linear infinite;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 .header-icon-group {
@@ -54,6 +68,10 @@ body {
 
 .message-icon {
   cursor: pointer;
+}
+
+.el-collapse .el-collapse-item {
+  --el-collapse-header-height: 36px;
 }
 
 .el-collapse-item .el-collapse-item__header,

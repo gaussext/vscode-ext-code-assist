@@ -1,0 +1,135 @@
+<template>
+  <div class="provider-item">
+    <el-icon v-if="showDelete" class="hover-visible icon-delete" @click="$emit('delete')">
+      <Delete />
+    </el-icon>
+    <div class="form-container">
+      <div class="form-section">
+        <label>Base URL</label>
+        <input v-model="provider.baseURL" class="vscode-input" placeholder="https://api.example.com/v1" />
+      </div>
+      <div class="form-section">
+        <label>API Key</label>
+        <input v-model="provider.apiKey" class="vscode-input" type="password" placeholder="sk-..." />
+      </div>
+    </div>
+    <div class="preview-container">
+      <div class="form-section">
+        <label style="display: flex; align-items: center; gap: 8px">
+          <span>Models</span>
+          <el-icon v-if="loading" class="animation-rotate"><Loading /></el-icon>
+          <el-icon v-else style="cursor: pointer" @click="getModels(provider)">
+            <Refresh></Refresh>
+          </el-icon>
+        </label>
+        <div class="model-container">
+          <div v-for="model in provider.models" :key="model.id" class="model-item">{{ model.id }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script lang="ts" setup>
+import { chatService } from '@/api';
+import type { Model } from '@/models/Model';
+import type { Provider } from '@/models/Provider';
+import { sha256 } from '@/utils/hash';
+import { Delete, Loading, Refresh } from '@element-plus/icons-vue';
+import { ref } from 'vue';
+
+const props = defineProps<{
+  provider: Provider;
+  showDelete: boolean;
+}>();
+
+defineEmits<{
+  delete: [];
+}>();
+
+const loading = ref(false);
+const getModels = async (provider: Provider) => {
+  loading.value = true;
+  try {
+    const res = await chatService.models({
+      baseURL: provider.baseURL,
+      apiKey: provider.apiKey,
+    });
+    const models = res.body.data || ([] as Model[]);
+    const modelsWithHash: Model[] = [];
+    for (const model of models) {
+      const hash = await sha256(provider.baseURL + provider.apiKey + model.id);
+      modelsWithHash.push({
+        id: model.id,
+        hash,
+      });
+    }
+    provider.models = modelsWithHash;
+  } catch (error) {
+    console.error(error);
+  } finally {
+    loading.value = false;
+  }
+};
+
+</script>
+
+<style lang="scss" scoped>
+.provider-item {
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid var(--vscode-pickerGroup-border);
+  margin-bottom: 12px;
+  position: relative;
+  display: flex;
+  gap: 8px;
+
+  .form-container {
+    width: 320px;
+  }
+
+  .preview-container {
+    flex: 1;
+  }
+
+  .hover-visible {
+    visibility: hidden;
+  }
+
+  &:hover .hover-visible {
+    visibility: visible;
+  }
+}
+
+.icon-delete {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.form-section {
+  margin-bottom: 16px;
+}
+
+.form-section label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+.model-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.model-item {
+  padding: 4px 8px;
+  font-size: 12px;
+  border: 1px solid #444;
+  border-radius: 4px;
+  background-color: #272822;
+}
+</style>

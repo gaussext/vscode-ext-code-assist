@@ -84,10 +84,4 @@ onMounted(() => {
     height: calc(var(--chat-body-height) - var(--chat-prompt-height));
   }
 }
-
-.messages-area  .messgae-user .markdown-content {
-  background-color: var(--vscode-editor-background);
-  padding: 8px;
-  border-radius: 8px;
-}
 </style>
