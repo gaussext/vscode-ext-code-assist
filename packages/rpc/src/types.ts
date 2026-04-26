@@ -15,6 +15,13 @@ export interface JsonRpcResponse<T = unknown> {
   error?: JsonRpcError;
 }
 
+export interface JsonRpcInternal<T = unknown> {
+  id: string;
+  __type__?: string;
+  data?: T;
+  error?: JsonRpcError;
+}
+
 export interface JsonRpcError {
   code: number;
   message: string;
@@ -32,9 +39,5 @@ export interface RpcServerOptions {
 }
 
 export interface RpcHandler<TParams = any, TResult = any> {
-  (params?: TParams): Promise<TResult> | TResult | void;
-}
-
-export interface RpcStreamHandler<TParams = any, TChunk = any> {
-  (params?: TParams): Promise<ReadableStream<TChunk>> | ReadableStream<TChunk> | void;
+  (params?: TParams): Promise<ReadableStream<TResult>> | ReadableStream<TResult> | Promise<TResult> | TResult | void;
 }

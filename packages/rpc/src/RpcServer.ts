@@ -1,5 +1,5 @@
 import Stream from 'stream';
-import type { RpcServerOptions, RpcHandler, RpcStreamHandler, JsonRpcRequest, JsonRpcResponse } from './types';
+import type { RpcServerOptions, RpcHandler, JsonRpcRequest, JsonRpcResponse, JsonRpcInternal } from './types';
 
 const JSONRPC_VERSION = '2.0';
 
@@ -10,7 +10,7 @@ const enum RpcInternalType {
 }
 
 export abstract class RpcServer {
-  private handlers: Map<string, RpcStreamHandler | RpcHandler> = new Map();
+  private handlers: Map<string,  RpcHandler> = new Map();
   private options: RpcServerOptions;
 
   constructor(options: RpcServerOptions = {}) {
@@ -21,7 +21,7 @@ export abstract class RpcServer {
 
   abstract log(level: string, ...args: unknown[]): void;
 
-  registerHandler(method: string, handler: RpcStreamHandler | RpcHandler) {
+  registerHandler(method: string, handler: RpcHandler) {
     this.log('info', 'registerHandler', method);
     this.handlers.set(method, handler);
   }
@@ -67,7 +67,7 @@ export abstract class RpcServer {
     }
 
     if (__stream__) {
-      return this.handleStreamRequest(id, handler as RpcStreamHandler, params);
+      return this.handleStreamRequest(id, handler, params);
     }
 
     return (async () => {
@@ -85,7 +85,7 @@ export abstract class RpcServer {
     })();
   }
 
-  private handleStreamRequest(id: string, handler: RpcStreamHandler, params: unknown): Promise<JsonRpcResponse | null> {
+  private handleStreamRequest(id: string, handler: RpcHandler, params: unknown): Promise<JsonRpcResponse | null> {
     try {
       const stream = handler(params);
       if (stream instanceof Stream) {
@@ -109,27 +109,24 @@ export abstract class RpcServer {
     return Promise.resolve(null);
   }
 
-  writeStreamChunk(id: string, chunk: unknown): JsonRpcResponse {
+  writeStreamChunk(id: string, chunk: unknown): JsonRpcInternal {
     return {
       id,
-      jsonrpc: JSONRPC_VERSION,
       __type__: RpcInternalType.Stream,
       data: chunk,
     };
   }
 
-  completeStream(id: string): JsonRpcResponse {
+  completeStream(id: string): JsonRpcInternal {
     return {
       id,
-      jsonrpc: JSONRPC_VERSION,
       __type__: RpcInternalType.Complete,
     };
   }
 
-  errorStream(id: string, error: Error): JsonRpcResponse {
+  errorStream(id: string, error: Error): JsonRpcInternal {
     return {
       id,
-      jsonrpc: JSONRPC_VERSION,
       __type__: RpcInternalType.Error,
       error: {
         code: -32603,
