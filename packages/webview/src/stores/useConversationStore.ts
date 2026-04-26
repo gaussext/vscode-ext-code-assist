@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import localforage from 'localforage';
-import { ChatConversation } from '@/models/Model';
 import { EnumStorageKey } from './constants';
+import { ChatConversation } from '@/models/Conversation';
 
 const storeConversations = localforage.createInstance({
   name: 'code-assist',

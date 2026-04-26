@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { ChatMessage } from '@/models/Model';
+import { ChatMessage } from '@/models/Message';
 import { onMounted, ref, watch } from 'vue';
 import MessageUser from './MessageUser.vue';
 import MessageBot from './MessageBot.vue';
@@ -83,11 +83,5 @@ onMounted(() => {
   &.has-code {
     height: calc(var(--chat-body-height) - var(--chat-prompt-height));
   }
-}
-
-.messages-area  .messgae-user .markdown-content {
-  background-color: var(--vscode-editor-background);
-  padding: 8px;
-  border-radius: 8px;
 }
 </style>

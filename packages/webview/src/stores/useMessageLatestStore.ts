@@ -1,5 +1,5 @@
+import { ChatMessage } from '@/models/Message';
 import { defineStore } from 'pinia';
-import { ChatMessage } from '@/models/Model';
 
 export const useMessageLatestStore = defineStore('message-latest', () => {
   const messageMap = new Map<string, ChatMessage>();

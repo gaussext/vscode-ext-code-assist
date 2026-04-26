@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import type { ChatMessage } from '@/models/Model';
+import type { ChatMessage } from '@/models/Message';
 import { useConversationStore } from '@/stores/useConversationStore';
 import { useMessageStore } from '@/stores/useMessageStore';
 import { Download, FolderAdd, FolderOpened, Setting } from '@element-plus/icons-vue';

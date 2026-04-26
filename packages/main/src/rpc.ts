@@ -1,13 +1,14 @@
 import * as vscode from 'vscode';
-import { EnumRpcMessage } from 'code-assist-rpc';
-import { streamMessageHandler, stopChatHandler, modelsHandler, summaryHandler } from './controllers/ChatController';
+import { EnumRpcMessage } from 'code-assist-shared';
 import { VscodeRpcServer } from './lib/VscodeRpcServer';
+import { OpenAIService } from './services/OpenAIService';
 
 export function createRpc(webview: vscode.Webview) {
-  const rpcServer = new VscodeRpcServer(webview, webview, { debug: true });
-  rpcServer.registerHandler(EnumRpcMessage.Stream, streamMessageHandler);
-  rpcServer.registerHandler(EnumRpcMessage.Stop, stopChatHandler);
-  rpcServer.registerHandler(EnumRpcMessage.Models, modelsHandler);
-  rpcServer.registerHandler(EnumRpcMessage.Summary, summaryHandler);
+  const rpcServer = new VscodeRpcServer(webview, webview);
+  const openaiService = new OpenAIService();
+  rpcServer.registerHandler(EnumRpcMessage.Models, openaiService.models.bind(openaiService));
+  rpcServer.registerHandler(EnumRpcMessage.Chat, openaiService.chat.bind(openaiService));
+  rpcServer.registerHandler(EnumRpcMessage.ChatStream, openaiService.chatStream.bind(openaiService));
+  rpcServer.registerHandler(EnumRpcMessage.Stop, openaiService.stop.bind(openaiService));
   return rpcServer;
 }

@@ -1,12 +1,12 @@
-import type { IMessage } from '@/types';
+import type { IChatChunkMerge } from '@/types';
 import { groupBy } from 'lodash';
 
 type Callback<T> = (result: T) => void;
 
 export class QueueRender {
-  queue: IMessage[] = [];
+  queue: IChatChunkMerge[] = [];
   timer: number = 0;
-  callback: Callback<IMessage> = null;
+  callback: Callback<IChatChunkMerge> = null;
   constructor() {
     this.loop();
   }
@@ -39,7 +39,7 @@ export class QueueRender {
     this.queue = [];
   }
 
-  output(list: IMessage[]) {
+  output(list: IChatChunkMerge[]) {
     let chunk = list[0];
     list.forEach((item, index) => {
       if (index > 0) {
@@ -49,7 +49,7 @@ export class QueueRender {
     this.callback(chunk);
   }
 
-  queueAsync<T extends IMessage>(result: T, callback: Callback<T>) {
+  queueAsync<T extends IChatChunkMerge>(result: T, callback: Callback<T>) {
     this.queue.push(result);
     this.callback = callback;
   }

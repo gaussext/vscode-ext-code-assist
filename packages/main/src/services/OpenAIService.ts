@@ -1,10 +1,9 @@
 import OpenAI from 'openai';
 import log from 'loglevel';
-import { IChatParams, StreamCallbacks } from '../models';
+import { IChatParams, IProviderParams } from 'code-assist-shared';
 
 export class OpenAIService {
   private client: OpenAI | null = null;
-  private controller: AbortController | null = null;
 
   private getClient(apiKey: string, baseURL?: string) {
     if (!baseURL) {
@@ -21,78 +20,66 @@ export class OpenAIService {
     return this.client;
   }
 
-  stop() {
-    if (this.controller) {
-      this.controller.abort();
-      this.controller = null;
-    }
-  }
-
-  async chat(params: IChatParams, callbacks: StreamCallbacks) {
-    this.controller = new AbortController();
+  async models(params: IChatParams) {
+    log.info('OpenAI models request', params);
     const { apiKey, baseURL } = params;
-    log.info('chat', params);
     try {
       const client = this.getClient(apiKey, baseURL);
-      const stream = (await client.chat.completions.create(
-        {
-          model: params.model,
-          messages: params.messages,
-          stream: true,
-        },
-        {
-          signal: this.controller.signal,
-        }
-      )) as any;
-      for await (const chunk of stream) {
-        const reasoning = chunk.choices[0]?.delta?.reasoning || chunk.choices[0]?.delta?.reasoning_content || '';
-        if (reasoning) {
-          callbacks.onChunk({ type: 'reasoning', data: reasoning });
-        }
-        const content = chunk.choices[0]?.delta?.content || '';
-        if (content) {
-          callbacks.onChunk({ type: 'content', data: content });
-        }
-      }
-      callbacks.onComplete();
+      const resp = await client.models.list();
+      console.log('OpenAI models response', resp);
+      return resp;
     } catch (error: any) {
-      if (error.name === 'AbortError') {
-        log.info('OpenAI chat aborted');
-      } else {
-        log.error('OpenAI chat error:', error);
-        callbacks.onError(new Error(`Error: ${error.message}`));
-        callbacks.onComplete();
-      }
+      return {
+        message: 'OpenAI api error: ' + error.message,
+      };
     }
   }
 
-  async summary(params: IChatParams) {
-    log.info('summary', params);
+  async chat(params: IChatParams) {
+    log.info('OpenAI chat request', params);
     const { apiKey, baseURL } = params;
     try {
       const client = this.getClient(apiKey, baseURL);
-      return client.chat.completions.create({
+      const resp = await client.chat.completions.create({
         model: params.model,
-        messages: [
-          ...params.messages,
-          { role: 'user', content: '请用20字以内总结以上对话主题，作为对话标题直接返回，不需要任何标点和修饰' },
-        ],
+        messages: params.messages,
         stream: false,
       });
+      console.log('OpenAI chat response', resp);
+      return resp;
     } catch (error: any) {
-      return 'OpenAI compact error: ' + error.message;
+      return {
+        message: 'OpenAI api error: ' + error.message,
+      };
     }
   }
 
-  async models(params: IChatParams) {
-    log.info('models', params);
+  async chatStream(params: IChatParams) {
     const { apiKey, baseURL } = params;
+    log.info('OpenAI stream', params);
+    const client = this.getClient(apiKey, baseURL);
     try {
-      const client = this.getClient(apiKey, baseURL);
-      const list = await client.models.list();
-      return JSON.stringify(list);
+      const stream = await client.chat.completions.create({
+        model: params.model,
+        messages: params.messages,
+        stream: true,
+      });
+      return new ReadableStream({
+        async start(controller) {
+          for await (const chunk of stream) {
+            controller.enqueue(chunk);
+          }
+          controller.close();
+        },
+      });
     } catch (error: any) {
-      return 'OpenAI models error: ' + error.message;
+      return {
+        message: 'OpenAI api error: ' + error.message,
+      };
     }
+  }
+
+  stop() {
+    return Promise.resolve({ message: 'Stop not implemented for OpenAI' });
   }
 }

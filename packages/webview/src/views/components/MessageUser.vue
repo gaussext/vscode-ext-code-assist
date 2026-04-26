@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { ChatMessage } from '@/models/Model';
+import { ChatMessage } from '@/models/Message';
 import Markdown from '@/components/Markdown.vue';
 
 const props = defineProps({
@@ -36,8 +36,12 @@ const props = defineProps({
   justify-content: flex-end;
 }
 
-.markdown-content {
+.messages-area  .messgae-user .markdown-content {
   max-width: 100%;
+  font-size: 13px;
+  padding: 8px;
+  border-radius: 8px;
   border: 1px solid var(--vscode-inputOption-activeBorder);
+  background-color: var(--vscode-editor-background);
 }
 </style>

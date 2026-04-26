@@ -1,14 +1,14 @@
 import * as vscode from 'vscode';
 import { RpcServer } from 'code-assist-rpc';
-import type { IReceiver, ISender, RpcServerOptions } from 'code-assist-rpc';
+import { IReceiver, ISender } from 'code-assist-shared';
 
 export class VscodeRpcServer extends RpcServer {
   private sender: ISender;
   private receiver: IReceiver;
   private disposables: vscode.Disposable[] = [];
 
-  constructor(sender: ISender, receiver: IReceiver, options: RpcServerOptions = {}) {
-    super(options);
+  constructor(sender: ISender, receiver: IReceiver) {
+    super();
     this.sender = sender;
     this.receiver = receiver;
     this.setupMessageListener();
@@ -30,10 +30,11 @@ export class VscodeRpcServer extends RpcServer {
     this.sender.postMessage(message);
   }
 
-  log() {}
+  log(...params: any): void {
+    console.log('[rpc server]', ...params);
+  }
 
   dispose(): void {
-    super.dispose();
     this.disposables.forEach((d) => d.dispose());
     this.disposables = [];
   }

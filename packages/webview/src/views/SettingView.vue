@@ -38,39 +38,13 @@
         <h2 class="provider-setting-title">Provider</h2>
       </div>
       <div class="provider-setting-body">
-        <div v-for="provider in providers" :key="provider.id" class="provider-item">
-          <el-icon
-            v-if="providers.length > 1"
-            class="hover-visible icon-delete"
-            @click="handleRemoveProvider(provider.id)"
-          >
-            <Delete />
-          </el-icon>
-          <div class="form-container">
-            <div class="form-section">
-              <label>Base URL</label>
-              <input v-model="provider.baseURL" class="vscode-input" placeholder="https://api.example.com" />
-            </div>
-            <div class="form-section">
-              <label>API Key</label>
-              <input v-model="provider.apiKey" class="vscode-input" type="password" placeholder="sk-..." />
-            </div>
-          </div>
-
-          <div class="preview-container">
-            <div class="form-section">
-              <label style="display: flex; align-items: center; gap: 8px">
-                <span>Models</span>
-                <el-icon style="cursor: pointer" @click="getModels(provider)">
-                  <Refresh></Refresh>
-                </el-icon>
-              </label>
-              <div class="model-container">
-                <div v-for="model in provider.models" :key="model.id" class="model-item">{{ model.id }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <ProviderItem
+          v-for="provider in providers"
+          :key="provider.id"
+          :provider="provider"
+          :show-delete="providers.length > 1"
+          @delete="handleRemoveProvider(provider.id)"
+        />
       </div>
     </div>
     <div class="setting-footer">
@@ -84,13 +58,12 @@
 </template>
 
 <script lang="ts" setup>
-import { chatService } from '@/api';
-import type { IOption, Model } from '@/models/Model';
-import { createDefaultProvider, Provider } from '@/models/Provider';
+import ProviderItem from '@/components/ProviderItem.vue';
+import { createDefaultProvider } from '@/models/Provider';
 import { useProviderStore } from '@/stores/useProviderStore';
 import { useSettingStore } from '@/stores/useSettingStore';
-import { sha256 } from '@/utils/hash';
-import { Delete, Download, Refresh } from '@element-plus/icons-vue';
+import type { IStandardItem } from '@/types';
+import { Download } from '@element-plus/icons-vue';
 import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
@@ -103,7 +76,7 @@ const currentModelHash = ref(settingStore.currentModelHash || '');
 const summaryModelHash = ref(settingStore.summaryModelHash || '');
 
 const currentModels = computed(() => {
-  const groups: Record<string, IOption[]> = {};
+  const groups: Record<string, IStandardItem<string>[]> = {};
   providers.value.forEach((p) => {
     if (!groups[p.baseURL]) {
       groups[p.baseURL] = [];
@@ -123,28 +96,6 @@ const currentModels = computed(() => {
     options,
   }));
 });
-
-const getModels = async (provider: Provider) => {
-  const json = await chatService.models({
-    baseURL: provider.baseURL,
-    apiKey: provider.apiKey,
-  });
-  try {
-    const res = JSON.parse(json);
-    const models = res.body.data || ([] as Model[]);
-    const modelsWithHash: Model[] = [];
-    for (const model of models) {
-      const hash = await sha256(provider.baseURL + provider.apiKey + model.id);
-      modelsWithHash.push({
-        id: model.id,
-        hash,
-      });
-    }
-    provider.models = modelsWithHash;
-  } catch (error) {
-    console.error(error);
-  }
-};
 
 const handleAddProvider = async () => {
   providers.value.push(await createDefaultProvider());
@@ -214,7 +165,7 @@ const onConfirmClick = () => {
 .model-setting-body {
   display: flex;
   gap: 8px;
-  .model-setting-item{
+  .model-setting-item {
     flex: 1;
   }
 }
@@ -223,82 +174,6 @@ const onConfirmClick = () => {
   flex: 1;
   max-height: calc(100vh - 320px);
   overflow-y: auto;
-}
-
-.provider-item {
-  padding: 16px;
-  border-radius: 8px;
-  border: 1px solid var(--vscode-pickerGroup-border);
-  margin-bottom: 12px;
-  position: relative;
-  display: flex;
-  gap: 8px;
-
-  .form-container {
-    width: 320px;
-  }
-
-  .preview-container {
-    flex: 1;
-  }
-
-  .hover-visible {
-    visibility: hidden;
-  }
-
-  &:hover .hover-visible {
-    visibility: visible;
-  }
-}
-
-.icon-delete {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.form-section {
-  margin-bottom: 16px;
-}
-
-.form-section label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 500;
-}
-
-.models-section {
-  margin-top: 20px;
-}
-
-.models-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-  font-weight: 500;
-}
-
-.models-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.model-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-}
-
-.model-item {
-  padding: 4px 8px;
-  font-size: 12px;
-  border: 1px solid #444;
-  border-radius: 4px;
-  background-color: #272822;
 }
 
 .setting-footer {

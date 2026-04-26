@@ -3,9 +3,11 @@
     <div class="message-title">
       <span>Bot</span>
     </div>
-    <el-collapse v-if="message.reasoning" class="reasoning-content" expand-icon-position="left">
-      <el-collapse-item title="Think">
-        {{ message.reasoning }}
+    <el-collapse v-if="message.reasoning" v-model="activeNames" class="reasoning-box" expand-icon-position="left">
+      <el-collapse-item title="Think" name="Think">
+        <div class="reasoning-content">
+          {{ message.reasoning }}
+        </div>
       </el-collapse-item>
     </el-collapse>
     <div v-if="message.content" class="markdown-content">
@@ -24,7 +26,7 @@
 </template>
 
 <script setup lang="ts">
-import { ChatMessage } from '@/models/Model';
+import { ChatMessage } from '@/models/Message';
 import { copyToClipboard } from '@/utils';
 import { Check, CopyDocument } from '@element-plus/icons-vue';
 import { ref } from 'vue';
@@ -36,7 +38,7 @@ const props = defineProps({
     default: () => new ChatMessage('assistant', ''),
   },
 });
-
+const activeNames = ref([]);
 const copied = ref(false);
 const copyContent = async (content: string) => {
   await copyToClipboard(content);
@@ -52,8 +54,12 @@ const copyContent = async (content: string) => {
   margin-bottom: 8px;
 }
 
-.reasoning-content {
+.reasoning-box {
   margin-bottom: 16px;
+}
+
+.message-bot .reasoning-content {
+  font-size: 12px;
 }
 
 .footer-content {

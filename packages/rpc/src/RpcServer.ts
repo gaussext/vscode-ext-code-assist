@@ -1,184 +1,146 @@
-import type {
-  RpcMessage,
-  RpcRequest,
-  RpcResponse,
-  RpcStreamChunk,
-  RpcError,
-  RpcComplete,
-  StreamCallback,
-  CompleteCallback,
-  ErrorCallback,
-  RpcServerOptions,
-  RpcHandler,
-  RpcStreamHandler,
-} from './types';
+import type { RpcHandler, JsonRpcRequest, JsonRpcResponse, JsonRpcInternal } from './types';
 
-export interface IChannel<T> {
-  write: StreamCallback<T>;
-  complete: CompleteCallback;
-  error: ErrorCallback;
+const JSONRPC_VERSION = '2.0';
+
+const enum RpcInternalType {
+  Stream = '__stream__',
+  Complete = '__complete__',
+  Error = '__error__',
 }
 
 export abstract class RpcServer {
-  private handlers: Map<string, RpcStreamHandler | RpcHandler> = new Map();
-  private pendingRequests: Map<string, IChannel<unknown>> = new Map();
-  private options: RpcServerOptions;
-
-  constructor(options: RpcServerOptions = {}) {
-    this.options = { debug: false, ...options };
-  }
+  private handlers: Map<string, RpcHandler> = new Map();
 
   abstract sendMessage(message: string): void;
 
-  /**
-   * 抽象日志方法，由子类实现具体的日志输出。
-   * @param level 日志级别（'info' | 'debug' | 'error'）
-   * @param args  要记录的信息
-   */
   abstract log(level: string, ...args: unknown[]): void;
 
-  registerHandler(path: string, handler: RpcStreamHandler | RpcHandler) {
-    this.log('info', 'registerHandler', path);
-    this.handlers.set(path, handler);
+  registerHandler(method: string, handler: RpcHandler) {
+    this.log('info', 'registerHandler', method);
+    this.handlers.set(method, handler);
   }
 
-  unregisterHandler(path: string) {
-    this.handlers.delete(path);
+  unregisterHandler(method: string) {
+    this.handlers.delete(method);
   }
 
-  handleMessage(message: string): Promise<string | null> {
+  async handleMessage(message: string): Promise<string | null> {
     try {
-      const msg: RpcMessage = JSON.parse(message);
-      return this.processMessage(msg);
+      const params = JSON.parse(message);
+      const resp = await this.handleJsonRpcRequest(params);
+      return JSON.stringify(resp);
     } catch (error) {
-      if (this.options.debug) {
-        this.log('error', 'RPC Server: Failed to parse message', error);
-      }
+      this.log('error', 'RPC Server: Failed to parse message', error);
       return Promise.resolve(null);
     }
   }
 
-  private processMessage(msg: RpcMessage): Promise<string | null> {
-    if (msg.type === 'request') {
-      return this.handleRequest(msg as RpcRequest);
+  private isJsonRpcRequest(msg: unknown): msg is JsonRpcRequest {
+    return (
+      typeof msg === 'object' &&
+      msg !== null &&
+      (msg as any).jsonrpc === JSONRPC_VERSION &&
+      'method' in msg &&
+      'id' in msg
+    );
+  }
+
+  private handleJsonRpcRequest(msg: unknown): Promise<JsonRpcResponse | null> {
+    if (!this.isJsonRpcRequest(msg)) {
+      return Promise.resolve(null);
+    }
+
+    const { method, params, id, __stream__ } = msg;
+    this.log('info', 'handleJsonRpcRequest', msg);
+
+    const handler = this.handlers.get(method);
+
+    if (!handler) {
+      return Promise.resolve(this.createJsonRpcErrorResponse(id, -32601, 'Method not found'));
+    }
+
+    if (__stream__) {
+      return this.handleStreamRequest(id, handler, params);
+    } else {
+      return this.handleNormalRequest(id, handler, params);
+    }
+  }
+
+  private async handleNormalRequest(id: string, handler: RpcHandler, params: unknown): Promise<JsonRpcResponse | null> {
+    try {
+      const result = await handler(params);
+      this.log('info', 'handleJsonRpcRequest result', result);
+      return {
+        jsonrpc: JSONRPC_VERSION,
+        result,
+        id,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      return this.createJsonRpcErrorResponse(id, -32603, errorMessage);
+    }
+  }
+
+  private async handleStreamRequest(id: string, handler: RpcHandler, params: unknown): Promise<JsonRpcResponse | null> {
+    try {
+      let stream = await handler(params);
+      this.log('info', 'handleStreamRequest stream created', stream);
+      if (stream instanceof ReadableStream) {
+        const reader = (stream as ReadableStream).getReader();
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) {
+            this.log('info', 'Stream end', value);
+            const completeMessage = this.completeStream(id);
+            this.sendMessage(JSON.stringify(completeMessage));
+            break;
+          }
+          this.log('info', 'Stream chunk', value);
+          const message = this.writeStreamChunk(id, value);
+          this.sendMessage(JSON.stringify(message));
+        }
+      } else {
+        this.log('error', 'Stream does not have getReader method');
+      }
+    } catch (err) {
+      this.log('error', 'Stream request error', err);
+      const message = this.errorStream(id, err as Error);
+      this.sendMessage(JSON.stringify(message));
     }
     return Promise.resolve(null);
   }
 
-  private handleRequest(request: RpcRequest): Promise<string | null> {
-    const { id, path, data } = request;
-    this.log('info', 'handleRequest', request);
-    this.log('debug', 'handler');
-    const handler = this.handlers.get(path);
-
-    if (!handler) {
-      return Promise.resolve(this.createErrorResponse(id, -32601, 'handler not found'));
-    }
-
-    if (this.isStreamRequest(data)) {
-      const streamHandler = handler as RpcStreamHandler;
-      const streamContext: IChannel<unknown> = {
-        write: (chunk: unknown) => {
-          const message = this.writeStreamChunk(id, chunk, 0, false);
-          this.sendMessage(message);
-        },
-        complete: () => {
-          const message = this.completeStream(id);
-          this.sendMessage(message);
-        },
-        error: (err: Error) => {
-          const message = this.errorStream(id, err);
-          this.sendMessage(message);
-        },
-      };
-
-      try {
-        const result = streamHandler(streamContext, data);
-        if (result instanceof Promise) {
-          result.catch((err: Error) => {
-            const message = this.errorStream(id, err);
-            this.sendMessage(message);
-          });
-        }
-      } catch (err) {
-        const message = this.errorStream(id, err as Error);
-        this.sendMessage(message);
-      }
-      return Promise.resolve(null);
-    }
-
-    return (async () => {
-      try {
-        const result = await (handler as any)(data);
-        const response: RpcResponse = {
-          id,
-          type: 'response',
-          data: result,
-        };
-        return JSON.stringify(response);
-      } catch (error) {
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        return this.createErrorResponse(id, -32603, errorMessage);
-      }
-    })();
-  }
-
-  private isStreamRequest(params: unknown): boolean {
-    return (
-      params !== null &&
-      typeof params === 'object' &&
-      '__stream__' in params &&
-      (params as any).__stream__ === true
-    );
-  }
-
-  createStream(id: string, write: StreamCallback<unknown>, complete: CompleteCallback, error: ErrorCallback) {
-    this.pendingRequests.set(id, { write, complete, error });
-  }
-
-  writeStreamChunk(id: string, chunk: unknown, chunkIndex: number, isLast: boolean): string {
-    const streamChunk: RpcStreamChunk = {
+  writeStreamChunk(id: string, chunk: unknown): JsonRpcInternal {
+    return {
       id,
-      type: 'stream',
+      __type__: RpcInternalType.Stream,
       data: chunk,
-      chunkIndex,
-      isLast,
     };
-    return JSON.stringify(streamChunk);
   }
 
-  completeStream(id: string): string {
-    const complete: RpcComplete = {
+  completeStream(id: string): JsonRpcInternal {
+    return {
       id,
-      type: 'complete',
+      __type__: RpcInternalType.Complete,
     };
-    this.pendingRequests.delete(id);
-    return JSON.stringify(complete);
   }
 
-  errorStream(id: string, error: Error): string {
-    const errorResponse: RpcError = {
+  errorStream(id: string, error: Error): JsonRpcInternal {
+    return {
       id,
-      type: 'error',
+      __type__: RpcInternalType.Error,
       error: {
         code: -32603,
         message: error.message,
       },
     };
-    this.pendingRequests.delete(id);
-    return JSON.stringify(errorResponse);
   }
 
-  private createErrorResponse(id: string, code: number, message: string): string {
-    const errorResponse: RpcError = {
-      id,
-      type: 'error',
+  private createJsonRpcErrorResponse(id: string, code: number, message: string): JsonRpcResponse {
+    return {
+      jsonrpc: JSONRPC_VERSION,
       error: { code, message },
+      id,
     };
-    return JSON.stringify(errorResponse);
-  }
-
-  dispose(): void {
-    this.pendingRequests.clear();
   }
 }

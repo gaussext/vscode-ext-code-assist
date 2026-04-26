@@ -1,30 +1,36 @@
-import type { IChatParams, IProviderParams } from '@/models/Model';
-import { EnumRpcMessage } from 'code-assist-rpc';
+import type { IChatParams, IProviderParams } from 'code-assist-shared';
+import { EnumRpcMessage } from 'code-assist-shared';
 import { RpcMock } from './rpc-mock';
-import type { IChunk } from '@/types';
 import { WebviewRpcClient } from '@/lib/WebviewRpcClient';
-
-export interface StreamCallbacks {
-  onChunk: (chunk: IChunk) => void;
-  onComplete: () => void;
-  onError: (error: Error) => void;
-}
+import type { IChatChunk } from '@/types';
 
 class ChatRpcClient {
   private rpcClient: WebviewRpcClient;
-  private abortController: AbortController = new AbortController();
 
   constructor() {
     if (globalThis.acquireVsCodeApi) {
       const vscode = (globalThis as any).acquireVsCodeApi();
-      this.rpcClient = new WebviewRpcClient(vscode, globalThis, { debug: true });
+      this.rpcClient = new WebviewRpcClient(vscode, globalThis);
     }
   }
 
-  streamMessage(params: IChatParams, callbacks: StreamCallbacks): void {
+  async models(params: IProviderParams): Promise<any> {
     if (!this.rpcClient) {
-      RpcMock.mockStream(callbacks);
-      return;
+      return RpcMock.mockModels();
+    }
+    return this.rpcClient.call(EnumRpcMessage.Models, params);
+  }
+
+  async chat(params: IChatParams): Promise<any> {
+    if (!this.rpcClient) {
+      throw new Error('RPC client not initialized. model:' + params.model);
+    }
+    return this.rpcClient.call(EnumRpcMessage.Chat, params);
+  }
+
+  chatStream(params: IChatParams): ReadableStream<IChatChunk> {
+    if (!this.rpcClient) {
+      return RpcMock.mockChatStream();
     }
     const { baseURL, apiKey, model } = params;
     if (!baseURL) {
@@ -36,22 +42,20 @@ class ChatRpcClient {
     if (!model) {
       throw new Error('model required');
     }
-    this.abortController = new AbortController();
-    this.rpcClient.streamCall(EnumRpcMessage.Stream, params, {
-      onChunk: (chunk: IChunk) => {
-        if (this.abortController.signal.aborted) {
-          callbacks.onComplete();
-          return;
-        }
-        callbacks.onChunk(chunk);
-      },
-      onComplete: () => {
-        callbacks.onComplete();
-      },
-      onError: (error: Error) => {
-        callbacks.onError(error);
-      }
-    });
+    const rawStream = this.rpcClient.call(EnumRpcMessage.ChatStream, params, true);
+    return rawStream.pipeThrough(
+      new TransformStream<any, IChatChunk>({
+        transform(chunk, controller) {
+          const delta = chunk.choices?.[0]?.delta;
+          if (delta) {
+            const reasoning = delta.reasoning || delta.reasoning_content || '';
+            if (reasoning) controller.enqueue({ type: 'reasoning', data: reasoning });
+            const content = delta.content || '';
+            if (content) controller.enqueue({ type: 'content', data: content });
+          }
+        },
+      })
+    );
   }
 
   async stopChat(): Promise<any> {
@@ -59,22 +63,7 @@ class ChatRpcClient {
       RpcMock.abort();
       return;
     }
-    this.abortController.abort();
     return this.rpcClient.call(EnumRpcMessage.Stop, {});
-  }
-
-  async models(params: IProviderParams): Promise<any> {
-    if (!this.rpcClient) {
-      throw new Error('RPC client not initialized. baseURL:' + params.baseURL);
-    }
-    return this.rpcClient.call(EnumRpcMessage.Models, params);
-  }
-
-  async summary(params: IChatParams): Promise<any> {
-    if (!this.rpcClient) {
-      throw new Error('RPC client not initialized. model:' + params.model);
-    }
-    return this.rpcClient.call(EnumRpcMessage.Summary, params);
   }
 }
 

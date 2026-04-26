@@ -1,151 +1,104 @@
 # code-assist-rpc
 
-[![npm version](https://img.shields.io/npm/v/code-assist-rpc.svg)](https://www.npmjs.com/package/code-assist-rpc)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+JSON-RPC 2.0 客户端/服务端通信库，支持流式响应。
 
-VS Code Webview RPC 通讯库，支持流式数据传输。
-
-## 特性
-
-- 简单易用的 RPC 通讯接口
-- 支持普通请求-响应模式
-- 支持流式数据传输
-- 类型安全的 TypeScript 支持
-- 完整的错误处理机制
-- 抽象类设计，便于扩展
-
-## 安装
+## Installation
 
 ```bash
-pnpm install code-assist-rpc
+pnpm add code-assist-rpc
 ```
 
-## 使用方法
+## Usage
 
-### Main 端（VS Code Extension）
+### Server
 
 ```typescript
-import * as vscode from 'vscode';
 import { RpcServer } from 'code-assist-rpc';
 
 class MyRpcServer extends RpcServer {
   sendMessage(message: string): void {
-    webview.postMessage(message);
+    // 发送消息到客户端
   }
 
   log(level: string, ...args: unknown[]): void {
-    console.log(`[${level}]`, ...args);
+    console.log(level, ...args);
   }
 }
 
-// 创建 RPC 服务器
-const rpcServer = new MyRpcServer();
-
-// 注册处理器
-rpcServer.registerHandler('chat.sendMessage', async (params: { message: string }) => {
-  return { response: 'Hello!' };
+const server = new MyRpcServer({ debug: true });
+server.registerHandler('myMethod', async (params) => {
+  return { result: params.value * 2 };
 });
 
-rpcServer.registerHandler('chat.streamMessage', async (stream, params: { message: string }) => {
-  for (let i = 0; i < 5; i++) {
-    stream.write({ chunk: `Part ${i}` });
-    await new Promise(resolve => setTimeout(resolve, 100));
-  }
-  stream.complete();
-});
-
-// 处理来自 webview 的消息
-webview.onDidReceiveMessage(message => {
-  rpcServer.handleMessage(message);
-});
+// 处理收到的消息
+const response = await server.handleMessage(jsonRpcRequestString);
+if (response) {
+  server.sendMessage(response);
+}
 ```
 
-### Webview 端
+### Client
 
 ```typescript
 import { RpcClient } from 'code-assist-rpc';
 
 class MyRpcClient extends RpcClient {
   sendMessage(message: string): void {
-    vscode.postMessage(message);
+    // 发送消息到服务端
   }
 
   log(level: string, message: string, ...args: unknown[]): void {
-    console.log(`[${level}]`, message, ...args);
+    console.log(level, message, ...args);
   }
 }
 
-// 创建 RPC 客户端
-const rpcClient = new MyRpcClient();
-
-// 设置消息监听
-window.addEventListener('message', (event) => {
-  rpcClient.handleMessage(event.data);
-});
+const client = new MyRpcClient({ debug: true });
 
 // 普通调用
-const result = await rpcClient.call('chat.sendMessage', { message: 'Hello' });
+const result = await client.call('myMethod', { value: 5 });
 
 // 流式调用
-await rpcClient.streamCall('chat.streamMessage', { message: 'Hello' }, {
-  onChunk: (chunk) => console.log('Received:', chunk),
-  onComplete: () => console.log('Stream completed'),
-  onError: (error) => console.error('Stream error:', error)
+await client.streamCall('myStreamMethod', { value: 5 }, {
+  onChunk: (chunk) => console.log('chunk:', chunk),
+  onComplete: () => console.log('complete'),
+  onError: (error) => console.error('error:', error),
 });
 ```
 
-## API
+## JSON-RPC 2.0 规范
 
-### RpcServer
+符合 [JSON-RPC 2.0](https://www.jsonrpc.org/specification) 规范：
 
-抽象类，需要子类实现以下方法：
+- 请求：`{"jsonrpc": "2.0", "method": "methodName", "params": {...}, "id": "..."}`
+- 响应：`{"jsonrpc": "2.0", "result": {...}, "id": "..."}`
+- 错误响应：`{"jsonrpc": "2.0", "error": {"code": -32603, "message": "..."}, "id": "..."}`
 
-- `sendMessage(message: string): void` - 发送消息到对端
-- `log(level: string, ...args: unknown[]): void` - 日志记录
+### 流式扩展
 
-方法：
-
-- `registerHandler(path: string, handler: RpcStreamHandler | RpcHandler)` - 注册处理器
-- `unregisterHandler(path: string)` - 注销处理器
-- `handleMessage(message: string): Promise<string | null>` - 处理接收到的消息
-- `dispose()` - 清理资源
-
-### RpcClient
-
-抽象类，需要子类实现以下方法：
-
-- `sendMessage(message: string): void` - 发送消息到对端
-- `log(level: string, message: string, ...args: unknown[]): void` - 日志记录
-
-方法：
-
-- `call<TParams, TResult>(path: string, params: TParams): Promise<TResult>` - 普通调用
-- `streamCall<TParams, TChunk>(path: string, params: TParams, options): Promise<void>` - 流式调用
-- `handleMessage(message: string): void` - 处理接收到的消息
-- `dispose()` - 清理资源
-
-### 类型定义
+通过 `__stream__: true` 参数标记流式请求：
 
 ```typescript
-// 流处理器
-interface IChannel<T> {
-  write: (chunk: T) => void;
-  complete: () => void;
-  error: (err: Error) => void;
-}
-
-// 消息类型
-type RpcMessageType = 'request' | 'response' | 'stream' | 'error' | 'complete';
-
-// 消息枚举
-enum EnumRpcMessage {
-  Stream = '/rpc/chat/stream',
-  Summary = '/rpc/chat/summary',
-  Stop = '/rpc/chat/stop',
-  Models = '/rpc/models',
+{
+  "jsonrpc": "2.0",
+  "method": "streamMethod",
+  "params": {...},
+  "id": "...",
+  "__stream__": true
 }
 ```
 
-## 许可证
+流式响应使用内部消息类型：
+- `{ "id": "...", "__type__": "__stream__", "data": {...} }`
+- `{ "id": "...", "__type__": "__complete__" }`
+- `{ "id": "...", "__type__": "__error__", "error": {...} }`
+
+### 错误码
+
+- `-32600` - Invalid Request
+- `-32601` - Method not found
+- `-32602` - Invalid params
+- `-32603` - Internal error
+
+## License
 
 MIT

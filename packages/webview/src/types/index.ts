@@ -3,12 +3,12 @@ export interface IStandardItem<T> {
   label: string;
 }
 
-export interface IChunk {
+export interface IChatChunk {
   type: 'content' | 'reasoning' | 'error';
   data: string;
 }
 
-export interface IMessage {
+export interface IChatChunkMerge {
   conversationId: string;
   type: 'content' | 'reasoning'  | 'error' |  'end';
   data?: string;
@@ -16,3 +16,4 @@ export interface IMessage {
   loadTime?: number;
   endTime?: number;
 }
+
