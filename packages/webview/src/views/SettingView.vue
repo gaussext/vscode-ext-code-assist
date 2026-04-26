@@ -17,14 +17,20 @@
           <label>Chat Model</label>
           <select v-model="currentModelHash" class="vscode-select">
             <option v-if="currentModels.length === 0" value="" disabled>Select a model</option>
-            <option v-for="model in currentModels" :key="model.value" :value="model.value">{{ model.label }}</option>
+            <optgroup v-for="group in currentModels" :key="group.label">
+              <option class="as-title" :value="group.label" disabled>{{ group.label }}</option>
+              <option v-for="model in group.options" :key="model.value" :value="model.value">{{ model.label }}</option>
+            </optgroup>
           </select>
         </div>
         <div class="form-section">
           <label>Summary Model</label>
           <select v-model="summaryModelHash" class="vscode-select">
             <option v-if="currentModels.length === 0" value="" disabled>Select a model</option>
-            <option v-for="model in currentModels" :key="model.value" :value="model.value">{{ model.label }}</option>
+            <optgroup v-for="group in currentModels" :key="group.label">
+              <option class="as-title" :value="group.label" disabled>{{ group.label }}</option>
+              <option v-for="model in group.options" :key="model.value" :value="model.value">{{ model.label }}</option>
+            </optgroup>
           </select>
         </div>
       </div>
@@ -33,8 +39,11 @@
       </div>
       <div class="provider-setting-body">
         <div v-for="provider in providers" :key="provider.id" class="provider-item">
-          <el-icon v-if="providers.length > 1" class="hover-visible icon-delete"
-            @click="handleRemoveProvider(provider.id)">
+          <el-icon
+            v-if="providers.length > 1"
+            class="hover-visible icon-delete"
+            @click="handleRemoveProvider(provider.id)"
+          >
             <Delete />
           </el-icon>
           <div class="form-container">
@@ -94,19 +103,25 @@ const currentModelHash = ref(settingStore.currentModelHash || '');
 const summaryModelHash = ref(settingStore.summaryModelHash || '');
 
 const currentModels = computed(() => {
-  let result: IOption[] = [];
+  const groups: Record<string, IOption[]> = {};
   providers.value.forEach((p) => {
+    if (!groups[p.baseURL]) {
+      groups[p.baseURL] = [];
+    }
     p.models.forEach((m) => {
       let option = {
-        label: m.id + '(' + p.baseURL + ')',
+        label: m.id,
         value: m.hash,
       };
-      if (!result.find((o) => o.value === option.value)) {
-        result.push(option);
-      } 
+      if (!groups[p.baseURL].find((o) => o.value === option.value)) {
+        groups[p.baseURL].push(option);
+      }
     });
   });
-  return result;
+  return Object.entries(groups).map(([label, options]) => ({
+    label,
+    options,
+  }));
 });
 
 const getModels = async (provider: Provider) => {
@@ -143,10 +158,13 @@ const handleResetClick = async () => {
   await providerStore.resetProviders();
   providers.value = providerStore.providers;
   setTimeout(() => {
-    currentModelHash.value = currentModels.value[0].value;
-    settingStore.setCurrentModelHash(currentModelHash.value);
-    summaryModelHash.value = currentModels.value[0].value;
-    settingStore.setSummaryModelHash(summaryModelHash.value);
+    const firstModel = currentModels.value[0]?.options[0];
+    if (firstModel) {
+      currentModelHash.value = firstModel.value;
+      summaryModelHash.value = firstModel.value;
+      settingStore.setCurrentModelHash(firstModel.value);
+      settingStore.setSummaryModelHash(firstModel.value);
+    }
   });
 };
 
@@ -240,7 +258,6 @@ const onConfirmClick = () => {
   margin-bottom: 6px;
   font-weight: 500;
 }
-
 
 .models-section {
   margin-top: 20px;
