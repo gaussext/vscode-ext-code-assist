@@ -21,7 +21,7 @@
           </select>
         </div>
         <div class="form-section">
-          <label>Chat Model</label>
+          <label>Summary Model</label>
           <select v-model="summaryModelHash" class="vscode-select">
             <option v-if="currentModels.length === 0" value="" disabled>Select a model</option>
             <option v-for="model in currentModels" :key="model.value" :value="model.value">{{ model.label }}</option>
