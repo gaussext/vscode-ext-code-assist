@@ -69,6 +69,14 @@ export const useConversationStore = defineStore('conversation', () => {
     return await setConversations([]);
   };
 
+  const resetConversations = async () => {
+    const conv = new ChatConversation()
+    setConversationId(conv.id)
+    setConversationTitle(conv.title ?? '');
+    conversations.value = [conv];
+    return await setConversations(conversations.value);
+  }
+
   const updateConversationTitle = async (conversationId: string, title: string) => {
     setConversationTitle(title);
     conversations.value.forEach((item) => {
@@ -95,6 +103,7 @@ export const useConversationStore = defineStore('conversation', () => {
     // 
     getConversations,
     clearConversations,
+    resetConversations,
     // 
     createConversation,
     deleteConversation,

@@ -23,13 +23,12 @@ const props = defineProps({
 });
 </script>
 
-<style scoped>
-
-
+<style lang="scss" scoped>
 .message-title {
+  width: 100%;
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 8px
+  margin-bottom: 8px;
 }
 
 .message-content {
@@ -39,5 +38,6 @@ const props = defineProps({
 
 .markdown-content {
   max-width: 100%;
+  border: 1px solid var(--vscode-inputOption-activeBorder);
 }
 </style>

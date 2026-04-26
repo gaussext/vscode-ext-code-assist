@@ -1,9 +1,6 @@
 <template>
   <div class="app-header chat-header header-area">
     <div class="header-area-tool">
-      <div class="header-icon-group" style="display: flex; align-items: center; gap: 4px">
-        <UsageInfo :info="info" />
-      </div>
       <div class="header-title">
         {{ conversationStore.conversationTitle }}
       </div>
@@ -21,9 +18,6 @@
           <Setting></Setting>
         </el-icon>
       </div>
-    </div>
-    <div class="header-area-bar">
-      <div class="header-area-bar__inner" :style="barStyle"></div>
     </div>
   </div>
 </template>

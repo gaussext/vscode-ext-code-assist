@@ -93,7 +93,7 @@ code {
   height: 100%;
   padding: 4px;
   resize: none;
-  border: 1px solid var(--vscode-inputOption-activeBorder);
+  border: 1px solid var(--vscode-editor-background);
   background-color: var(--vscode-input-background);
   color: var(--vscode-input-foreground);
   border-radius: 2px;
@@ -109,6 +109,7 @@ code {
   color: var(--vscode-input-placeholderForeground);
 }
 
+.vscode-textarea.focus,
 .vscode-textarea:focus {
   border-color: var(--vscode-inputOption-activeBorder);
 }

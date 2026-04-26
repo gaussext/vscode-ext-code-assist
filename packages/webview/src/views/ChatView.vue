@@ -1,9 +1,19 @@
 <template>
-  <div class="chat-container">
+  <div class="chat-container" :class="{'has-code': promptCode}">
     <ChatHeader :messages="currentMessageList" :loading="loading" @update:conversationId="handleConversationChange" />
-    <ChatBody :messages="currentMessageList" :promptCode="promptCode" :currentMessage="currentMessage"
-      :loading="loading" />
-    <ChatFooter v-model="prompt" :promptCode="promptCode" :loading="loading" @click="onButtonClick" />
+    <ChatBody
+      :messages="currentMessageList"
+      :promptCode="promptCode"
+      :currentMessage="currentMessage"
+      :loading="loading"
+    />
+    <ChatFooter
+      v-model="prompt"
+      :promptCode="promptCode"
+      :loading="loading"
+      @code="onCodeButtonCLick"
+      @send="onSendButtonClick"
+    />
   </div>
 </template>
 
@@ -95,10 +105,11 @@ const enqueue = async (value: IMessage) => {
       case 'reasoning':
         handleChating(result);
         break;
-      case 'end':{
-        handleChatEnd(result);
-        queueRender?.dispose();
-      }
+      case 'end':
+        {
+          handleChatEnd(result);
+          queueRender?.dispose();
+        }
         break;
       default:
         break;
@@ -132,7 +143,14 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
           loadTime = Date.now();
         }
         const endTime = Date.now();
-        enqueue({ conversationId: currentConversationId, type: chunk.type, data: chunk.data, startTime, loadTime, endTime });
+        enqueue({
+          conversationId: currentConversationId,
+          type: chunk.type,
+          data: chunk.data,
+          startTime,
+          loadTime,
+          endTime,
+        });
       },
       () => {
         if (!loadTime) {
@@ -218,7 +236,7 @@ const handleSummary = (conversationId: string, messages: ChatMessage[]) => {
       const summary = result?.choices?.[0]?.message?.content || '';
       if (summary) {
         // 更新会话标题
-        conversationStore.updateConversationTitle(conversationId, summary);
+        conversationStore.updateConversationTitle(conversationId, summary.slice(0, 20));
       }
     });
 };
@@ -233,7 +251,7 @@ const handleOptimization = (code: string) => {
 \`\`\`
 ${code}
 \`\`\``;
-  onButtonClick();
+  onSendButtonClick();
 };
 
 const handleExplanation = (code: string) => {
@@ -245,7 +263,7 @@ const handleExplanation = (code: string) => {
 \`\`\`
 ${code}
 \`\`\``;
-  onButtonClick();
+  onSendButtonClick();
 };
 
 const handleComment = (code: string) => {
@@ -257,7 +275,7 @@ const handleComment = (code: string) => {
 \`\`\`
 ${code}
 \`\`\``;
-  onButtonClick();
+  onSendButtonClick();
 };
 
 const handleUpgradeClass = (code: string) => {
@@ -269,7 +287,7 @@ const handleUpgradeClass = (code: string) => {
 \`\`\`
 ${code}
 \`\`\``;
-  onButtonClick();
+  onSendButtonClick();
 };
 
 const handleUpgradeVue = (code: string) => {
@@ -281,7 +299,7 @@ const handleUpgradeVue = (code: string) => {
 \`\`\`
 ${code}
 \`\`\``;
-  onButtonClick();
+  onSendButtonClick();
 };
 
 const handleUpgradeReact = (code: string) => {
@@ -293,7 +311,7 @@ const handleUpgradeReact = (code: string) => {
 \`\`\`
 ${code}
 \`\`\``;
-  onButtonClick();
+  onSendButtonClick();
 };
 
 const handleAnalysis = (code: string) => {
@@ -305,7 +323,7 @@ const handleAnalysis = (code: string) => {
 \`\`\`
 ${code}
 \`\`\``;
-  onButtonClick();
+  onSendButtonClick();
 };
 
 const handleTranslation = (code: string) => {
@@ -317,7 +335,7 @@ const handleTranslation = (code: string) => {
 \`\`\`
 ${code}
 \`\`\``;
-  onButtonClick();
+  onSendButtonClick();
 };
 
 const handleAppreciation = (code: string) => {
@@ -329,7 +347,7 @@ const handleAppreciation = (code: string) => {
 \`\`\`
 ${code}
 \`\`\``;
-  onButtonClick();
+  onSendButtonClick();
 };
 
 const handleAddToChat = (code: string) => {
@@ -343,10 +361,19 @@ ${code}
 \`\`\``;
 };
 
+const onCodeButtonCLick = async () => {
+  promptCode.value = prompt.value ? `\`\`\`
+${prompt.value} 
+\`\`\`` : '';
+  prompt.value = '';
+};
+
 // 发送消息
-const onButtonClick = async () => {
+const onSendButtonClick = async () => {
   const currentConversationId = conversationStore.conversationId;
-  const content = prompt.value + promptCode.value;
+  const content = `${prompt.value}
+${promptCode.value}
+`;
   if (loading.value) {
     await chatService.stop();
     loading.value = false;
@@ -388,7 +415,7 @@ onUnmounted(() => {
   flex-direction: column;
   height: 100%;
   min-width: 400px;
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto;
   max-height: 100vh;
   padding: 0 4px;

@@ -163,7 +163,7 @@ const onConfirmClick = () => {
 <style lang="scss" scoped>
 .setting-container {
   min-width: 400px;
-  max-width: 800px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 0 4px;
   display: flex;

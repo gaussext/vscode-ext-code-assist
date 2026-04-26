@@ -2,7 +2,6 @@
   <div class="chat-message message-bot">
     <div class="message-title">
       <span>Bot</span>
-      <span>({{ message.model }})</span>
     </div>
     <el-collapse v-if="message.reasoning" class="reasoning-content" expand-icon-position="left">
       <el-collapse-item title="Think">
@@ -10,7 +9,7 @@
       </el-collapse-item>
     </el-collapse>
     <div v-if="message.content" class="markdown-content">
-      <Markdown :content="message.content"></Markdown>
+      <Markdown :content="message.content" mode="full"></Markdown>
     </div>
     <div class="footer-content">
       <el-icon v-if="!copied" class="message-icon" @click="copyContent(message.content)">
@@ -48,7 +47,7 @@ const copyContent = async (content: string) => {
 };
 </script>
 
-<style scoped>
+<style lang="scss">
 .message-title {
   margin-bottom: 8px;
 }
