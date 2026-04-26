@@ -9,7 +9,6 @@ import type {
   CompleteCallback,
   ErrorCallback,
 } from './types';
-import log from 'loglevel';
 
 interface IPromiseChannel {
   resolve: (value: unknown) => void;
@@ -20,22 +19,37 @@ interface IPromiseChannel {
   onError?: ErrorCallback;
 }
 
-export class RpcClient {
+export abstract class RpcClient {
   private pendingRequests: Map<string, IPromiseChannel> = new Map();
   private messageId: number = 0;
   private options: RpcClientOptions;
 
   constructor(options: RpcClientOptions = {}) {
-    this.options = { timeout: 30000, debug: false, ...options };
+    this.options = {
+      timeout: 30 * 1000,
+      streamTimeout: 10 * 60 * 1000,
+      debug: false,
+      ...options,
+    };
   }
 
   generateMessageId(): string {
-    return `msg_${Date.now()}_${++this.messageId}`;
+    if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+      return crypto.randomUUID();
+    } else {
+      return `msg-${Date.now()}-${this.messageId++}`;
+    }
   }
 
-  sendMessage(message: string): void {
-    throw new Error('sendMessage must be implemented by subclass');
-  }
+  protected abstract sendMessage(message: string): void;
+
+  /**
+   * 抽象日志方法，子类需实现具体的日志记录逻辑
+   * @param level 日志级别（如 'error', 'warn', 'info', 'debug'）
+   * @param message 日志信息
+   * @param args 附加参数
+   */
+  protected abstract log(level: string, message: string, ...args: unknown[]): void;
 
   handleMessage(message: string): void {
     try {
@@ -43,8 +57,13 @@ export class RpcClient {
       this.processMessage(msg);
     } catch (error) {
       if (this.options.debug) {
-        log.error('RPC Client: Failed to parse message', error);
+        this.log('error', 'RPC Client: Failed to parse message', error);
       }
+      this.handleError({
+        id: 'unknown',
+        type: 'error',
+        error: { code: 400, message: 'Invalid message format' },
+      });
     }
   }
 
@@ -85,17 +104,14 @@ export class RpcClient {
   }
 
   private handleError(error: RpcError): void {
-    const pendingRequest = this.pendingRequests.get(error.id);
-    if (pendingRequest) {
-      clearTimeout(pendingRequest.timeout);
-      this.pendingRequests.delete(error.id);
-      pendingRequest.reject(new Error(error.error.message));
-    }
-
-    const pendingStream = this.pendingRequests.get(error.id);
-    if (pendingStream) {
-      this.pendingRequests.delete(error.id);
-      pendingStream.onError?.(new Error(error.error.message));
+    const pending = this.pendingRequests.get(error.id);
+    if (!pending) return;
+    clearTimeout(pending.timeout);
+    this.pendingRequests.delete(error.id);
+    if (pending.onError) {
+      pending.onError(new Error(error.error.message));
+    } else {
+      pending.reject(new Error(error.error.message));
     }
   }
 
@@ -105,6 +121,7 @@ export class RpcClient {
 
     this.pendingRequests.delete(complete.id);
     pending.onComplete?.();
+    pending.resolve(undefined);
   }
 
   /**
@@ -113,7 +130,10 @@ export class RpcClient {
    * @param params
    * @returns
    */
-  async call<TParams = unknown, TResult = unknown>(path: string, params: TParams): Promise<TResult> {
+  call<TParams = unknown, TResult = unknown>(
+    path: string,
+    params: TParams
+  ): Promise<TResult> {
     const id = this.generateMessageId();
 
     return new Promise<TResult>((resolve, reject) => {
@@ -161,7 +181,7 @@ export class RpcClient {
           this.pendingRequests.delete(id);
           reject(new Error(`Request timeout: ${path}`));
         },
-        this.options.timeout ? this.options.timeout * 999 : Infinity
+        this.options.streamTimeout ? this.options.streamTimeout : Infinity
       );
 
       this.pendingRequests.set(id, {

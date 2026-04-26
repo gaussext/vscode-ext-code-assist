@@ -60,6 +60,7 @@ export interface RpcStreamHandler<TParams = any, TChunk = any> {
 
 export interface RpcClientOptions {
   timeout?: number;
+  streamTimeout ?: number;
   debug?: boolean;
 }
 

@@ -1,21 +1,21 @@
 import * as vscode from 'vscode';
-import { RpcServer } from './RpcServer';
-import type { IReceiver, ISender, RpcServerOptions } from './types';
+import { RpcServer } from 'code-assist-rpc';
+import type { IReceiver, ISender, RpcServerOptions } from 'code-assist-rpc';
 
-export class WebviewRpcServer extends RpcServer {
+export class VscodeRpcServer extends RpcServer {
   private sender: ISender;
   private receiver: IReceiver;
   private disposables: vscode.Disposable[] = [];
 
   constructor(sender: ISender, receiver: IReceiver, options: RpcServerOptions = {}) {
-    super(options)
+    super(options);
     this.sender = sender;
     this.receiver = receiver;
     this.setupMessageListener();
   }
 
   private setupMessageListener(): void {
-    const disposable = this.receiver.onDidReceiveMessage?.( async (message:any) => {
+    const disposable = this.receiver.onDidReceiveMessage?.(async (message: any) => {
       const response = await this.handleMessage(message);
       if (response) {
         this.sender.postMessage(response);
@@ -29,6 +29,8 @@ export class WebviewRpcServer extends RpcServer {
   sendMessage(message: string): void {
     this.sender.postMessage(message);
   }
+
+  log() {}
 
   dispose(): void {
     super.dispose();

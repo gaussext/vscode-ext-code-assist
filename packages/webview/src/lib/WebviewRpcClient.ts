@@ -1,5 +1,5 @@
-import { RpcClient } from './RpcClient';
-import type { IReceiver, ISender, RpcClientOptions } from './types';
+import { RpcClient } from 'code-assist-rpc';
+import type { IReceiver, ISender, RpcClientOptions } from 'code-assist-rpc';
 
 export class WebviewRpcClient extends RpcClient {
   private sender: ISender;
@@ -9,7 +9,7 @@ export class WebviewRpcClient extends RpcClient {
     super(options);
     this.sender = vscode;
     this.receiver = receiver;
-    this.setupMessageListener()
+    this.setupMessageListener();
   }
 
   private setupMessageListener(): void {
@@ -19,6 +19,8 @@ export class WebviewRpcClient extends RpcClient {
       }
     });
   }
+
+  log(): void {}
 
   sendMessage(message: string): void {
     this.sender.postMessage(message);
