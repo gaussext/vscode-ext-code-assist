@@ -52,3 +52,8 @@ export interface IOption {
   value: string;
   label: string;
 }
+
+export interface IOptionGroup {
+  label: string;
+  options: IOption[];
+}
