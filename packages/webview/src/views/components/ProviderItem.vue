@@ -14,20 +14,17 @@
       </div>
     </div>
     <div class="preview-container">
-      <div class="form-section">
-        <label style="display: flex; align-items: center; gap: 8px">
-          <span>Models</span>
-          <div class="vscode-button is-text" :disabled="loading" @click="getModels(provider)" style="padding: 4px 8px">
-            <el-icon v-if="loading" class="animation-rotate"><Loading /></el-icon>
-            <el-icon v-else >
-              <Refresh></Refresh>
-            </el-icon>
-            <span>更新模型列表</span>
-          </div>
-        </label>
-        <div class="model-container">
-          <div v-for="model in provider.models" :key="model.id" class="model-item">{{ model.id }}</div>
+      <label style="display: flex; align-items: center; gap: 8px">
+        <div class="vscode-button is-text" :disabled="loading" style="padding: 2px" @click="getModels(provider)">
+          <span>Update Models</span>
+          <el-icon v-if="loading" class="animation-rotate"><Loading /></el-icon>
+          <el-icon v-else>
+            <Refresh></Refresh>
+          </el-icon>
         </div>
+      </label>
+      <div class="model-container">
+        <div v-for="model in provider.models" :key="model.id" class="model-item">{{ model.id }}</div>
       </div>
     </div>
   </div>
@@ -127,6 +124,9 @@ const getModels = async (provider: Provider) => {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  padding: 4px 0;
+  max-height: 160px;
+  overflow-y: auto;
 }
 
 .model-item {

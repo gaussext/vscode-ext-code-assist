@@ -54,7 +54,7 @@
 </template>
 
 <script lang="ts" setup>
-import ProviderItem from '@/components/ProviderItem.vue';
+import ProviderItem from './components/ProviderItem.vue';
 import SelectPicker from '@/components/SelectPicker.vue';
 import { createDefaultProvider } from '@/models/Provider';
 import { useProviderStore } from '@/stores/useProviderStore';
@@ -162,6 +162,11 @@ const onConfirmClick = () => {
 .model-setting-body {
   display: flex;
   gap: 8px;
+  padding: 0 16px;
+  padding-top: 16px;
+  border: 1px solid var(--vscode-pickerGroup-border);
+  border-radius: 8px;
+  margin-bottom: 16px;
   .model-setting-item {
     flex: 1;
   }

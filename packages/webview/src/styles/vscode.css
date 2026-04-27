@@ -74,6 +74,10 @@ code {
   gap: 4px;
   background: transparent;
   border: none;
+  color: var(--vscode-button-foreground);
+}
+
+.vscode-button.is-text:hover {
   color: var(--vscode-button-secondaryForeground);
 }
 

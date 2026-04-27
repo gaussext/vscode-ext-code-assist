@@ -1,7 +1,7 @@
 import { shuffleArray, sleep } from '@/utils';
-import TEST from './TEST.md?raw';
 import type { IChatChunk } from '@/types';
-import { sl } from 'element-plus/es/locale/index.mjs';
+import TEST from './data/TEST.md?raw';
+import { models } from './data/models';
 
 export class RpcMock {
   static reasoning = `Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
@@ -9,47 +9,13 @@ Class euismod maecenas sed ridiculus sociis placerat porttitor.
 Parturient erat luctus vehicula ridiculus arcu conubia tempus. 
 Tempus in diam non malesuada penatibus hendrerit ultrices.`;
   static content = TEST;
-  static async loadContent() {
-    const TEST = await import('./TEST.md?raw');
-    this.content = TEST.default;
-  }
 
   static async mockModels() {
     await sleep(1000);
     return Promise.resolve({
       body: {
         object: 'list',
-        data: shuffleArray([
-          {
-            id: 'qwen3:4b',
-            object: 'model',
-            created: 1776875731,
-            owned_by: 'library',
-          },
-          {
-            id: 'qwen3:1.7b',
-            object: 'model',
-            created: 1776875342,
-            owned_by: 'library',
-          },
-          {
-            id: 'qwen3:0.6b',
-            object: 'model',
-            created: 1775916074,
-            owned_by: 'library',
-          },
-
-          {
-            id: 'deepseek-v4-flash',
-            object: 'model',
-            owned_by: 'deepseek',
-          },
-          {
-            id: 'deepseek-v4-pro',
-            object: 'model',
-            owned_by: 'deepseek',
-          },
-        ]),
+        data: shuffleArray(models),
       },
     });
   }
@@ -88,6 +54,5 @@ Tempus in diam non malesuada penatibus hendrerit ultrices.`;
     }
   }
 
-  static abort() {
-  }
+  static abort() {}
 }

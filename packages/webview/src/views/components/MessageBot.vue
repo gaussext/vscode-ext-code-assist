@@ -31,10 +31,10 @@ import { copyToClipboard } from '@/utils';
 import { Check, CopyDocument } from '@element-plus/icons-vue';
 import { ref } from 'vue';
 import Markdown from '@/components/Markdown.vue';
+import MessageInfo from './MessageInfo.vue';
 
 const props = defineProps({
   message: {
-    type: Object,
     default: () => new ChatMessage('assistant', ''),
   },
 });
