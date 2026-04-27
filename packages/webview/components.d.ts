@@ -17,5 +17,6 @@ declare module 'vue' {
     ProviderItem: typeof import('./src/components/ProviderItem.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SelectPicker: typeof import('./src/components/SelectPicker.vue')['default']
   }
 }

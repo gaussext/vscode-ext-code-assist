@@ -15,23 +15,19 @@
       <div class="model-setting-body">
         <div class="model-setting-item form-section">
           <label>Chat Model</label>
-          <select v-model="currentModelHash" class="vscode-select">
-            <option v-if="currentModels.length === 0" value="" disabled>Select a model</option>
-            <optgroup v-for="group in currentModels" :key="group.label">
-              <option class="as-title" :value="group.label" disabled>{{ group.label }}</option>
-              <option v-for="model in group.options" :key="model.value" :value="model.value">{{ model.label }}</option>
-            </optgroup>
-          </select>
+          <SelectPicker
+            v-model="currentModelHash"
+            :options="currentModels"
+            placeholder="Select a model"
+          />
         </div>
         <div class="model-setting-item form-section">
           <label>Summary Model</label>
-          <select v-model="summaryModelHash" class="vscode-select">
-            <option v-if="currentModels.length === 0" value="" disabled>Select a model</option>
-            <optgroup v-for="group in currentModels" :key="group.label">
-              <option class="as-title" :value="group.label" disabled>{{ group.label }}</option>
-              <option v-for="model in group.options" :key="model.value" :value="model.value">{{ model.label }}</option>
-            </optgroup>
-          </select>
+          <SelectPicker
+            v-model="summaryModelHash"
+            :options="currentModels"
+            placeholder="Select a model"
+          />
         </div>
       </div>
       <div class="provider-setting-header">
@@ -59,6 +55,7 @@
 
 <script lang="ts" setup>
 import ProviderItem from '@/components/ProviderItem.vue';
+import SelectPicker from '@/components/SelectPicker.vue';
 import { createDefaultProvider } from '@/models/Provider';
 import { useProviderStore } from '@/stores/useProviderStore';
 import { useSettingStore } from '@/stores/useSettingStore';
@@ -181,5 +178,15 @@ const onConfirmClick = () => {
   justify-content: flex-end;
   gap: 8px;
   margin-top: 12px;
+}
+
+.form-section {
+  margin-bottom: 16px;
+}
+
+.form-section label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 500;
 }
 </style>

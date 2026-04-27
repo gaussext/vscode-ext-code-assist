@@ -15,12 +15,12 @@
         @keypress="handleKeyPress"
       >
       </textarea>
-      <button class="vscode-button button-code" @click="$emit('code')" :disabled="!promptCode && !modelValue">
+      <button class="vscode-button is-icon button-code" @click="$emit('code')" :disabled="!promptCode && !modelValue">
         <el-icon>
           <component :is="modelValue ? DocumentAdd : DocumentRemove" />
         </el-icon>
       </button>
-      <button class="vscode-button button-send" @click="$emit('send')" :disabled="!loading && !modelValue">
+      <button class="vscode-button is-icon button-send" @click="$emit('send')" :disabled="!loading && !modelValue">
         <el-icon>
           <component :is="loading ? VideoPause : Promotion" />
         </el-icon>
@@ -108,8 +108,6 @@ const handleKeyPress = (e: KeyboardEvent) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: transparent;
-  border: transparent;
 }
 
 .footer-area .button-code {
