@@ -11,8 +11,8 @@ class ChatService {
     return chatRpcClient.chat(params);
   }
 
-  chatStream(params: IChatParams): ReadableStream<IChatChunk> {
-    return chatRpcClient.chatStream(params);
+  chatStream(params: IChatParams, signal?: AbortSignal): ReadableStream<IChatChunk> {
+    return chatRpcClient.chatStream(params, signal);
   }
 
   stop() {

@@ -68,6 +68,26 @@ code {
   background-color: #66b1ff;
 }
 
+.vscode-button.is-text {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  color: var(--vscode-button-foreground);
+}
+
+.vscode-button.is-text:hover {
+  color: var(--vscode-button-secondaryForeground);
+}
+
+.vscode-button.is-icon {
+  background-color: transparent;
+  border: transparent;
+}
+
+/* button group */
+
 .vscode-button-group {
   display: flex;
   align-items: center;
@@ -118,122 +138,4 @@ code {
 .vscode-textarea.focus,
 .vscode-textarea:focus {
   border-color: var(--vscode-inputOption-activeBorder);
-}
-
-/* Select */
-
-.vscode-select {
-  width: 100%;
-  font-size: 14px;
-  padding: 8px 12px;
-  border-radius: 4px;
-  cursor: pointer;
-  transition:
-    border-color 0.2s,
-    background-color 0.2s;
-  appearance: base-select;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath fill='%23c5c5c5' d='M4 6l4 4 4-4'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 8px center;
-  border: 1px solid var(--vscode-dropdown-border);
-  background-color: var(--vscode-dropdown-background);
-  color: var(--vscode-dropdown-foreground);
-}
-
-.vscode-select:hover {
-  border-color: var(--vscode-inputOption-activeBorder);
-}
-
-.vscode-select:focus {
-  outline: none;
-  border-color: var(--vscode-inputOption-activeBorder);
-}
-
-.vscode-select:open {
-  border-color: var(--vscode-inputOption-activeBorder);
-  border-radius: 4px 4px 0 0;
-}
-
-/* 下拉面板 */
-.vscode-select::picker(select) {
-  appearance: base-select;
-  max-height: 320px;
-  overflow: auto;
-  overscroll-behavior: none;
-  scrollbar-width: thin;
-  text-align: left;
-  border: 1px solid var(--vscode-inputOption-activeBorder);
-}
-
-.vscode-select::picker(select) {
-  opacity: 0;
-  transition: 0.2s allow-discrete;
-}
-
-.vscode-select::picker(select):popover-open {
-  opacity: 1;
-}
-
-/* 下拉分组 */
-.vscode-select optgroup {
-  font-weight: 700;
-  background-color: var(--vscode-editor-background);
-  border-bottom: 1px solid var(--vscode-dropdown-border);
-}
-
-.vscode-select optgroup[label] {
-  font-size: 14px;
-  line-height: 20px;
-  padding: 8px 0px;
-  min-height: 38px;
-  border-bottom: 1px solid var(--vscode-dropdown-border);
-}
-
-.vscode-select optgroup option {
-  text-indent: 0.5em;
-}
-
-.vscode-select optgroup option.as-title {
-  text-indent: 0;
-}
-
-/* 下拉选项 */
-
-.vscode-select option {
-  display: block;
-  line-height: 20px;
-  padding: 6px 12px;
-  padding-top: 6px;
-  font-size: 14px;
-  text-decoration: none;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  transition: background-color 0.2s;
-  box-sizing: border-box;
-  overflow: hidden;
-  background-color: var(--vscode-editor-background);
-  color: var(--vscode-dropdown-foreground);
-}
-
-.vscode-select option:checked {
-  background-color: var(--vscode-inputOption-hoverBackground);
-  color: var(--vscode-list-activeSelectionForeground);
-}
-
-.vscode-select option:hover {
-  background-color: var(--vscode-inputOption-hoverBackground);
-}
-
-.vscode-select option:focus {
-  background-color: var(--vscode-inputOption-hoverBackground);
-}
-
-.vscode-select option:disabled {
-  color: var(--vscode-disabledForeground);
-  background-color: var(--vscode-dropdown-listBackground);
-  cursor: default;
-}
-
-.vscode-select option::checkmark {
-  display: none;
 }

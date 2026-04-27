@@ -13,9 +13,8 @@ declare module 'vue' {
     ElIcon: typeof import('element-plus/es')['ElIcon']
     ElTooltip: typeof import('element-plus/es')['ElTooltip']
     Markdown: typeof import('./src/components/Markdown.vue')['default']
-    MessageInfo: typeof import('./src/components/MessageInfo.vue')['default']
-    ProviderItem: typeof import('./src/components/ProviderItem.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    SelectPicker: typeof import('./src/components/SelectPicker.vue')['default']
   }
 }

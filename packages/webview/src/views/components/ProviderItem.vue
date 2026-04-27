@@ -14,17 +14,17 @@
       </div>
     </div>
     <div class="preview-container">
-      <div class="form-section">
-        <label style="display: flex; align-items: center; gap: 8px">
-          <span>Models</span>
+      <label style="display: flex; align-items: center; gap: 8px">
+        <div class="vscode-button is-text" :disabled="loading" style="padding: 2px" @click="getModels(provider)">
+          <span>Update Models</span>
           <el-icon v-if="loading" class="animation-rotate"><Loading /></el-icon>
-          <el-icon v-else style="cursor: pointer" @click="getModels(provider)">
+          <el-icon v-else>
             <Refresh></Refresh>
           </el-icon>
-        </label>
-        <div class="model-container">
-          <div v-for="model in provider.models" :key="model.id" class="model-item">{{ model.id }}</div>
         </div>
+      </label>
+      <div class="model-container">
+        <div v-for="model in provider.models" :key="model.id" class="model-item">{{ model.id }}</div>
       </div>
     </div>
   </div>
@@ -37,6 +37,7 @@ import type { Provider } from '@/models/Provider';
 import { sha256 } from '@/utils/hash';
 import { Delete, Loading, Refresh } from '@element-plus/icons-vue';
 import { ref } from 'vue';
+import { sleep } from '@/utils';
 
 const props = defineProps<{
   provider: Provider;
@@ -51,6 +52,7 @@ const loading = ref(false);
 const getModels = async (provider: Provider) => {
   loading.value = true;
   try {
+    await sleep(300);
     const res = await chatService.models({
       baseURL: provider.baseURL,
       apiKey: provider.apiKey,
@@ -71,7 +73,6 @@ const getModels = async (provider: Provider) => {
     loading.value = false;
   }
 };
-
 </script>
 
 <style lang="scss" scoped>
@@ -105,7 +106,7 @@ const getModels = async (provider: Provider) => {
   position: absolute;
   top: 12px;
   right: 12px;
-  font-size: 16px;
+  font-size: 14px;
   cursor: pointer;
 }
 
@@ -123,6 +124,9 @@ const getModels = async (provider: Provider) => {
   display: flex;
   flex-wrap: wrap;
   gap: 4px;
+  padding: 4px 0;
+  max-height: 160px;
+  overflow-y: auto;
 }
 
 .model-item {
