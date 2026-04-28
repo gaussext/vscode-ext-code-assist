@@ -66,7 +66,7 @@ const getModels = async (provider: Provider) => {
         hash,
       });
     }
-    provider.models = modelsWithHash;
+    provider.models = modelsWithHash.sort((a, b) => a.id.localeCompare(b.id));
   } catch (error) {
     console.error(error);
   } finally {
@@ -86,7 +86,7 @@ const getModels = async (provider: Provider) => {
   gap: 8px;
 
   .form-container {
-    width: 320px;
+    width: 300px;
   }
 
   .preview-container {

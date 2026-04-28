@@ -55,6 +55,9 @@ const handleWindowMessage = (e: MessageEvent) => {
     case 'comment':
       handleComment(text);
       break;
+    case 'test':
+      handleTest(text);
+      break;
     case 'upgrade-class':
       handleUpgradeClass(text);
       break;
@@ -244,7 +247,7 @@ const handleOptimization = (code: string) => {
   if (!code) {
     return;
   }
-  prompt.value = `完善或优化一下这段代码`;
+  prompt.value = `完善或优化一下这段代码，可以是性能优化、代码简化、功能完善等方面的优化。请确保优化后的代码能够正常运行，并且在功能上与原代码保持一致。只要回答代码部分，不要有多余的文字，代码如下：`;
 
   promptCode.value = `
 \`\`\`
@@ -270,6 +273,18 @@ const handleComment = (code: string) => {
     return;
   }
   prompt.value = `给下面这段代码补充注释`;
+  promptCode.value = `
+\`\`\`
+${code}
+\`\`\``;
+  onSendButtonClick();
+};
+
+const handleTest = (code: string) => {
+  if (!code) {
+    return;
+  }
+  prompt.value = `给下面这段代码生成对应的测试用例，测试用例要覆盖主要的逻辑分支，并且符合常见的测试框架规范`;
   promptCode.value = `
 \`\`\`
 ${code}
