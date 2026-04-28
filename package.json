@@ -68,16 +68,8 @@
         "title": "代码注释"
       },
       {
-        "command": "codeAssist.upgrade-class",
-        "title": "升级 Class"
-      },
-      {
-        "command": "codeAssist.upgrade-vue",
-        "title": "升级 Vue"
-      },
-      {
-        "command": "codeAssist.upgrade-react",
-        "title": "升级 React"
+        "command": "codeAssist.test",
+        "title": "代码测试"
       },
       {
         "command": "codeAssist.analysis",
@@ -135,21 +127,9 @@
           "when": "editorHasSelection"
         },
         {
-          "command": "codeAssist.upgrade-class",
-          "group": "2_upgrade",
-          "order": 1,
-          "when": "editorHasSelection"
-        },
-        {
-          "command": "codeAssist.upgrade-vue",
-          "group": "2_upgrade",
-          "order": 2,
-          "when": "editorHasSelection"
-        },
-        {
-          "command": "codeAssist.upgrade-react",
-          "group": "2_upgrade",
-          "order": 3,
+          "command": "codeAssist.test",
+          "group": "1_basic",
+          "order": 4,
           "when": "editorHasSelection"
         },
         {
