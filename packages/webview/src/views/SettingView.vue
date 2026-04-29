@@ -75,6 +75,7 @@ const summaryModelHash = ref(settingStore.summaryModelHash || '');
 const currentModels = computed(() => {
   const groups: Record<string, IStandardItem<string>[]> = {};
   providers.value.forEach((p) => {
+    if (!p.enabled) return;
     if (!groups[p.baseURL]) {
       groups[p.baseURL] = [];
     }

@@ -6,6 +6,7 @@ export class Provider {
   id = UUID.v4();
   baseURL = 'http://localhost:11434/v1';
   apiKey = 'ollama';
+  enabled = true;
   models: Model[] = [
     { id: 'qwen3:0.6b', hash: '' },
     { id: 'qwen3:1.7b', hash: '' },

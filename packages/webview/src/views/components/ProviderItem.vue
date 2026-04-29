@@ -12,6 +12,15 @@
         <label>API Key</label>
         <input v-model="provider.apiKey" class="vscode-input" type="password" placeholder="sk-..." />
       </div>
+      <div class="form-section">
+        <label class="toggle-label">
+          <span>Enabled</span>
+          <label class="switch">
+            <input v-model="provider.enabled" type="checkbox" switch/>
+            <span class="slider"></span>
+          </label>
+        </label>
+      </div>
     </div>
     <div class="preview-container">
       <label style="display: flex; align-items: center; gap: 8px">
@@ -135,5 +144,17 @@ const getModels = async (provider: Provider) => {
   border: 1px solid #444;
   border-radius: 4px;
   background-color: #272822;
+}
+
+.form-section .toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.form-section label.switch {
+  margin-bottom: 0;
 }
 </style>
