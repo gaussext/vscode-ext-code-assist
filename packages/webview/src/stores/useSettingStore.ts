@@ -23,6 +23,7 @@ export const useSettingStore = defineStore('setting', () => {
     let provider = null;
     let model = null;
     providers.forEach((p) => {
+      if (!p.enabled) return;
       p.models.forEach((m) => {
         if (m.hash === modelHash) {
           provider = p;
