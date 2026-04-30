@@ -7,6 +7,7 @@ export class ChatMessage {
   conversationId: string = UUID.v4();
   role: MessageRole = 'system';
   model: string = '';
+  provider: string = '';
   content: string = '';
   reasoning?: string = '';
   startTime?: number = Date.now();

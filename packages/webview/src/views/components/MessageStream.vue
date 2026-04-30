@@ -2,6 +2,10 @@
   <div class="chat-message message-stream">
     <div class="message-title">
       <span>Bot</span>
+      <span>!</span>
+      <span>[{{ message.model }}]</span>
+      <span></span>
+      <span>({{ message.provider }})</span>
     </div>
     <el-collapse v-if="message.reasoning" v-model="activeNames" class="reasoning-box" expand-icon-position="left" value="Think">
       <el-collapse-item title="Think" name="Think">

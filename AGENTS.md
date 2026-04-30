@@ -54,3 +54,19 @@ Test flow: `pnpm run pretest` runs `compile-tests + compile + lint` before tests
 ## VS Code Debug
 
 Use the "Run Extension" launch config in `.vscode/launch.json` — it automatically runs the `watch` task as a pre-launch step.
+
+## Release Process
+
+Release is done by pushing a new git tag:
+
+```bash
+# Update version in package.json
+# Build and commit
+pnpm run compile
+git add -A && git commit -m "release: v1.0.0-beta.X"
+
+# Create and push tag
+git tag v1.0.0-beta.X && git push origin v1.0.0-beta.X
+```
+
+GitHub Actions will automatically build and attach the .vsix file to the release.

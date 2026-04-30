@@ -35,6 +35,7 @@ export const getMessageInfoFromMessage = (message: ChatMessage) => {
   const chars = content.length;
   const charsSpeed = (chars / parseFloat(evalDuration)).toFixed(2);
   return {
+    provider: message.provider,
     loadDuration,
     evalDuration,
     totalDuration,

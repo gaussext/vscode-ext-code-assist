@@ -119,12 +119,13 @@ const handleChatRequest = async (messages: ChatMessage[]) => {
   abortController = new AbortController();
   queueRender = new QueueRender();
   // 获取当前模型参数
-  const { baseURL, apiKey, model } = settingStore.getModelParams(settingStore.currentModelHash);
+  const { baseURL, apiKey, model, provider } = settingStore.getModelParams(settingStore.currentModelHash);
   // 记录当前对话ID
   const currentConversationId = conversationStore.conversationId;
   messageLatestStore.deleteLatestMessageByConvId(currentConversationId);
   currentMessage.value = messageLatestStore.getLatestMessageByConvId(currentConversationId);
   currentMessage.value.model = model;
+  currentMessage.value.provider = provider;
   const startTime = Date.now();
   let loadTime = 0;
   try {
