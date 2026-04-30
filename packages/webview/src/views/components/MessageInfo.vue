@@ -3,6 +3,10 @@
     <template #content>
       <div class="tooltip">
         <div class="tooltip__item">
+          <span>Provider :</span>
+          <span>{{ info.provider }}</span>
+        </div>
+        <div class="tooltip__item">
           <span>Model :</span>
           <span>{{ message.model }}</span>
         </div>

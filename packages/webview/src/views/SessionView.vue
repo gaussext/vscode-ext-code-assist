@@ -107,7 +107,7 @@ onMounted(async () => {
   margin-bottom: 8px;
 
   .conversation-history-title {
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 500;
   }
 }

@@ -35,6 +35,7 @@ export const useSettingStore = defineStore('setting', () => {
       baseURL: provider?.baseURL || '',
       apiKey: provider?.apiKey || '',
       model,
+      provider: provider?.baseURL || '',
     };
   };
 
