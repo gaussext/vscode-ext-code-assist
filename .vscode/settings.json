@@ -1,3 +1,5 @@
 {
-    "color-highlight.globalPaths": ["./packages/webview/src/styles/theme.css"]
+    "color-highlight.globalPaths": ["./packages/webview/src/styles/theme.css"],
+    "color-highlight.markerType": "dot-before",
+    "editor.colorDecorators": false
 }

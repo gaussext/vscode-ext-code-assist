@@ -1,5 +1,9 @@
 # AGENTS.md
 
+## Important
+
+使用中文思维完成接下来的所有任务
+
 ## Package Manager
 
 **pnpm** is required. Do not use npm or yarn.
