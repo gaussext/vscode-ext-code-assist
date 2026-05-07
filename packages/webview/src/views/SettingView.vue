@@ -13,22 +13,18 @@
         <h2 class="model-setting-title">Model</h2>
       </div>
       <div class="model-setting-body">
-        <div class="model-setting-item form-section">
-          <label>Chat Model</label>
-          <SelectPicker
-            v-model="currentModelHash"
-            :options="currentModels"
-            placeholder="Select a model"
-          />
-        </div>
-        <div class="model-setting-item form-section">
-          <label>Summary Model</label>
-          <SelectPicker
-            v-model="summaryModelHash"
-            :options="currentModels"
-            placeholder="Select a model"
-          />
-        </div>
+        <SettingModelItem
+          v-model="currentModelHash"
+          label="Chat Model"
+          :options="currentModels"
+          placeholder="Select a model"
+        />
+        <SettingModelItem
+          v-model="summaryModelHash"
+          label="Summary Model"
+          :options="currentModels"
+          placeholder="Select a model"
+        />
       </div>
       <div class="provider-setting-header">
         <h2 class="provider-setting-title">Provider</h2>
@@ -54,8 +50,8 @@
 </template>
 
 <script lang="ts" setup>
-import ProviderItem from './components/ProviderItem.vue';
-import SelectPicker from '@/components/SelectPicker.vue';
+import ProviderItem from './components/SettingProviderItem.vue';
+import SettingModelItem from './components/SettingModelItem.vue';
 import { createDefaultProvider } from '@/models/Provider';
 import { useProviderStore } from '@/stores/useProviderStore';
 import { useSettingStore } from '@/stores/useSettingStore';
@@ -168,9 +164,6 @@ const onConfirmClick = () => {
   border: 1px solid var(--vscode-pickerGroup-border);
   border-radius: 8px;
   margin-bottom: 16px;
-  .model-setting-item {
-    flex: 1;
-  }
 }
 
 .provider-setting-body {
