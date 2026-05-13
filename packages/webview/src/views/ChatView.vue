@@ -404,7 +404,7 @@ ${promptCode.value}
   const userMessage = new ChatMessage('user', currentConversationId);
   userMessage.content = content;
   currentMessageList.value = [...currentMessageList.value, userMessage];
-  const requestMessages = [...currentMessageList.value, userMessage];
+  const requestMessages = [...currentMessageList.value];
   messageStore.setMessagesById(currentConversationId, unref(currentMessageList));
   handleChatRequest(requestMessages);
 };
