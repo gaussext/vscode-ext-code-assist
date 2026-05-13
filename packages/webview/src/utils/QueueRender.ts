@@ -1,56 +1,66 @@
 import type { IChatChunkMerge } from '@/types';
-import { groupBy } from 'lodash';
 
 type Callback<T> = (result: T) => void;
 
+const CHUNK_TYPES = ['reasoning', 'content', 'error', 'end'] as const;
+const FPS_LIMIT = 33; // ~30fps
+
 export class QueueRender {
-  queue: IChatChunkMerge[] = [];
-  timer: number = 0;
-  callback: Callback<IChatChunkMerge> = null;
-  constructor() {
-    this.loop();
+  private queue: IChatChunkMerge[] = [];
+  private callback: Callback<IChatChunkMerge> | null = null;
+  private rafId: number | null = null;
+  private lastFlushTime = 0;
+
+  queueAsync<T extends IChatChunkMerge>(result: T, callback: Callback<T>) {
+    this.queue.push(result);
+    this.callback = callback as Callback<IChatChunkMerge>;
+    this.schedule();
   }
 
-  loop() {
-    this.timer = setInterval(() => {
-      this.task();
-    }, 33);
+  private schedule() {
+    if (this.rafId !== null) return;
+    this.rafId = requestAnimationFrame((timestamp) => {
+      this.rafId = null;
+      if (timestamp - this.lastFlushTime < FPS_LIMIT) {
+        this.schedule();
+        return;
+      }
+      this.lastFlushTime = timestamp;
+      this.flush();
+    });
+  }
+
+  private flush() {
+    if (this.queue.length === 0) return;
+    const items = this.queue;
+    this.queue = [];
+
+    const grouped: Record<string, IChatChunkMerge[]> = {};
+    for (const item of items) {
+      (grouped[item.type] ??= []).push(item);
+    }
+
+    for (const type of CHUNK_TYPES) {
+      const list = grouped[type];
+      if (list) this.output(list);
+    }
+  }
+
+  private output(list: IChatChunkMerge[]) {
+    if (!this.callback) return;
+    let chunk = list[0];
+    for (let i = 1; i < list.length; i++) {
+      chunk.data! += list[i].data ?? '';
+    }
+    this.callback(chunk);
   }
 
   dispose() {
     this.callback = null;
-    clearInterval(this.timer);
-  }
-  // 执行队列中的任务
-  async task() {
-    const grouped = await groupBy(this.queue, 'type');
-    if (grouped['reasoning']) {
-      this.output(grouped['reasoning']);
-    }
-    if (grouped['content']) {
-      this.output(grouped['content']);
-    }
-    if (grouped['error']) {
-      this.output(grouped['error']);
-    }
-    if (grouped['end']) {
-      this.output(grouped['end']);
+    if (this.rafId !== null) {
+      cancelAnimationFrame(this.rafId);
+      this.rafId = null;
     }
     this.queue = [];
-  }
-
-  output(list: IChatChunkMerge[]) {
-    let chunk = list[0];
-    list.forEach((item, index) => {
-      if (index > 0) {
-        chunk.data += item.data;
-      }
-    });
-    this.callback(chunk);
-  }
-
-  queueAsync<T extends IChatChunkMerge>(result: T, callback: Callback<T>) {
-    this.queue.push(result);
-    this.callback = callback;
   }
 }
