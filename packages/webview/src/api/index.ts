@@ -21,9 +21,36 @@ class ChatService {
     return chatRpcClient.stopChat();
   }
 
-  /** 从 ACP Agent 预加载历史消息，用于 webview 重连后恢复对话 */
   loadAndReplayHistory(config: ProviderConfig) {
     return chatRpcClient.loadAndReplayHistory(config);
+  }
+
+  // ---- Session CRUD ----
+
+  listSessions() {
+    return chatRpcClient.listAllSessions();
+  }
+
+  updateSessionTitle(sessionId: string, title: string) {
+    return chatRpcClient.updateSessionTitle(sessionId, title);
+  }
+
+  deleteSession(sessionId: string) {
+    return chatRpcClient.deleteSession(sessionId);
+  }
+
+  getSessionMessages(sessionId: string) {
+    return chatRpcClient.getSessionMessages(sessionId);
+  }
+
+  saveSession(data: {
+    sessionId: string;
+    title?: string;
+    messages?: { role: string; content: string }[];
+    model?: string;
+    provider?: string;
+  }) {
+    return chatRpcClient.saveSession(data);
   }
 }
 

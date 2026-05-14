@@ -237,10 +237,20 @@ export class AgentServer {
       },
 
       extMethod(method: string, params: Record<string, unknown>): Promise<Record<string, unknown>> {
-        if (method === 'code-assist/models') {
-          return self.handleListModels(params as any);
+        switch (method) {
+          case 'code-assist/models':
+            return self.handleListModels(params as any);
+          case 'code-assist/session/updateTitle':
+            return self.handleUpdateTitle(params as any);
+          case 'code-assist/session/delete':
+            return self.handleDeleteSession(params as any);
+          case 'code-assist/session/messages':
+            return self.handleGetSessionMessages(params as any);
+          case 'code-assist/session/save':
+            return self.handleSaveSession(params as any);
+          default:
+            return Promise.resolve({});
         }
-        return Promise.resolve({});
       },
     };
   }
@@ -270,6 +280,75 @@ export class AgentServer {
       });
     } catch {
     }
+  }
+
+  private async handleUpdateTitle(params: { sessionId: string; title: string }): Promise<Record<string, unknown>> {
+    const { sessionId, title } = params;
+    logger.info(`session/updateTitle: ${sessionId} "${title}"`);
+    await this.sessionStore.updateTitle(sessionId, title);
+    const session = this.sessions.get(sessionId);
+    if (session) {
+      session.data.title = title;
+    }
+    return {};
+  }
+
+  private async handleDeleteSession(params: { sessionId: string }): Promise<Record<string, unknown>> {
+    logger.info(`session/delete: ${params.sessionId}`);
+    const session = this.sessions.get(params.sessionId);
+    session?.cancel();
+    this.sessions.delete(params.sessionId);
+    await this.sessionStore.delete(params.sessionId);
+    return {};
+  }
+
+  private handleGetSessionMessages(params: { sessionId: string }): Record<string, unknown> {
+    const stored = this.sessionStore.load(params.sessionId);
+    if (!stored) {
+      return { messages: [], model: '', provider: '', title: '' };
+    }
+    return {
+      messages: stored.messages,
+      model: stored.model,
+      provider: stored.provider,
+      title: stored.title,
+    };
+  }
+
+  private async handleSaveSession(params: {
+    sessionId: string;
+    title?: string;
+    messages?: { role: string; content: string }[];
+    model?: string;
+    provider?: string;
+  }): Promise<Record<string, unknown>> {
+    const { sessionId } = params;
+    let session = this.sessions.get(sessionId);
+    if (!session) {
+      const stored = this.sessionStore.load(sessionId);
+      if (stored) {
+        session = ACPSession.fromData(stored);
+        this.sessions.set(sessionId, session);
+      }
+    }
+    if (!session) {
+      return { error: 'session not found' };
+    }
+    if (params.title !== undefined) {session.data.title = params.title;}
+    if (params.model !== undefined) {session.data.model = params.model;}
+    if (params.provider !== undefined) {session.data.provider = params.provider;}
+    if (params.messages !== undefined) {
+      session.data.messages = params.messages;
+    }
+    session.data.updatedAt = Date.now();
+    await this.sessionStore.save(session.data);
+    return {};
+  }
+
+  getSessionData(sessionId: string): Record<string, unknown> | null {
+    const stored = this.sessionStore.load(sessionId);
+    if (!stored) {return null;}
+    return { ...stored };
   }
 
   dispose(): void {

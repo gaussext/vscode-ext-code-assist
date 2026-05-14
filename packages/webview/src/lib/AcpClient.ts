@@ -19,6 +19,12 @@ export type SessionUpdateCallback = (chunk: {
   text: string
 }) => void
 
+export interface SessionInfo {
+  id: string
+  title: string
+  updatedAt: string
+}
+
 export class AcpClient {
   private connection: ClientSideConnection | null = null
   private _sessionId: string | null = null
@@ -97,11 +103,15 @@ export class AcpClient {
     this._sessionId = sessionId
   }
 
-  /**
-   * 加载一个已有 session 并收集历史回放消息
-   * 返回历史消息列表（user_message_chunk / agent_message_chunk）
-   */
-  async loadSessionHistory(sessionId: string): Promise<{ type: 'user_message_chunk' | 'agent_message_chunk'; text: string }[]> {
+  async closeSession(): Promise<void> {
+    if (!this._sessionId || !this.connection) return
+    await this.connection.closeSession({ sessionId: this._sessionId }).catch(() => {})
+    this._sessionId = null
+  }
+
+  async loadSessionHistory(
+    sessionId: string,
+  ): Promise<{ type: 'user_message_chunk' | 'agent_message_chunk'; text: string }[]> {
     const history: { type: 'user_message_chunk' | 'agent_message_chunk'; text: string }[] = []
     const cleanup = this.onUpdate((chunk) => {
       history.push(chunk)
@@ -124,16 +134,9 @@ export class AcpClient {
     this.connection?.cancel({ sessionId: this._sessionId }).catch(() => {})
   }
 
-  async listModels(baseURL: string, apiKey: string): Promise<any> {
-    if (!this.connection) return { object: 'list', data: [] }
-    try {
-      return await this.connection.extMethod('code-assist/models', { baseURL, apiKey })
-    } catch {
-      return { object: 'list', data: [] }
-    }
-  }
+  // ---- Session CRUD ----
 
-  async listSessions(): Promise<{ id: string; title: string; updatedAt: string }[]> {
+  async listSessions(): Promise<SessionInfo[]> {
     if (!this.connection) return []
     const result = await this.connection.listSessions({})
     return result.sessions.map((s) => ({
@@ -141,6 +144,44 @@ export class AcpClient {
       title: s.title ?? '',
       updatedAt: s.updatedAt ?? '',
     }))
+  }
+
+  async updateSessionTitle(sessionId: string, title: string): Promise<void> {
+    if (!this.connection) return
+    await this.connection.extMethod('code-assist/session/updateTitle', { sessionId, title })
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    if (!this.connection) return
+    await this.connection.extMethod('code-assist/session/delete', { sessionId })
+  }
+
+  async getSessionMessages(
+    sessionId: string,
+  ): Promise<{ messages: { role: string; content: string }[]; model: string; provider: string; title: string }> {
+    if (!this.connection) return { messages: [], model: '', provider: '', title: '' }
+    const result = await this.connection.extMethod('code-assist/session/messages', { sessionId })
+    return result as any
+  }
+
+  async saveSession(data: {
+    sessionId: string
+    title?: string
+    messages?: { role: string; content: string }[]
+    model?: string
+    provider?: string
+  }): Promise<void> {
+    if (!this.connection) return
+    await this.connection.extMethod('code-assist/session/save', data)
+  }
+
+  async listModels(baseURL: string, apiKey: string): Promise<any> {
+    if (!this.connection) return { object: 'list', data: [] }
+    try {
+      return await this.connection.extMethod('code-assist/models', { baseURL, apiKey })
+    } catch {
+      return { object: 'list', data: [] }
+    }
   }
 
   dispose(): void {

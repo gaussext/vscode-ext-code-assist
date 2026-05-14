@@ -29,6 +29,15 @@ export class SessionStore {
     await this.storage.update(STORAGE_KEY, all);
   }
 
+  async updateTitle(sessionId: string, title: string): Promise<void> {
+    const all = this.getAll();
+    if (all[sessionId]) {
+      all[sessionId].title = title;
+      all[sessionId].updatedAt = Date.now();
+      await this.storage.update(STORAGE_KEY, all);
+    }
+  }
+
   load(sessionId: string): SessionData | null {
     return this.getAll()[sessionId] ?? null;
   }

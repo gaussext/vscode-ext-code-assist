@@ -162,6 +162,33 @@ class ChatRpcClient {
     this.acpClient.cancel();
     return { message: 'stopped' };
   }
+
+  // ---- Session CRUD (delegated to the Agent) ----
+
+  async listAllSessions(): Promise<{ id: string; title: string; updatedAt: string }[]> {
+    await this.acpClient.initialize();
+    return this.acpClient.listSessions();
+  }
+
+  async updateSessionTitle(sessionId: string, title: string): Promise<void> {
+    await this.acpClient.initialize();
+    return this.acpClient.updateSessionTitle(sessionId, title);
+  }
+
+  async deleteSession(sessionId: string): Promise<void> {
+    await this.acpClient.initialize();
+    return this.acpClient.deleteSession(sessionId);
+  }
+
+  async getSessionMessages(sessionId: string): Promise<{ messages: { role: string; content: string }[]; model: string; provider: string; title: string }> {
+    await this.acpClient.initialize();
+    return this.acpClient.getSessionMessages(sessionId);
+  }
+
+  async saveSession(data: { sessionId: string; title?: string; messages?: { role: string; content: string }[]; model?: string; provider?: string }): Promise<void> {
+    await this.acpClient.initialize();
+    return this.acpClient.saveSession(data);
+  }
 }
 
 export type { ProviderConfig } from '@/lib/AcpClient';
