@@ -2,7 +2,7 @@
   <div class="app-header chat-header header-area">
     <div class="header-area-tool">
       <div class="header-title">
-        {{ conversationStore.conversationTitle.slice(0, 20) || 'New Session' }}
+        {{ session.conversationTitle.value.slice(0, 20) || 'New Session' }}
       </div>
       <div class="header-icon-group right">
         <el-icon class="header-icon" :class="{ disabled: loading }" @click="downloadConversation">
@@ -24,15 +24,13 @@
 
 <script setup lang="ts">
 import type { ChatMessage } from '@/models/Message';
-import { useConversationStore } from '@/stores/useConversationStore';
-import { useMessageStore } from '@/stores/useMessageStore';
+import { chatService } from '@/api';
+import { useSession } from '@/stores/useSession';
 import { Download, FolderAdd, FolderOpened, Setting } from '@element-plus/icons-vue';
-import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
-const conversationStore = useConversationStore();
-const messageStore = useMessageStore();
+const session = useSession();
 
 const props = defineProps({
   messages: {
@@ -43,57 +41,36 @@ const props = defineProps({
   },
 });
 
-onMounted(async () => {
-  const conversation = await conversationStore.getConversationById(conversationStore.conversationId);
-  if (conversation) {
-    conversationStore.setConversationTitle(conversation.title);
-  }
-});
-
-const emit = defineEmits<{
-  (e: 'create'): void;
-  (e: 'delete'): void;
-  (e: 'update:conversationId', value: string): void;
-  (e: 'download'): void;
-}>();
-
 const downloadConversation = async () => {
-  if (props.loading) {
-    return;
-  }
-  const conversation = await conversationStore.getConversationById(conversationStore.conversationId);
-  if (!conversation) {
-    return;
-  }
-  await messageStore.downloadConversation(conversationStore.conversationId, conversation.title);
+  const id = session.conversationId.value;
+  if (!id) return;
+  const title = session.conversationTitle.value || 'chat';
+  const data = await chatService.getSessionMessages(id);
+  const text = data.messages
+    .filter((m: any) => m.role === 'agent')
+    .map((m: any) => m.content)
+    .join('\n');
+  if (!text) return;
+  const blob = new Blob([text], { type: 'text/plain' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${title}.md`;
+  a.click();
+  URL.revokeObjectURL(url);
 };
 
-const onCreateConversation = async () => {
-  if (props.loading) {
-    return;
-  }
-  if (props.messages.length === 0) {
-    return;
-  }
-  const conv = await conversationStore.createConversation();
-  conversationStore.setConversationId(conv.id);
-  conversationStore.setConversationTitle(conv.title);
-  emit('create');
-  emit('update:conversationId', conv.id);
-};
-
-const gotoHistory = () => {
-  if (props.loading) {
-    return;
-  }
-  router.push('/session');
+const onCreateConversation = () => {
+  session.setConversationId(crypto.randomUUID());
+  session.setConversationTitle('');
 };
 
 const gotoSetting = () => {
-  if (props.loading) {
-    return;
-  }
   router.push('/setting');
+};
+
+const gotoHistory = () => {
+  router.push('/session');
 };
 </script>
 

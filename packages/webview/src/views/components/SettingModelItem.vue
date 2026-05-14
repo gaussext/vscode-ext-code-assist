@@ -61,7 +61,7 @@ const testModel = async (hash) => {
   status.value = 0;
   await sleep(300);
   chatService
-    .chat({
+    .chatRaw({
       baseURL,
       apiKey,
       model,

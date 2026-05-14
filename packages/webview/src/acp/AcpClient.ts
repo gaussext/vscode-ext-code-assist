@@ -19,6 +19,8 @@ export type SessionUpdateCallback = (chunk: {
   text: string
 }) => void
 
+export type SessionInfoCallback = (info: { title?: string }) => void
+
 export interface SessionInfo {
   id: string
   title: string
@@ -29,6 +31,7 @@ export class AcpClient {
   private connection: ClientSideConnection | null = null
   private _sessionId: string | null = null
   private updateCallbacks: Set<SessionUpdateCallback> = new Set()
+  private infoCallbacks: Set<SessionInfoCallback> = new Set()
   private _initialized = false
 
   get sessionId(): string | null {
@@ -71,6 +74,11 @@ export class AcpClient {
               cb({ type: update.sessionUpdate, text: content.text }),
             )
           }
+        } else if (update.sessionUpdate === 'session_info_update') {
+          const info = update as any
+          if (info.title !== undefined) {
+            self.infoCallbacks.forEach((cb) => cb({ title: info.title }))
+          }
         }
         return Promise.resolve()
       },
@@ -84,6 +92,11 @@ export class AcpClient {
   onUpdate(callback: SessionUpdateCallback): () => void {
     this.updateCallbacks.add(callback)
     return () => this.updateCallbacks.delete(callback)
+  }
+
+  onInfo(callback: SessionInfoCallback): () => void {
+    this.infoCallbacks.add(callback)
+    return () => this.infoCallbacks.delete(callback)
   }
 
   async createSession(cwd = '', providerConfig?: ProviderConfig): Promise<string> {
@@ -134,6 +147,10 @@ export class AcpClient {
     this.connection?.cancel({ sessionId: this._sessionId }).catch(() => {})
   }
 
+  cancelSession(sessionId: string): void {
+    this.connection?.cancel({ sessionId }).catch(() => {})
+  }
+
   // ---- Session CRUD ----
 
   async listSessions(): Promise<SessionInfo[]> {
@@ -162,6 +179,12 @@ export class AcpClient {
     if (!this.connection) return { messages: [], model: '', provider: '', title: '' }
     const result = await this.connection.extMethod('code-assist/session/messages', { sessionId })
     return result as any
+  }
+
+  async summarizeSession(sessionId: string, baseURL: string, apiKey: string, model: string): Promise<string> {
+    if (!this.connection) return ''
+    const result = await this.connection.extMethod('code-assist/session/summarize', { sessionId, baseURL, apiKey, model })
+    return ((result as any)?.title as string) ?? ''
   }
 
   async saveSession(data: {

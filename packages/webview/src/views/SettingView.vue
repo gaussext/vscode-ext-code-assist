@@ -52,19 +52,17 @@
 <script lang="ts" setup>
 import ProviderItem from './components/SettingProviderItem.vue';
 import SettingModelItem from './components/SettingModelItem.vue';
-import { createDefaultProvider } from '@/models/Provider';
-import { useProviderStore } from '@/stores/useProviderStore';
 import { useSettingStore } from '@/stores/useSettingStore';
+import { useProviderStore } from '@/stores/useProviderStore';
 import type { IStandardItem } from '@/types';
-import { Download } from '@element-plus/icons-vue';
-import { computed, ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { computed, ref, toRef } from 'vue';
 
 const router = useRouter();
-const providerStore = useProviderStore();
 const settingStore = useSettingStore();
+const providerStore = useProviderStore();
 
-const providers = ref(providerStore.providers);
+const providers = toRef(providerStore, 'providers');
 const currentModelHash = ref(settingStore.currentModelHash || '');
 const summaryModelHash = ref(settingStore.summaryModelHash || '');
 
@@ -92,32 +90,23 @@ const currentModels = computed(() => {
 });
 
 const handleAddProvider = async () => {
+  const { createDefaultProvider } = await import('@/models/Provider');
   providers.value.push(await createDefaultProvider());
 };
 
 const handleRemoveProvider = (id: string) => {
-  providers.value = providers.value.filter((p) => p.id !== id);
+  providerStore.setProviders(providers.value.filter((p: any) => p.id !== id));
 };
 
 const handleResetClick = async () => {
   await providerStore.resetProviders();
-  providers.value = providerStore.providers;
-  setTimeout(() => {
-    const firstModel = currentModels.value[0]?.options[0];
-    if (firstModel) {
-      currentModelHash.value = firstModel.value;
-      summaryModelHash.value = firstModel.value;
-      settingStore.setCurrentModelHash(firstModel.value);
-      settingStore.setSummaryModelHash(firstModel.value);
-    }
-  });
 };
 
 const onConfirmClick = () => {
   if (providers.value.length > 0) {
     providerStore.setProviders(providers.value);
-    settingStore.setCurrentModelHash(currentModelHash.value);
-    settingStore.setSummaryModelHash(summaryModelHash.value);
+    settingStore.setCurrentModelHash(settingStore.currentModelHash);
+    settingStore.setSummaryModelHash(settingStore.summaryModelHash);
     router.push('/');
   }
 };

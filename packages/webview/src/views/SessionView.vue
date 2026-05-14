@@ -14,7 +14,7 @@
         :key="conv.id"
         class="conversation-item"
         :class="{
-          'is-active': conv.id === conversationStore.conversationId,
+          'is-active': conv.id === session.conversationId.value,
         }"
       >
         <span class="conversation-item-title">{{ conv.title }}</span>
@@ -36,56 +36,56 @@
       <div style="flex: 1">
         <button class="vscode-button" @click="onAddConversation">Add Session</button>
       </div>
-      <button class="vscode-button" @click="onClearConversation">Reset</button>
+      <button class="vscode-button" @click="onClearClick">Reset</button>
       <button class="vscode-button primary" @click="$router.push('/')">OK</button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { useConversationStore } from '@/stores/useConversationStore';
-import { useMessageStore } from '@/stores/useMessageStore';
-import { firstElement } from '@/utils';
-import { Delete, Download, Promotion, Setting } from '@element-plus/icons-vue';
-import { storeToRefs } from 'pinia';
-import { onMounted } from 'vue';
+import { useSession } from '@/stores/useSession';
+import { Delete, Promotion } from '@element-plus/icons-vue';
+import { onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
-const router = useRouter();
-const conversationStore = useConversationStore();
-const { conversations } = storeToRefs(useConversationStore());
-const messageStore = useMessageStore();
+interface ConvItem { id: string; title: string }
 
-const onConversationChange = async (id: string) => {
-  conversationStore.setConversationId(id);
+const router = useRouter();
+const session = useSession();
+const conversations = ref<ConvItem[]>([]);
+
+const loadSessions = async () => {
+  const list = await session.listSessions();
+  conversations.value = list.map((s: any) => ({ id: s.id, title: s.title || 'New Session' }));
+};
+
+const onConversationChange = (id: string) => {
+  session.setConversationId(id);
   router.push('/');
 };
 
-const onAddConversation = async () => {
-  const conv = await conversationStore.createConversation();
-  conversationStore.setConversationId(conv.id);
-  conversationStore.setConversationTitle(conv.title ?? '');
+const onAddConversation = () => {
+  const id = crypto.randomUUID();
+  session.setConversationId(id);
+  session.setConversationTitle('');
+};
+
+const onClearClick = () => {
+  const id = crypto.randomUUID();
+  session.setConversationId(id);
+  conversations.value = [{ id, title: 'New Session' }];
 };
 
 const onDeleteConversation = async (id: string) => {
-  await conversationStore.deleteConversation(id);
-  await messageStore.removeMessagesById(id);
-  const convs = await conversationStore.getConversations();
-  if (convs.length > 0) {
-    conversationStore.setConversationId(firstElement(convs).id);
-  }
-};
-
-const onClearConversation = async () => {
-  await conversationStore.resetConversations();
-  const convs = await conversationStore.getConversations();
-  if (convs.length > 0) {
-    conversationStore.setConversationId(firstElement(convs).id);
+  await session.deleteSession(id);
+  await loadSessions();
+  if (conversations.value.length > 0) {
+    session.setConversationId(conversations.value[0].id);
   }
 };
 
 onMounted(async () => {
-  await conversationStore.getConversations();
+  await loadSessions();
 });
 </script>
 

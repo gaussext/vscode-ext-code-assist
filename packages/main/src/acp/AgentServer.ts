@@ -21,9 +21,12 @@ import {
   type AgentCapabilities,
 } from '@agentclientprotocol/sdk';
 import { OpenAIService } from '../services/OpenAIService';
+import type { StoredMessage } from './SessionStore';
 import { SessionStore } from './SessionStore';
 import { ACPSession, type PromptConfig } from './ACPSession';
 import { logger } from '../lib/Logger';
+
+
 
 export class AgentServer {
   private sessions = new Map<string, ACPSession>();
@@ -32,8 +35,12 @@ export class AgentServer {
   private openaiService: OpenAIService;
   private disposables: vscode.Disposable[] = [];
 
-  constructor(globalState: vscode.Memento) {
-    this.sessionStore = new SessionStore(globalState);
+  constructor(
+    globalState: vscode.Memento,
+    _secrets: vscode.SecretStorage,
+    globalStorageUri: vscode.Uri,
+  ) {
+    this.sessionStore = new SessionStore(globalState, globalStorageUri);
     this.openaiService = new OpenAIService();
   }
 
@@ -88,7 +95,7 @@ export class AgentServer {
             baseURL: metaProvider.baseURL || '',
             apiKey: metaProvider.apiKey || '',
             model: metaProvider.model || '',
-            provider: metaProvider.provider || '',
+            provider: metaProvider.provider || metaProvider.baseURL || '',
           };
         }
 
@@ -115,7 +122,7 @@ export class AgentServer {
           return { stopReason: 'end_turn' };
         }
 
-        session.addMessage({ role: 'user', content: userText });
+        session.addMessage({ role: 'user', content: userText, model: session.config.model, provider: session.config.provider });
 
         const controller = new AbortController();
         session.activeController = controller;
@@ -130,7 +137,7 @@ export class AgentServer {
             baseURL,
             apiKey,
             model,
-            messages: session.data.messages,
+            messages: session.toCompletionMessages(),
           });
 
           let content = '';
@@ -164,10 +171,15 @@ export class AgentServer {
             return { stopReason: 'cancelled' };
           }
 
-          const fullContent = reasoning ? `${reasoning}\n\n${content}` : content;
-          session.addMessage({ role: 'assistant', content: fullContent });
+          session.addMessage({ role: 'agent', content, model, provider: session.config.provider });
+          if (reasoning) {
+            session.addMessage({ role: 'think', content: reasoning, model, provider: session.config.provider });
+          }
           await self.sessionStore.save(session.data);
           logger.info(`session/prompt complete: ${params.sessionId} tokens=${content.length}`);
+
+          // 自动生成标题
+          self.generateTitle(params.sessionId, baseURL, apiKey, model).catch(() => {});
 
           return { stopReason: 'end_turn' };
         } catch (err: unknown) {
@@ -177,7 +189,7 @@ export class AgentServer {
           }
           const msg = err instanceof Error ? err.message : 'Unknown error';
           logger.error(`session/prompt error: ${params.sessionId} ${msg}`);
-          session.addMessage({ role: 'assistant', content: `Error: ${msg}` });
+          session.addMessage({ role: 'agent', content: `Error: ${msg}`, model: session.config.model, provider: session.config.provider });
           await self.sessionStore.save(session.data);
           return { stopReason: 'end_turn' };
         } finally {
@@ -248,6 +260,8 @@ export class AgentServer {
             return self.handleGetSessionMessages(params as any);
           case 'code-assist/session/save':
             return self.handleSaveSession(params as any);
+          case 'code-assist/session/summarize':
+            return self.handleSummarizeSession(params as any);
           default:
             return Promise.resolve({});
         }
@@ -262,6 +276,22 @@ export class AgentServer {
     } catch (err: unknown) {
       return { message: err instanceof Error ? err.message : 'Unknown error' };
     }
+  }
+
+  private async generateTitle(sessionId: string, baseURL: string, apiKey: string, model: string): Promise<void> {
+    try {
+      const result = await this.handleSummarizeSession({ sessionId, baseURL, apiKey, model });
+      const title = result.title as string;
+      if (title && this.connection) {
+        await this.connection.sessionUpdate({
+          sessionId,
+          update: {
+            sessionUpdate: 'session_info_update' as any,
+            title,
+          } as any,
+        }).catch(() => {});
+      }
+    } catch {}
   }
 
   private async sendChunk(
@@ -302,30 +332,57 @@ export class AgentServer {
     return {};
   }
 
-  private handleGetSessionMessages(params: { sessionId: string }): Record<string, unknown> {
-    const stored = this.sessionStore.load(params.sessionId);
+  private async handleGetSessionMessages(params: { sessionId: string }): Promise<Record<string, unknown>> {
+    const stored = await this.sessionStore.load(params.sessionId);
     if (!stored) {
-      return { messages: [], model: '', provider: '', title: '' };
+      return { messages: [], title: '' };
     }
     return {
       messages: stored.messages,
-      model: stored.model,
-      provider: stored.provider,
       title: stored.title,
     };
+  }
+
+  private async handleSummarizeSession(params: {
+    sessionId: string;
+    baseURL: string;
+    apiKey: string;
+    model: string;
+  }): Promise<Record<string, unknown>> {
+    const stored = await this.sessionStore.load(params.sessionId);
+    if (!stored || stored.messages.length === 0) {
+      return { title: '' };
+    }
+    try {
+      const resp = await this.openaiService.chat({
+        baseURL: params.baseURL,
+        apiKey: params.apiKey,
+        model: params.model,
+        messages: [
+          ...stored.messages.map((m: any) => ({ role: m.role, content: m.content })),
+          { role: 'user', content: '请用20字以内总结以上对话主题，作为对话标题直接返回，不需要任何标点和修饰' },
+        ],
+      });
+      const title = ((resp as any)?.choices?.[0]?.message?.content || '').slice(0, 20);
+      if (title) {
+        await this.sessionStore.updateTitle(params.sessionId, title);
+      }
+      return { title };
+    } catch (err: unknown) {
+      logger.error(`session/summarize error: ${err instanceof Error ? err.message : 'unknown'}`);
+      return { title: '' };
+    }
   }
 
   private async handleSaveSession(params: {
     sessionId: string;
     title?: string;
     messages?: { role: string; content: string }[];
-    model?: string;
-    provider?: string;
   }): Promise<Record<string, unknown>> {
     const { sessionId } = params;
     let session = this.sessions.get(sessionId);
     if (!session) {
-      const stored = this.sessionStore.load(sessionId);
+      const stored = await this.sessionStore.load(sessionId);
       if (stored) {
         session = ACPSession.fromData(stored);
         this.sessions.set(sessionId, session);
@@ -335,20 +392,16 @@ export class AgentServer {
       return { error: 'session not found' };
     }
     if (params.title !== undefined) {session.data.title = params.title;}
-    if (params.model !== undefined) {session.data.model = params.model;}
-    if (params.provider !== undefined) {session.data.provider = params.provider;}
     if (params.messages !== undefined) {
-      session.data.messages = params.messages;
+      session.data.messages = (params.messages as any[]).map((m: any) => ({
+        ...m,
+        model: m.model || session.config.model || undefined,
+        provider: m.provider || session.config.provider || undefined,
+      }));
     }
     session.data.updatedAt = Date.now();
     await this.sessionStore.save(session.data);
     return {};
-  }
-
-  getSessionData(sessionId: string): Record<string, unknown> | null {
-    const stored = this.sessionStore.load(sessionId);
-    if (!stored) {return null;}
-    return { ...stored };
   }
 
   dispose(): void {

@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { IChatParams, IProviderParams } from 'code-assist-shared';
+import { IOpenAIParams, IProviderParams } from 'code-assist-shared';
 import { logger } from '../lib/Logger';
 
 export class OpenAIService {
@@ -20,8 +20,8 @@ export class OpenAIService {
     return this.client;
   }
 
-  async models(params: IChatParams) {
-    logger.info('OpenAI models request', params);
+  async models(params: IProviderParams) {
+    logger.info('OpenAI models request', { baseURL: params.baseURL });
     const { apiKey, baseURL } = params;
     try {
       const client = this.getClient(apiKey, baseURL);
@@ -35,8 +35,8 @@ export class OpenAIService {
     }
   }
 
-  async chat(params: IChatParams) {
-    logger.info('OpenAI chat request', params);
+  async chat(params: IOpenAIParams) {
+    logger.info('OpenAI chat request', { model: params.model, messages: params.messages.length });
     const { apiKey, baseURL } = params;
     try {
       const client = this.getClient(apiKey, baseURL);
@@ -54,7 +54,7 @@ export class OpenAIService {
     }
   }
 
-  async chatStream(params: IChatParams) {
+  async chatStream(params: IOpenAIParams) {
     const { apiKey, baseURL } = params;
     logger.info('OpenAI stream start', { model: params.model, messages: params.messages.length });
     const client = this.getClient(apiKey, baseURL);

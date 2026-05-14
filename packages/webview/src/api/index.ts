@@ -1,6 +1,5 @@
-import type { IChatParams, IProviderParams } from 'code-assist-shared';
+import type { IProviderParams } from 'code-assist-shared';
 import { chatRpcClient, type ProviderConfig } from './rpc';
-import type { IChatChunk } from '@/types';
 
 export type { ProviderConfig };
 
@@ -9,16 +8,27 @@ class ChatService {
     return chatRpcClient.models(params);
   }
 
-  chat(params: IChatParams) {
-    return chatRpcClient.chat(params);
+  chatRaw(params: {
+    baseURL: string;
+    apiKey: string;
+    model: string;
+    messages: { role: string; content: string }[];
+  }) {
+    return chatRpcClient.chatRaw(params);
   }
 
-  chatStream(params: IChatParams, signal?: AbortSignal): ReadableStream<IChatChunk> {
-    return chatRpcClient.chatStream(params, signal);
+  /** 发送提示词，onChunk 回调接收流式内容 */
+  sendPrompt(
+    sessionId: string,
+    text: string,
+    onChunk?: (chunk: string) => void,
+    signal?: AbortSignal,
+  ) {
+    return chatRpcClient.sendPrompt(sessionId, text, onChunk, signal);
   }
 
-  stop() {
-    return chatRpcClient.stopChat();
+  stop(sessionId?: string) {
+    return chatRpcClient.stopChat(sessionId);
   }
 
   loadAndReplayHistory(config: ProviderConfig) {
@@ -47,10 +57,12 @@ class ChatService {
     sessionId: string;
     title?: string;
     messages?: { role: string; content: string }[];
-    model?: string;
-    provider?: string;
   }) {
     return chatRpcClient.saveSession(data);
+  }
+
+  summarizeSession(sessionId: string, baseURL: string, apiKey: string, model: string) {
+    return chatRpcClient.summarizeSession(sessionId, baseURL, apiKey, model);
   }
 }
 

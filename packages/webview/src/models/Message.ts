@@ -1,6 +1,6 @@
 import * as UUID from 'uuid';
 
-type MessageRole = 'system' | 'user' | 'assistant';
+type MessageRole = 'system' | 'user' | 'agent' | 'think' | 'tool';
 
 export class ChatMessage {
   id: string = UUID.v4();

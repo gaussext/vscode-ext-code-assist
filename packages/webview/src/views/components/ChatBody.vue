@@ -2,7 +2,7 @@
   <div ref="messagesAreaRef" class="chat-body messages-area" :class="{ 'has-code': promptCode }">
     <template v-for="message in messages" :key="message.id">
       <MessageUser v-if="message.role === 'user'" :message="message" />
-      <MessageBot v-if="message.role === 'assistant'" :message="message" />
+      <MessageBot v-if="message.role === 'agent'" :message="message" />
     </template>
     <MessageStream v-show="loading" :message="currentMessage" />
     <div ref="footerRef"></div>

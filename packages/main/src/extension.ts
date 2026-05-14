@@ -3,7 +3,12 @@ import { ChatWebViewProvider } from './views/ChatWebViewProvider';
 import { logger } from './lib/Logger';
 
 function setupChatWebview(context: vscode.ExtensionContext) {
-  const provider = new ChatWebViewProvider(context.extensionUri, context.globalState);
+  const provider = new ChatWebViewProvider(
+    context.extensionUri,
+    context.globalState,
+    context.secrets,
+    context.globalStorageUri,
+  );
   const view = vscode.window.registerWebviewViewProvider('code-assist.view', provider);
   context.subscriptions.push(view);
 

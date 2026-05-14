@@ -19,15 +19,17 @@ export interface IProviderParams {
   apiKey: string;
 }
 
-export interface ICompletionMessage {
-  role: 'user' | 'assistant' | 'system';
-  content: string;
+/** webview → Agent 的 prompt 请求参数 */
+export interface IChatParams {
+  sessionId: string;
+  text: string;
 }
 
-export interface IChatParams {
+/** OpenAI API 调用参数（内部使用） */
+export interface IOpenAIParams {
   baseURL: string;
   apiKey: string;
   model: string;
-  messages: ICompletionMessage[];
+  messages: { role: string; content: string }[];
 }
 

@@ -1,7 +1,5 @@
-import type { IChatParams, IProviderParams } from 'code-assist-shared';
-import { AcpClient, type ProviderConfig } from '@/lib/AcpClient';
-import type { IChatChunk } from '@/types';
-import { RpcMock } from './rpc-mock';
+import type { IProviderParams } from 'code-assist-shared';
+import { AcpClient, type ProviderConfig } from '@/acp/AcpClient';
 
 const SESSION_KEY_PREFIX = 'acp_session_';
 
@@ -61,7 +59,7 @@ class ChatRpcClient {
     const messages: { role: string; content: string }[] = [];
     let cur: { role: string; content: string } | null = null;
     for (const chunk of history) {
-      const role = chunk.type === 'user_message_chunk' ? 'user' : 'assistant';
+      const role = chunk.type === 'user_message_chunk' ? 'user' : 'agent';
       if (cur && cur.role === role) {
         cur.content += chunk.text;
       } else {
@@ -75,21 +73,30 @@ class ChatRpcClient {
 
   async models(params: IProviderParams): Promise<any> {
     if (typeof (globalThis as any).acquireVsCodeApi === 'undefined') {
-      return RpcMock.mockModels();
+      return { object: 'list', data: [] };
     }
     await this.acpClient.initialize();
     return this.acpClient.listModels(params.baseURL, params.apiKey);
   }
 
-  async chat(params: IChatParams): Promise<any> {
-    const config: ProviderConfig = {
+  /** 非流式聊天（用于 summary / 模型测试），直接发消息到 Agent 单次完成 */
+  async chatRaw(params: {
+    baseURL: string;
+    apiKey: string;
+    model: string;
+    messages: { role: string; content: string }[];
+  }): Promise<any> {
+    await this.acpClient.initialize();
+    const sessionId = await this.acpClient.createSession('', {
       baseURL: params.baseURL,
       apiKey: params.apiKey,
       model: params.model,
       provider: params.baseURL,
-    };
-
-    await this.initSession(config);
+    });
+    await this.acpClient.saveSession({
+      sessionId,
+      messages: params.messages,
+    });
 
     let fullContent = '';
     return new Promise((resolve, reject) => {
@@ -98,9 +105,7 @@ class ChatRpcClient {
           fullContent += chunk.text;
         }
       });
-
-      const promptText = params.messages.map(m => m.content).join('\n');
-      this.acpClient.prompt(promptText)
+      this.acpClient.prompt(params.messages.map(m => m.content).join('\n'))
         .then(() => {
           cleanup();
           resolve({ choices: [{ message: { content: fullContent } }] });
@@ -112,54 +117,49 @@ class ChatRpcClient {
     });
   }
 
-  chatStream(params: IChatParams, signal?: AbortSignal): ReadableStream<IChatChunk> {
-    if (typeof (globalThis as any).acquireVsCodeApi === 'undefined') {
-      return RpcMock.mockChatStream(signal);
+  /**
+   * 发送提示词并使用回调接收流式块
+   * @param sessionId 当前会话 ID
+   * @param text 用户消息
+   * @param onChunk 每个 agent_message_chunk 的回调
+   * @param signal 可选的取消信号
+   */
+  async sendPrompt(
+    sessionId: string,
+    text: string,
+    onChunk?: (chunk: string) => void,
+    signal?: AbortSignal,
+  ): Promise<void> {
+    await this.acpClient.initialize();
+    this.acpClient['_sessionId'] = sessionId;
+
+    const cleanup = this.acpClient.onUpdate((chunk) => {
+      if (chunk.type === 'agent_message_chunk') {
+        onChunk?.(chunk.text);
+      }
+    });
+
+    if (signal) {
+      signal.addEventListener('abort', () => {
+        this.acpClient.cancel();
+        cleanup();
+      }, { once: true });
     }
 
-    return new ReadableStream<IChatChunk>({
-      start: async (controller) => {
-        const config: ProviderConfig = {
-          baseURL: params.baseURL,
-          apiKey: params.apiKey,
-          model: params.model,
-          provider: params.baseURL,
-        };
-
-        try {
-          await this.initSession(config);
-
-          const cleanup = this.acpClient.onUpdate((chunk) => {
-            if (chunk.type === 'agent_message_chunk') {
-              controller.enqueue({ type: 'content', data: chunk.text } as IChatChunk);
-            }
-          });
-
-          if (signal) {
-            signal.addEventListener('abort', () => {
-              this.acpClient.cancel();
-              cleanup();
-            }, { once: true });
-          }
-
-          const promptText = params.messages.map((m) => m.content).join('\n');
-          const promptMsg = params.messages.find(m => m.role === 'user')?.content || promptText;
-          await this.acpClient.prompt(promptMsg);
-
-          cleanup();
-          controller.close();
-        } catch (err: any) {
-          if (err?.name !== 'AbortError' && err?.message !== 'Aborted') {
-            controller.enqueue({ type: 'error', data: err?.message || 'Unknown error' });
-          }
-          controller.close();
-        }
-      },
-    });
+    try {
+      await this.acpClient.prompt(text);
+    } finally {
+      cleanup();
+    }
   }
 
-  async stopChat(): Promise<any> {
-    this.acpClient.cancel();
+  async stopChat(sessionId?: string): Promise<any> {
+    if (sessionId) {
+      await this.acpClient.initialize();
+      this.acpClient.cancelSession(sessionId);
+    } else {
+      this.acpClient.cancel();
+    }
     return { message: 'stopped' };
   }
 
@@ -185,11 +185,17 @@ class ChatRpcClient {
     return this.acpClient.getSessionMessages(sessionId);
   }
 
-  async saveSession(data: { sessionId: string; title?: string; messages?: { role: string; content: string }[]; model?: string; provider?: string }): Promise<void> {
+  async saveSession(data: { sessionId: string; title?: string; messages?: { role: string; content: string }[] }): Promise<void> {
     await this.acpClient.initialize();
     return this.acpClient.saveSession(data);
   }
+
+  async summarizeSession(sessionId: string, baseURL: string, apiKey: string, model: string): Promise<string> {
+    await this.acpClient.initialize();
+    return this.acpClient.summarizeSession(sessionId, baseURL, apiKey, model);
+  }
+
 }
 
-export type { ProviderConfig } from '@/lib/AcpClient';
+export type { ProviderConfig } from '@/acp/AcpClient';
 export const chatRpcClient = new ChatRpcClient();

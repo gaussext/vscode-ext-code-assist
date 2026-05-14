@@ -13,8 +13,10 @@ export class ChatWebViewProvider implements vscode.WebviewViewProvider {
   constructor(
     private readonly _extensionUri: vscode.Uri,
     globalState: vscode.Memento,
+    secrets: vscode.SecretStorage,
+    globalStorageUri: vscode.Uri,
   ) {
-    this.agentServer = new AgentServer(globalState);
+    this.agentServer = new AgentServer(globalState, secrets, globalStorageUri);
   }
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
