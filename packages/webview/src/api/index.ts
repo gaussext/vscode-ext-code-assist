@@ -1,6 +1,8 @@
 import type { IChatParams, IProviderParams } from 'code-assist-shared';
-import { chatRpcClient } from './rpc';
+import { chatRpcClient, type ProviderConfig } from './rpc';
 import type { IChatChunk } from '@/types';
+
+export type { ProviderConfig };
 
 class ChatService {
   models(params: IProviderParams) {
@@ -17,6 +19,11 @@ class ChatService {
 
   stop() {
     return chatRpcClient.stopChat();
+  }
+
+  /** 从 ACP Agent 预加载历史消息，用于 webview 重连后恢复对话 */
+  loadAndReplayHistory(config: ProviderConfig) {
+    return chatRpcClient.loadAndReplayHistory(config);
   }
 }
 

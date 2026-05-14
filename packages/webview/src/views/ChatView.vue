@@ -14,6 +14,7 @@ import { useMessageLatestStore } from '@/stores/useMessageLatestStore';
 import { useMessageStore } from '@/stores/useMessageStore';
 import { onMounted, onUnmounted, ref, unref } from 'vue';
 import { chatService } from '../api';
+import type { ProviderConfig } from '../api';
 import { ChatMessage } from '../models/Message';
 import ChatBody from './components/ChatBody.vue';
 import ChatFooter from './components/ChatFooter.vue';
@@ -90,7 +91,7 @@ const handleWindowMessage = (e: MessageEvent) => {
 let queueRender: QueueRender | null = null;
 
 onUnmounted(() => {
-  abortController?.abort();
+  // 不取消请求——让 Agent 在后台继续处理，重开 webview 后通过 session/load 恢复
   queueRender?.dispose();
 });
 
@@ -415,10 +416,34 @@ const handleConversationChange = () => {
   loadMessages();
 };
 
+const restoreACPHistoryIfNeeded = async () => {
+  const { baseURL, apiKey, model } = settingStore.getModelParams(settingStore.currentModelHash);
+  if (!baseURL || !model) return;
+
+  const config: ProviderConfig = { baseURL, apiKey, model, provider: baseURL };
+  const history = await chatService.loadAndReplayHistory(config);
+  if (history.length === 0) return;
+
+  const existing = await messageStore.getMessagesById(conversationStore.conversationId);
+  if (existing.length > 0) return;
+
+  const convId = conversationStore.conversationId;
+  const messages: ChatMessage[] = history.map((msg) => {
+    const chatMsg = new ChatMessage(msg.role as 'user' | 'assistant', convId);
+    chatMsg.content = msg.content;
+    return chatMsg;
+  });
+
+  await messageStore.setMessagesById(convId, messages);
+};
+
 onMounted(async () => {
   window.addEventListener('message', handleWindowMessage);
   await conversationStore.getConversations();
-  loadMessages();
+
+  await restoreACPHistoryIfNeeded();
+
+  await loadMessages();
 });
 
 onUnmounted(() => {

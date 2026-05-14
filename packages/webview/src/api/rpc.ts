@@ -3,20 +3,74 @@ import { AcpClient, type ProviderConfig } from '@/lib/AcpClient';
 import type { IChatChunk } from '@/types';
 import { RpcMock } from './rpc-mock';
 
+const SESSION_KEY_PREFIX = 'acp_session_';
+
 class ChatRpcClient {
   private acpClient: AcpClient;
-  private lastProviderConfig: ProviderConfig | null = null;
+  private sessionIdByConfig = new Map<string, string>();
 
   constructor() {
     this.acpClient = new AcpClient();
   }
 
-  private async ensureSession(config: ProviderConfig): Promise<void> {
+  /** 初始化并恢复持久化的 session — 在 app 启动时调用 */
+  async initSession(config: ProviderConfig): Promise<void> {
     await this.acpClient.initialize();
-    this.lastProviderConfig = config;
-    if (!this.acpClient.sessionId) {
-      await this.acpClient.createSession('', config);
+
+    const key = this.configKey(config);
+    const inMem = this.sessionIdByConfig.get(key);
+    if (inMem) return;
+
+    const stored = localStorage.getItem(this.storageKey(config));
+    if (stored) {
+      this.sessionIdByConfig.set(key, stored);
+      this.acpClient['_sessionId'] = stored;
+      return;
     }
+
+    const sessionId = await this.acpClient.createSession('', config);
+    this.sessionIdByConfig.set(key, sessionId);
+    localStorage.setItem(this.storageKey(config), sessionId);
+  }
+
+  /** 回放指定 session 的历史消息，返回完整消息列表 */
+  async loadAndReplayHistory(config: ProviderConfig): Promise<{ role: string; content: string }[]> {
+    const stored = localStorage.getItem(this.storageKey(config));
+    if (!stored) return [];
+
+    await this.acpClient.initialize();
+
+    const history = await this.acpClient.loadSessionHistory(stored);
+    this.sessionIdByConfig.set(this.configKey(config), stored);
+    this.acpClient['_sessionId'] = stored;
+
+    return this.mergeHistory(history);
+  }
+
+  private configKey(config: ProviderConfig): string {
+    return `${config.baseURL}|${config.model}`;
+  }
+
+  private storageKey(config: ProviderConfig): string {
+    return SESSION_KEY_PREFIX + this.configKey(config);
+  }
+
+  private mergeHistory(
+    history: { type: 'user_message_chunk' | 'agent_message_chunk'; text: string }[],
+  ): { role: string; content: string }[] {
+    const messages: { role: string; content: string }[] = [];
+    let cur: { role: string; content: string } | null = null;
+    for (const chunk of history) {
+      const role = chunk.type === 'user_message_chunk' ? 'user' : 'assistant';
+      if (cur && cur.role === role) {
+        cur.content += chunk.text;
+      } else {
+        if (cur) messages.push(cur);
+        cur = { role, content: chunk.text };
+      }
+    }
+    if (cur) messages.push(cur);
+    return messages;
   }
 
   async models(params: IProviderParams): Promise<any> {
@@ -28,12 +82,14 @@ class ChatRpcClient {
   }
 
   async chat(params: IChatParams): Promise<any> {
-    await this.ensureSession({
+    const config: ProviderConfig = {
       baseURL: params.baseURL,
       apiKey: params.apiKey,
       model: params.model,
       provider: params.baseURL,
-    });
+    };
+
+    await this.initSession(config);
 
     let fullContent = '';
     return new Promise((resolve, reject) => {
@@ -63,18 +119,15 @@ class ChatRpcClient {
 
     return new ReadableStream<IChatChunk>({
       start: async (controller) => {
+        const config: ProviderConfig = {
+          baseURL: params.baseURL,
+          apiKey: params.apiKey,
+          model: params.model,
+          provider: params.baseURL,
+        };
+
         try {
-          await this.acpClient.initialize();
-
-          const config: ProviderConfig = {
-            baseURL: params.baseURL,
-            apiKey: params.apiKey,
-            model: params.model,
-            provider: params.baseURL,
-          };
-          this.lastProviderConfig = config;
-
-          const sessionId = await this.acpClient.createSession('', config);
+          await this.initSession(config);
 
           const cleanup = this.acpClient.onUpdate((chunk) => {
             if (chunk.type === 'agent_message_chunk') {
@@ -111,4 +164,5 @@ class ChatRpcClient {
   }
 }
 
+export type { ProviderConfig } from '@/lib/AcpClient';
 export const chatRpcClient = new ChatRpcClient();

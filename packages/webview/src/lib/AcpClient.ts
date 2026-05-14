@@ -97,6 +97,20 @@ export class AcpClient {
     this._sessionId = sessionId
   }
 
+  /**
+   * 加载一个已有 session 并收集历史回放消息
+   * 返回历史消息列表（user_message_chunk / agent_message_chunk）
+   */
+  async loadSessionHistory(sessionId: string): Promise<{ type: 'user_message_chunk' | 'agent_message_chunk'; text: string }[]> {
+    const history: { type: 'user_message_chunk' | 'agent_message_chunk'; text: string }[] = []
+    const cleanup = this.onUpdate((chunk) => {
+      history.push(chunk)
+    })
+    await this.loadSession(sessionId)
+    cleanup()
+    return history
+  }
+
   async prompt(text: string): Promise<void> {
     if (!this.connection || !this._sessionId) throw new Error('ACP Client not initialized')
     await this.connection.prompt({
