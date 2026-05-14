@@ -1,14 +1,20 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { createRpc } from '../rpc';
+import { AgentServer, createWebviewStream } from '../acp';
 
 const setting = vscode.workspace.getConfiguration('code-assist');
 
 export class ChatWebViewProvider implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
-  
-  constructor(private readonly _extensionUri: vscode.Uri) {}
+  private agentServer: AgentServer;
+
+  constructor(
+    private readonly _extensionUri: vscode.Uri,
+    globalState: vscode.Memento,
+  ) {
+    this.agentServer = new AgentServer(globalState);
+  }
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
     this._view = webviewView;
@@ -18,7 +24,9 @@ export class ChatWebViewProvider implements vscode.WebviewViewProvider {
     };
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-    createRpc(webviewView.webview);
+
+    const stream = createWebviewStream(webviewView.webview);
+    this.agentServer.connect(stream);
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {

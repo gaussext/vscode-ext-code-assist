@@ -1,69 +1,113 @@
 import type { IChatParams, IProviderParams } from 'code-assist-shared';
-import { EnumRpcMessage } from 'code-assist-shared';
-import { RpcMock } from './rpc-mock';
-import { WebviewRpcClient } from '@/lib/WebviewRpcClient';
+import { AcpClient, type ProviderConfig } from '@/lib/AcpClient';
 import type { IChatChunk } from '@/types';
+import { RpcMock } from './rpc-mock';
 
 class ChatRpcClient {
-  private rpcClient: WebviewRpcClient;
+  private acpClient: AcpClient;
+  private lastProviderConfig: ProviderConfig | null = null;
 
   constructor() {
-    if (globalThis.acquireVsCodeApi) {
-      const vscode = (globalThis as any).acquireVsCodeApi();
-      this.rpcClient = new WebviewRpcClient(vscode, globalThis);
+    this.acpClient = new AcpClient();
+  }
+
+  private async ensureSession(config: ProviderConfig): Promise<void> {
+    await this.acpClient.initialize();
+    this.lastProviderConfig = config;
+    if (!this.acpClient.sessionId) {
+      await this.acpClient.createSession('', config);
     }
   }
 
   async models(params: IProviderParams): Promise<any> {
-    if (!this.rpcClient) {
+    if (typeof (globalThis as any).acquireVsCodeApi === 'undefined') {
       return RpcMock.mockModels();
     }
-    return this.rpcClient.call(EnumRpcMessage.Models, params);
+    await this.acpClient.initialize();
+    return this.acpClient.listModels(params.baseURL, params.apiKey);
   }
 
   async chat(params: IChatParams): Promise<any> {
-    if (!this.rpcClient) {
-      throw new Error('RPC client not initialized. model:' + params.model);
-    }
-    return this.rpcClient.call(EnumRpcMessage.Chat, params);
+    await this.ensureSession({
+      baseURL: params.baseURL,
+      apiKey: params.apiKey,
+      model: params.model,
+      provider: params.baseURL,
+    });
+
+    let fullContent = '';
+    return new Promise((resolve, reject) => {
+      const cleanup = this.acpClient.onUpdate((chunk) => {
+        if (chunk.type === 'agent_message_chunk') {
+          fullContent += chunk.text;
+        }
+      });
+
+      const promptText = params.messages.map(m => m.content).join('\n');
+      this.acpClient.prompt(promptText)
+        .then(() => {
+          cleanup();
+          resolve({ choices: [{ message: { content: fullContent } }] });
+        })
+        .catch((err) => {
+          cleanup();
+          reject(err);
+        });
+    });
   }
 
   chatStream(params: IChatParams, signal?: AbortSignal): ReadableStream<IChatChunk> {
-    if (!this.rpcClient) {
+    if (typeof (globalThis as any).acquireVsCodeApi === 'undefined') {
       return RpcMock.mockChatStream(signal);
     }
-    const { baseURL, apiKey, model } = params;
-    if (!baseURL) {
-      throw new Error('baseURL required');
-    }
-    if (!apiKey) {
-      throw new Error('apiKey required');
-    }
-    if (!model) {
-      throw new Error('model required');
-    }
-    const rawStream = this.rpcClient.call(EnumRpcMessage.ChatStream, params, true, signal);
-    return rawStream.pipeThrough(
-      new TransformStream<any, IChatChunk>({
-        transform(chunk, controller) {
-          const delta = chunk.choices?.[0]?.delta;
-          if (delta) {
-            const reasoning = delta.reasoning || delta.reasoning_content || '';
-            if (reasoning) controller.enqueue({ type: 'reasoning', data: reasoning });
-            const content = delta.content || '';
-            if (content) controller.enqueue({ type: 'content', data: content });
+
+    return new ReadableStream<IChatChunk>({
+      start: async (controller) => {
+        try {
+          await this.acpClient.initialize();
+
+          const config: ProviderConfig = {
+            baseURL: params.baseURL,
+            apiKey: params.apiKey,
+            model: params.model,
+            provider: params.baseURL,
+          };
+          this.lastProviderConfig = config;
+
+          const sessionId = await this.acpClient.createSession('', config);
+
+          const cleanup = this.acpClient.onUpdate((chunk) => {
+            if (chunk.type === 'agent_message_chunk') {
+              controller.enqueue({ type: 'content', data: chunk.text } as IChatChunk);
+            }
+          });
+
+          if (signal) {
+            signal.addEventListener('abort', () => {
+              this.acpClient.cancel();
+              cleanup();
+            }, { once: true });
           }
-        },
-      })
-    );
+
+          const promptText = params.messages.map((m) => m.content).join('\n');
+          const promptMsg = params.messages.find(m => m.role === 'user')?.content || promptText;
+          await this.acpClient.prompt(promptMsg);
+
+          cleanup();
+          controller.close();
+        } catch (err: any) {
+          if (err?.name !== 'AbortError' && err?.message !== 'Aborted') {
+            controller.enqueue({ type: 'error', data: err?.message || 'Unknown error' });
+          }
+          controller.close();
+        }
+      },
+    });
   }
 
   async stopChat(): Promise<any> {
-    if (!this.rpcClient) {
-      RpcMock.abort();
-      return;
-    }
-    return this.rpcClient.call(EnumRpcMessage.Stop, {});
+    this.acpClient.cancel();
+    return { message: 'stopped' };
   }
 }
 

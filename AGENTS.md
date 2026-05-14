@@ -22,21 +22,24 @@ pnpm run compile          # compiles the main extension
 
 ```
 packages/
-├── main/       # VS Code extension host (webpack bundling)
-├── rpc/        # Shared RPC lib (code-assit-rpc) — must be built before main/webview
-└── webview/    # Vue 3 frontend (Vite) — embeds rpc via workspace:*
+├── main/       # VS Code extension host + ACP Agent (webpack bundling)
+├── rpc/        # Deprecated — old custom RPC lib (still built for compat, not used)
+├── shared/     # Shared types (IChatParams, ICompletionMessage, etc.)
+└── webview/    # Vue 3 frontend + ACP Client (Vite)
 ```
 
-- `packages/rpc` is a published lib (not code-assist-rpc — that dir is empty/missing)
-- Both `main` and `webview` depend on `code-assit-rpc` via `workspace:*`
+- Communication between `main` and `webview` uses **ACP (Agent Client Protocol)** via `@agentclientprotocol/sdk`
+- ACP transport is built on top of VS Code's `postMessage` mechanism
+- The extension host acts as an **ACP Agent** — sessions persist even when webview closes
+- The webview acts as an **ACP Client** — can disconnect/reconnect without losing state
 
 ## Developer Commands
 
 | Command | Purpose |
 |---------|---------|
-| `pnpm run build:rpc` | Build only the RPC library |
+| `pnpm run build:rpc` | Build only the RPC library (deprecated, still needed for compat) |
 | `pnpm run build:webview` | Build only the webview |
-| `pnpm run build:prepare` | Build rpc + webview (fast, no bundling) |
+| `pnpm run build:prepare` | Build shared + rpc + webview (fast, no bundling) |
 | `pnpm run compile` | Full build: prepare + webpack bundle |
 | `pnpm run watch` | Watch mode (rpc + webview + webpack watch) |
 | `pnpm run package` | Production bundle |
@@ -49,11 +52,17 @@ Test flow: `pnpm run pretest` runs `compile-tests + compile + lint` before tests
 
 ## Extension Architecture
 
-- **Entry point**: `packages/main/src/extension.ts`
-- **Webview provider**: `packages/main/src/views/ChatWebViewProvider.ts`
+- **Entry point**: `packages/main/src/extension.ts` — initializes `AgentServer` with `globalState`
+- **ACP Agent**: `packages/main/src/acp/AgentServer.ts` — handles `session/new`, `session/prompt`, `session/load`, etc.
+- **Session store**: `packages/main/src/acp/SessionStore.ts` — persists messages via VS Code Memento
+- **Session**: `packages/main/src/acp/ACPSession.ts` — per-conversation state (messages, model config, abort controller)
+- **Transport**: `packages/main/src/acp/transport.ts` — wraps `webview.postMessage` as ACP `Stream`
+- **Webview provider**: `packages/main/src/views/ChatWebViewProvider.ts` — creates webview + connects Agent
+- **Commands**: All `codeAssist.*` commands registered in `extension.ts`
 - **Webview entry**: `packages/webview/src/main.ts` + `App.vue`
-- **Commands**: All `codeAssist.*` commands are registered in `extension.ts` and use the same pattern — open webview, send selection, trigger a prompt type.
-- **Streaming**: Responses use the OpenAI streaming API and are streamed to the webview via RPC.
+- **ACP Client**: `packages/webview/src/lib/AcpClient.ts` — sends prompts, receives streaming updates
+- **Streaming**: Agent sends `session/update` notifications during prompt processing; Client receives via `onUpdate` callback
+- **Background processing**: If webview closes mid-stream, Agent continues reading from OpenAI and stores result in SessionStore. Reopening webview and calling `session/load` replays history.
 
 ## VS Code Debug
 

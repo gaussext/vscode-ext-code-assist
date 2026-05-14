@@ -11,10 +11,12 @@
     "watch-tests": "tsc -p . -w --outDir out"
   },
   "dependencies": {
+    "@agentclientprotocol/sdk": "^0.21.1",
+    "code-assist-rpc": "workspace:*",
+    "code-assist-shared": "workspace:*",
     "loglevel": "^1.9.2",
     "openai": "^4.28.0",
-    "code-assist-rpc": "workspace:*",
-    "code-assist-shared": "workspace:*"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.16",

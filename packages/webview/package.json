@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@agentclientprotocol/sdk": "^0.21.1",
     "@element-plus/icons-vue": "^2.3.2",
     "code-assist-rpc": "workspace:*",
     "code-assist-shared": "workspace:*",
@@ -23,7 +24,8 @@
     "pinia": "^3.0.4",
     "uuid": "^11.1.0",
     "vue": "^3.5.13",
-    "vue-router": "^5.0.4"
+    "vue-router": "^5.0.4",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/lodash": "^4.17.24",

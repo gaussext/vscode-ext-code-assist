@@ -15,12 +15,12 @@
         @keypress="handleKeyPress"
       >
       </textarea>
-      <button class="vscode-button is-icon button-code" @click="$emit('code')" :disabled="!promptCode && !modelValue">
+      <button class="vscode-button is-icon button-code" :disabled="!promptCode && !modelValue" @click="$emit('code')">
         <el-icon>
           <component :is="modelValue ? DocumentAdd : DocumentRemove" />
         </el-icon>
       </button>
-      <button class="vscode-button is-icon button-send" @click="$emit('send')" :disabled="!loading && !modelValue">
+      <button class="vscode-button is-icon button-send" :disabled="!loading && !modelValue" @click="$emit('send')">
         <el-icon>
           <component :is="loading ? VideoPause : Promotion" />
         </el-icon>
