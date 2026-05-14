@@ -418,14 +418,14 @@ const handleConversationChange = () => {
 
 const restoreACPHistoryIfNeeded = async () => {
   const { baseURL, apiKey, model } = settingStore.getModelParams(settingStore.currentModelHash);
-  if (!baseURL || !model) return;
+  if (!baseURL || !model) {return;}
 
   const config: ProviderConfig = { baseURL, apiKey, model, provider: baseURL };
   const history = await chatService.loadAndReplayHistory(config);
-  if (history.length === 0) return;
+  if (history.length === 0) {return;}
 
   const existing = await messageStore.getMessagesById(conversationStore.conversationId);
-  if (existing.length > 0) return;
+  if (existing.length > 0) {return;}
 
   const convId = conversationStore.conversationId;
   const messages: ChatMessage[] = history.map((msg) => {

@@ -1,6 +1,6 @@
 import OpenAI from 'openai';
-import log from 'loglevel';
 import { IChatParams, IProviderParams } from 'code-assist-shared';
+import { logger } from '../lib/Logger';
 
 export class OpenAIService {
   private client: OpenAI | null = null;
@@ -21,12 +21,12 @@ export class OpenAIService {
   }
 
   async models(params: IChatParams) {
-    log.info('OpenAI models request', params);
+    logger.info('OpenAI models request', params);
     const { apiKey, baseURL } = params;
     try {
       const client = this.getClient(apiKey, baseURL);
       const resp = await client.models.list();
-      console.log('OpenAI models response', resp);
+      logger.info('OpenAI models response', resp);
       return resp;
     } catch (error: any) {
       return {
@@ -36,7 +36,7 @@ export class OpenAIService {
   }
 
   async chat(params: IChatParams) {
-    log.info('OpenAI chat request', params);
+    logger.info('OpenAI chat request', params);
     const { apiKey, baseURL } = params;
     try {
       const client = this.getClient(apiKey, baseURL);
@@ -45,7 +45,7 @@ export class OpenAIService {
         messages: params.messages,
         stream: false,
       });
-      console.log('OpenAI chat response', resp);
+      logger.info('OpenAI chat response', resp);
       return resp;
     } catch (error: any) {
       return {
@@ -56,7 +56,7 @@ export class OpenAIService {
 
   async chatStream(params: IChatParams) {
     const { apiKey, baseURL } = params;
-    log.info('OpenAI stream', params);
+    logger.info('OpenAI stream start', { model: params.model, messages: params.messages.length });
     const client = this.getClient(apiKey, baseURL);
     try {
       const stream = await client.chat.completions.create({

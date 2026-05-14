@@ -23,6 +23,7 @@ import {
 import { OpenAIService } from '../services/OpenAIService';
 import { SessionStore } from './SessionStore';
 import { ACPSession, type PromptConfig } from './ACPSession';
+import { logger } from '../lib/Logger';
 
 export class AgentServer {
   private sessions = new Map<string, ACPSession>();
@@ -37,7 +38,12 @@ export class AgentServer {
   }
 
   connect(stream: Stream): void {
+    logger.info('ACP Agent connect');
     this.connection = new AgentSideConnection(() => this.createAgentHandler(), stream);
+
+    this.connection.signal.addEventListener('abort', () => {
+      logger.info('ACP Agent disconnected');
+    });
 
     this.disposables.push({
       dispose: () => {
@@ -50,6 +56,7 @@ export class AgentServer {
     const self = this;
     return {
       initialize(_params: InitializeRequest): Promise<InitializeResponse> {
+        logger.info('ACP initialize');
         const caps: AgentCapabilities = {
           loadSession: true,
           sessionCapabilities: { list: {}, close: {} } as SessionCapabilities,
@@ -87,12 +94,15 @@ export class AgentServer {
 
         const session = new ACPSession(id, params.cwd, config);
         self.sessions.set(id, session);
+        logger.info(`session/new: ${id} model=${config?.model || 'none'}`);
         return Promise.resolve({ sessionId: id });
       },
 
       async prompt(params: PromptRequest): Promise<PromptResponse> {
         const session = self.sessions.get(params.sessionId);
+        logger.info(`session/prompt: ${params.sessionId}`);
         if (!session) {
+          logger.warn(`session/prompt: session not found ${params.sessionId}`);
           return { stopReason: 'end_turn' };
         }
 
@@ -150,19 +160,23 @@ export class AgentServer {
           }
 
           if (controller.signal.aborted) {
+            logger.info(`session/prompt cancelled: ${params.sessionId}`);
             return { stopReason: 'cancelled' };
           }
 
           const fullContent = reasoning ? `${reasoning}\n\n${content}` : content;
           session.addMessage({ role: 'assistant', content: fullContent });
           await self.sessionStore.save(session.data);
+          logger.info(`session/prompt complete: ${params.sessionId} tokens=${content.length}`);
 
           return { stopReason: 'end_turn' };
         } catch (err: unknown) {
           if (err instanceof Error && err.name === 'AbortError') {
+            logger.info(`session/prompt aborted: ${params.sessionId}`);
             return { stopReason: 'cancelled' };
           }
           const msg = err instanceof Error ? err.message : 'Unknown error';
+          logger.error(`session/prompt error: ${params.sessionId} ${msg}`);
           session.addMessage({ role: 'assistant', content: `Error: ${msg}` });
           await self.sessionStore.save(session.data);
           return { stopReason: 'end_turn' };
@@ -172,18 +186,22 @@ export class AgentServer {
       },
 
       cancel(params: CancelNotification): Promise<void> {
+        logger.info(`session/cancel: ${params.sessionId}`);
         const session = self.sessions.get(params.sessionId);
         session?.cancel();
         return Promise.resolve();
       },
 
       async loadSession(params: LoadSessionRequest): Promise<LoadSessionResponse> {
+        logger.info(`session/load: ${params.sessionId}`);
         const stored = self.sessionStore.load(params.sessionId);
         if (!stored) {
+          logger.warn(`session/load not found: ${params.sessionId}`);
           return {};
         }
         const session = ACPSession.fromData(stored);
         self.sessions.set(params.sessionId, session);
+        logger.info(`session/load replaying ${session.data.messages.length} messages`);
 
         for (const msg of session.data.messages) {
           const updateType = msg.role === 'user'
@@ -208,31 +226,31 @@ export class AgentServer {
       },
 
       closeSession(params: CloseSessionRequest): Promise<CloseSessionResponse | void> {
-        const session = self.sessions.get(params.sessionId)
-        session?.cancel()
-        self.sessions.delete(params.sessionId)
-        return Promise.resolve({})
+        const session = self.sessions.get(params.sessionId);
+        session?.cancel();
+        self.sessions.delete(params.sessionId);
+        return Promise.resolve({});
       },
 
       extNotification(method: string, params: Record<string, unknown>): Promise<void> {
-        return Promise.resolve()
+        return Promise.resolve();
       },
 
       extMethod(method: string, params: Record<string, unknown>): Promise<Record<string, unknown>> {
         if (method === 'code-assist/models') {
-          return self.handleListModels(params as any)
+          return self.handleListModels(params as any);
         }
-        return Promise.resolve({})
+        return Promise.resolve({});
       },
-    }
+    };
   }
 
   private async handleListModels(config: { baseURL: string; apiKey: string }): Promise<Record<string, unknown>> {
     try {
-      const resp = await this.openaiService.models(config)
-      return resp as Record<string, unknown>
+      const resp = await this.openaiService.models(config);
+      return resp as Record<string, unknown>;
     } catch (err: unknown) {
-      return { message: err instanceof Error ? err.message : 'Unknown error' }
+      return { message: err instanceof Error ? err.message : 'Unknown error' };
     }
   }
 

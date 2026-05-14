@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { ChatWebViewProvider } from './views/ChatWebViewProvider';
+import { logger } from './lib/Logger';
 
 function setupChatWebview(context: vscode.ExtensionContext) {
   const provider = new ChatWebViewProvider(context.extensionUri, context.globalState);
@@ -41,6 +42,7 @@ function setupChatWebview(context: vscode.ExtensionContext) {
 }
 
 export function activate(context: vscode.ExtensionContext) {
+  logger.info('Extension activate');
   setupChatWebview(context);
 
   const openCommand = vscode.commands.registerCommand('codeAssist.open', () => {
