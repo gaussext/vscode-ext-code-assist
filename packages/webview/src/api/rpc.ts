@@ -1,4 +1,4 @@
-import type { IProviderParams } from 'code-assist-shared';
+import type { IProviderParams } from './types';
 import { AcpClient, type ProviderConfig } from '@/acp/AcpClient';
 
 const SESSION_KEY_PREFIX = 'acp_session_';

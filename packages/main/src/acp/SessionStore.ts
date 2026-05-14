@@ -27,6 +27,7 @@ export interface SessionData {
 
 interface SessionIndex {
   id: string;
+  cwd: string;
   title: string;
   createdAt: number;
   updatedAt: number;
@@ -81,6 +82,7 @@ export class SessionStore {
     let index = this.list().filter((i) => i.id !== data.id);
     index.unshift({
       id: data.id,
+      cwd: data.cwd,
       title: data.title,
       createdAt: data.createdAt,
       updatedAt: data.updatedAt,

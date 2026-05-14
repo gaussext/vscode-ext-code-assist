@@ -24,7 +24,6 @@ pnpm run compile          # compiles the main extension
 packages/
 ├── main/       # VS Code extension host + ACP Agent (webpack bundling)
 ├── rpc/        # Deprecated — old custom RPC lib (still built for compat, not used)
-├── shared/     # Shared types (IChatParams, ICompletionMessage, etc.)
 └── webview/    # Vue 3 frontend + ACP Client (Vite)
 ```
 
@@ -39,9 +38,9 @@ packages/
 |---------|---------|
 | `pnpm run build:rpc` | Build only the RPC library (deprecated, still needed for compat) |
 | `pnpm run build:webview` | Build only the webview |
-| `pnpm run build:prepare` | Build shared + rpc + webview (fast, no bundling) |
+| `pnpm run build:prepare` | Build rpc + webview (fast, no bundling) |
 | `pnpm run compile` | Full build: prepare + webpack bundle |
-| `pnpm run watch` | Watch mode (rpc + webview + webpack watch) |
+| `pnpm run watch` | Watch mode (webview + webpack watch) |
 | `pnpm run package` | Production bundle |
 | `pnpm run lint` | ESLint on all packages |
 | `pnpm run lint:fix` | ESLint with auto-fix |

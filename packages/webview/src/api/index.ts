@@ -1,4 +1,4 @@
-import type { IProviderParams } from 'code-assist-shared';
+import type { IProviderParams } from './types';
 import { chatRpcClient, type ProviderConfig } from './rpc';
 
 export type { ProviderConfig };

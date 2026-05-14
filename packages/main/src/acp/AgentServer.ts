@@ -64,6 +64,7 @@ export class AgentServer {
     return {
       initialize(_params: InitializeRequest): Promise<InitializeResponse> {
         logger.info('ACP initialize');
+        logger.info('ACP initialize');
         const caps: AgentCapabilities = {
           loadSession: true,
           sessionCapabilities: { list: {}, close: {} } as SessionCapabilities,
@@ -83,6 +84,10 @@ export class AgentServer {
           },
           authMethods: [],
         });
+      },
+
+      authenticate(_params: any): Promise<any> {
+        return Promise.resolve({});
       },
 
       newSession(params: NewSessionRequest): Promise<NewSessionResponse> {
@@ -206,7 +211,7 @@ export class AgentServer {
 
       async loadSession(params: LoadSessionRequest): Promise<LoadSessionResponse> {
         logger.info(`session/load: ${params.sessionId}`);
-        const stored = self.sessionStore.load(params.sessionId);
+        const stored = await self.sessionStore.load(params.sessionId);
         if (!stored) {
           logger.warn(`session/load not found: ${params.sessionId}`);
           return {};

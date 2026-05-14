@@ -1,6 +1,19 @@
 import OpenAI from 'openai';
-import { IOpenAIParams, IProviderParams } from 'code-assist-shared';
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
+
 import { logger } from '../lib/Logger';
+
+interface IProviderParams {
+  baseURL: string;
+  apiKey: string;
+}
+
+interface ChatParams {
+  baseURL: string;
+  apiKey: string;
+  model: string;
+  messages: ChatCompletionMessageParam[];
+}
 
 export class OpenAIService {
   private client: OpenAI | null = null;
@@ -35,7 +48,7 @@ export class OpenAIService {
     }
   }
 
-  async chat(params: IOpenAIParams) {
+  async chat(params: ChatParams) {
     logger.info('OpenAI chat request', { model: params.model, messages: params.messages.length });
     const { apiKey, baseURL } = params;
     try {
@@ -54,7 +67,7 @@ export class OpenAIService {
     }
   }
 
-  async chatStream(params: IOpenAIParams) {
+  async chatStream(params: ChatParams) {
     const { apiKey, baseURL } = params;
     logger.info('OpenAI stream start', { model: params.model, messages: params.messages.length });
     const client = this.getClient(apiKey, baseURL);

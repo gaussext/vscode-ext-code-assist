@@ -1,3 +1,4 @@
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
 import type { SessionData, StoredMessage } from './SessionStore';
 
 export interface PromptConfig {
@@ -38,13 +39,13 @@ export class ACPSession {
   }
 
   /** 转成 OpenAI API 需要的消息格式 */
-  toCompletionMessages(): { role: string; content: string }[] {
-    const result: { role: string; content: string }[] = [];
+  toCompletionMessages(): ChatCompletionMessageParam[] {
+    const result: ChatCompletionMessageParam[] = [];
     for (const m of this.data.messages) {
       if (m.role === 'agent' || m.role === 'think') {
         result.push({ role: 'assistant', content: m.content });
       } else if (m.role === 'tool') {
-        result.push({ role: 'tool', content: m.content });
+        result.push({ role: 'tool', content: m.content, tool_call_id: '' });
       } else {
         result.push({ role: m.role as 'user' | 'system', content: m.content });
       }
