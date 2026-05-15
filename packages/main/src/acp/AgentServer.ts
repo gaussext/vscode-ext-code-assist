@@ -173,6 +173,13 @@ export class AgentServer {
 
           if (controller.signal.aborted) {
             logger.info(`session/prompt cancelled: ${params.sessionId}`);
+            if (content) {
+              session.addMessage({ role: 'agent', content, model, provider: session.config.provider });
+            }
+            if (reasoning) {
+              session.addMessage({ role: 'think', content: reasoning, model, provider: session.config.provider });
+            }
+            await self.sessionStore.save(session.data);
             return { stopReason: 'cancelled' };
           }
 
