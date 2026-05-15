@@ -1,3 +1,12 @@
+<script setup lang="ts">
+import { onMounted } from 'vue';
+import { useProviderStore } from '@/stores/useProviderStore';
+
+onMounted(() => {
+  useProviderStore().init();
+});
+</script>
+
 <template>
   <div class="app-container">
     <router-view v-slot="{ Component }">

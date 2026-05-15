@@ -25,7 +25,7 @@ import { ref } from 'vue';
 const props = defineProps({
   message: {
     type: Object,
-    default: () => new ChatMessage('assistant', ''),
+    default: () => new ChatMessage('agent', ''),
   },
 });
 

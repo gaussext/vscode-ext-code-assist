@@ -79,13 +79,13 @@ const searchInputRef = ref<HTMLInputElement | null>(null);
 const selectedLabel = computed(() => {
   for (const group of props.options) {
     const found = group.options.find((o) => o.value === props.modelValue);
-    if (found) return found.label;
+    if (found) {return found.label;}
   }
   return '';
 });
 
 const filteredGroups = computed(() => {
-  if (!filterText.value) return props.options;
+  if (!filterText.value) {return props.options;}
   const lower = filterText.value.toLowerCase();
   return props.options
     .map((group) => ({
@@ -98,7 +98,7 @@ const filteredGroups = computed(() => {
 });
 
 const toggleOpen = () => {
-  if (props.disabled) return;
+  if (props.disabled) {return;}
   isOpen.value = !isOpen.value;
   if (isOpen.value) {
     filterText.value = '';

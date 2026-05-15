@@ -2,7 +2,7 @@
   <div ref="messagesAreaRef" class="chat-body messages-area" :class="{ 'has-code': promptCode }">
     <template v-for="message in messages" :key="message.id">
       <MessageUser v-if="message.role === 'user'" :message="message" />
-      <MessageBot v-if="message.role === 'assistant'" :message="message" />
+      <MessageBot v-if="message.role === 'agent'" :message="message" />
     </template>
     <MessageStream v-show="loading" :message="currentMessage" />
     <div ref="footerRef"></div>
@@ -37,7 +37,7 @@ const tryScrollToBottom = () => {
   const scrollTop = messagesAreaRef.value?.scrollTop || 0;
   const scrollHeight = messagesAreaRef.value?.scrollHeight || 0;
   const clientHeight = messagesAreaRef.value?.clientHeight || 0;
-  const isBottom = Math.abs((scrollTop + clientHeight) - scrollHeight) < 100;
+  const isBottom = Math.abs((scrollTop + clientHeight) - scrollHeight) < 200;
   if (isBottom) {
     footerRef.value?.scrollIntoView({ behavior: 'smooth' });
   }

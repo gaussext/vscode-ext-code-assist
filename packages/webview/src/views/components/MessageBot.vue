@@ -35,7 +35,7 @@ import MessageInfo from './MessageInfo.vue';
 
 const props = defineProps({
   message: {
-    default: () => new ChatMessage('assistant', ''),
+    default: () => new ChatMessage('agent', ''),
   },
 });
 const activeNames = ref([]);

@@ -1,16 +1,26 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { createRpc } from '../rpc';
+import { AgentServer, createWebviewStream } from '../acp';
+import { logger } from '../lib/Logger';
 
 const setting = vscode.workspace.getConfiguration('code-assist');
 
 export class ChatWebViewProvider implements vscode.WebviewViewProvider {
   private _view?: vscode.WebviewView;
-  
-  constructor(private readonly _extensionUri: vscode.Uri) {}
+  private agentServer: AgentServer;
+
+  constructor(
+    private readonly _extensionUri: vscode.Uri,
+    globalState: vscode.Memento,
+    secrets: vscode.SecretStorage,
+    globalStorageUri: vscode.Uri,
+  ) {
+    this.agentServer = new AgentServer(globalState, secrets, globalStorageUri);
+  }
 
   public resolveWebviewView(webviewView: vscode.WebviewView) {
+    logger.info('Webview resolve');
     this._view = webviewView;
     webviewView.webview.options = {
       enableScripts: true,
@@ -18,7 +28,9 @@ export class ChatWebViewProvider implements vscode.WebviewViewProvider {
     };
 
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
-    createRpc(webviewView.webview);
+
+    const stream = createWebviewStream(webviewView.webview);
+    this.agentServer.connect(stream);
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {

@@ -1,6 +1,19 @@
 import OpenAI from 'openai';
-import log from 'loglevel';
-import { IChatParams, IProviderParams } from 'code-assist-shared';
+import type { ChatCompletionMessageParam } from 'openai/resources/chat/completions';
+
+import { logger } from '../lib/Logger';
+
+interface IProviderParams {
+  baseURL: string;
+  apiKey: string;
+}
+
+interface ChatParams {
+  baseURL: string;
+  apiKey: string;
+  model: string;
+  messages: ChatCompletionMessageParam[];
+}
 
 export class OpenAIService {
   private client: OpenAI | null = null;
@@ -20,13 +33,13 @@ export class OpenAIService {
     return this.client;
   }
 
-  async models(params: IChatParams) {
-    log.info('OpenAI models request', params);
+  async models(params: IProviderParams) {
+    logger.info('OpenAI models request', { baseURL: params.baseURL });
     const { apiKey, baseURL } = params;
     try {
       const client = this.getClient(apiKey, baseURL);
       const resp = await client.models.list();
-      console.log('OpenAI models response', resp);
+      logger.info('OpenAI models response', resp);
       return resp;
     } catch (error: any) {
       return {
@@ -35,8 +48,8 @@ export class OpenAIService {
     }
   }
 
-  async chat(params: IChatParams) {
-    log.info('OpenAI chat request', params);
+  async chat(params: ChatParams) {
+    logger.info('OpenAI chat request', { model: params.model, messages: params.messages.length });
     const { apiKey, baseURL } = params;
     try {
       const client = this.getClient(apiKey, baseURL);
@@ -45,7 +58,7 @@ export class OpenAIService {
         messages: params.messages,
         stream: false,
       });
-      console.log('OpenAI chat response', resp);
+      logger.info('OpenAI chat response', resp);
       return resp;
     } catch (error: any) {
       return {
@@ -54,9 +67,9 @@ export class OpenAIService {
     }
   }
 
-  async chatStream(params: IChatParams) {
+  async chatStream(params: ChatParams) {
     const { apiKey, baseURL } = params;
-    log.info('OpenAI stream', params);
+    logger.info('OpenAI stream start', { model: params.model, messages: params.messages.length });
     const client = this.getClient(apiKey, baseURL);
     try {
       const stream = await client.chat.completions.create({

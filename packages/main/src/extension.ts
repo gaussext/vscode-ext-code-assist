@@ -1,8 +1,14 @@
 import * as vscode from 'vscode';
 import { ChatWebViewProvider } from './views/ChatWebViewProvider';
+import { logger } from './lib/Logger';
 
 function setupChatWebview(context: vscode.ExtensionContext) {
-  const provider = new ChatWebViewProvider(context.extensionUri);
+  const provider = new ChatWebViewProvider(
+    context.extensionUri,
+    context.globalState,
+    context.secrets,
+    context.globalStorageUri,
+  );
   const view = vscode.window.registerWebviewViewProvider('code-assist.view', provider);
   context.subscriptions.push(view);
 
@@ -36,9 +42,12 @@ function setupChatWebview(context: vscode.ExtensionContext) {
     'appreciation',
     'add-to-chat',
   ].forEach(addCommand);
+
+  context.subscriptions.push(provider['agentServer'] as any);
 }
 
 export function activate(context: vscode.ExtensionContext) {
+  logger.info('Extension activate');
   setupChatWebview(context);
 
   const openCommand = vscode.commands.registerCommand('codeAssist.open', () => {
