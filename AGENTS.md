@@ -74,3 +74,11 @@ git tag v1.0.0-beta.X && git push origin v1.0.0-beta.X
 ```
 
 GitHub Actions will automatically build and attach the .vsix file to the release.
+
+## Release Operations
+
+Follow these steps for releasing:
+
+1. Switch to master and sync with remote
+2. Push the v-prefixed tag to remote
+3. Switch back to develop
