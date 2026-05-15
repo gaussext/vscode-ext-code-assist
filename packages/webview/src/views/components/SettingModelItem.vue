@@ -25,7 +25,7 @@ import SelectPicker from '@/components/SelectPicker.vue';
 import { CircleCheck, CircleClose, Loading, Refresh } from '@element-plus/icons-vue';
 import type { IStandardItem } from '@/types';
 import { useSettingStore } from '@/stores/useSettingStore';
-import { chatService } from '@/api';
+import { chatService } from '@/acp';
 import { ref, watch } from 'vue';
 import { sleep } from '@/utils';
 

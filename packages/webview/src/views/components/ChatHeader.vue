@@ -24,7 +24,7 @@
 
 <script setup lang="ts">
 import type { ChatMessage } from '@/models/Message';
-import { chatService } from '@/api';
+import { chatService } from '@/acp';
 import { useSession } from '@/stores/useSession';
 import { Download, FolderAdd, FolderOpened, Setting } from '@element-plus/icons-vue';
 import { useRouter } from 'vue-router';

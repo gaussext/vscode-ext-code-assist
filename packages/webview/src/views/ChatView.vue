@@ -10,7 +10,7 @@
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref } from 'vue';
-import { chatService } from '../api';
+import { chatService } from '../acp';
 import { ChatMessage } from '../models/Message';
 
 import ChatBody from './components/ChatBody.vue';

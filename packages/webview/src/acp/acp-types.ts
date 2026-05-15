@@ -1,4 +1,4 @@
 export interface IProviderParams {
-  baseURL: string;
-  apiKey: string;
+  baseURL: string
+  apiKey: string
 }

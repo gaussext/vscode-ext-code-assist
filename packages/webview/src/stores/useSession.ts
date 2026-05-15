@@ -1,5 +1,5 @@
 import { ref } from 'vue';
-import { chatService } from '@/api';
+import { chatService } from '@/acp';
 import { EnumStorageKey } from './constants';
 
 const conversationId = ref<string>(localStorage.getItem(EnumStorageKey.ConversationId) || '');

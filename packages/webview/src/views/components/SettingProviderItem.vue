@@ -40,7 +40,7 @@
 </template>
 
 <script lang="ts" setup>
-import { chatService } from '@/api';
+import { chatService } from '@/acp';
 import type { Model } from '@/models/Model';
 import type { Provider } from '@/models/Provider';
 import { sha256 } from '@/utils/hash';
