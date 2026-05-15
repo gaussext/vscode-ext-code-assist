@@ -32,7 +32,7 @@ jobs:
           pnpm vsce # 运行构建脚本
           
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: |
             *.vsix
